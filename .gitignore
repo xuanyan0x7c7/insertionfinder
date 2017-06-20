@@ -90,3 +90,5 @@ Makefile.in
 
 Makefile
 .deps
+
+/src/insertionfinder
