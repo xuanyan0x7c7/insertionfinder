@@ -90,5 +90,6 @@ Makefile.in
 
 Makefile
 .deps
+.dirstamp
 
 /src/insertionfinder
