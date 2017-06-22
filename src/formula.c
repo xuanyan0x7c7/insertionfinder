@@ -19,17 +19,8 @@ static const char twist_str[][3] = {
     "", "B", "B2", "B'"
 };
 
-static const int inv_move[] = {
-    0, 3, 2, 1,
-    4, 7, 6, 5,
-    8, 11, 10, 9,
-    12, 15, 14, 13,
-    16, 19, 18, 17,
-    20, 23, 22, 21
-};
 
-
-static inline char* ListGetItem(const LinkedListNode* node);
+static char* ListGetItem(const LinkedListNode* node);
 
 static void CycleReplace(char* c, const char* pattern);
 
@@ -188,15 +179,15 @@ void FormulaDestroy(Formula* formula) {
 }
 
 
-inline size_t FormulaLength(const Formula* formula) {
+size_t FormulaLength(const Formula* formula) {
     return formula->length;
 }
 
-inline int FormulaGetMove(const Formula* formula, size_t index) {
+int FormulaGetMove(const Formula* formula, size_t index) {
     return formula->move[index];
 }
 
-inline void FormulaSetMove(Formula* formula, size_t index, int move) {
+void FormulaSetMove(Formula* formula, size_t index, int move) {
     formula->move[index] = move;
 }
 

@@ -1,6 +1,24 @@
 #pragma once
 #include <stddef.h>
 
+enum {
+    TWIST_U0, TWIST_U, TWIST_U2, TWIST_U3,
+    TWIST_D0, TWIST_D, TWIST_D2, TWIST_D3,
+    TWIST_R0, TWIST_R, TWIST_R2, TWIST_R3,
+    TWIST_L0, TWIST_L, TWIST_L2, TWIST_L3,
+    TWIST_F0, TWIST_F, TWIST_F2, TWIST_F3,
+    TWIST_B0, TWIST_B, TWIST_B2, TWIST_B3
+};
+
+static const int inverse_move_table[] = {
+    TWIST_U0, TWIST_U3, TWIST_U2, TWIST_U,
+    TWIST_D0, TWIST_D3, TWIST_D2, TWIST_D,
+    TWIST_R0, TWIST_R3, TWIST_R2, TWIST_R,
+    TWIST_L0, TWIST_L3, TWIST_L2, TWIST_L,
+    TWIST_F0, TWIST_F3, TWIST_F2, TWIST_F,
+    TWIST_B0, TWIST_B3, TWIST_B2, TWIST_B
+};
+
 typedef struct Formula Formula;
 struct Formula {
     size_t length;
