@@ -188,6 +188,19 @@ void FormulaDestroy(Formula* formula) {
 }
 
 
+inline size_t FormulaLength(const Formula* formula) {
+    return formula->length;
+}
+
+inline int FormulaGetMove(const Formula* formula, size_t index) {
+    return formula->move[index];
+}
+
+inline void FormulaSetMove(Formula* formula, size_t index, int move) {
+    formula->move[index] = move;
+}
+
+
 char* FormulaToString(const Formula* formula, char* string) {
     if (formula->length == 0) {
         if (string) {
