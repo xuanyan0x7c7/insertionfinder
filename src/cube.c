@@ -1,4 +1,6 @@
+#include <stdint.h>
 #include <stdlib.h>
+#include "formula.h"
 #include "cube.h"
 
 
@@ -73,23 +75,50 @@ Cube* CubeConstruct(Cube* cube, const Formula* formula) {
 }
 
 
+void CubeSave(const Cube* cube, FILE* stream) {
+    int8_t corner[8], edge[12];
+    for (int i = 0; i < 8; ++i) {
+        corner[i] = cube->corner[i];
+    }
+    for (int i = 0; i < 12; ++i) {
+        edge[i] = cube->edge[i];
+    }
+    fwrite(corner, sizeof(int8_t), 8, stream);
+    fwrite(edge, sizeof(int8_t), 12, stream);
+}
+
+void CubeLoad(Cube* cube, FILE* stream) {
+    int8_t corner[8], edge[12];
+    fread(corner, sizeof(int8_t), 8, stream);
+    fread(edge, sizeof(int8_t), 12, stream);
+    for (int i = 0; i < 8; ++i) {
+        cube->corner[i] = corner[i];
+    }
+    for (int i = 0; i < 12; ++i) {
+        cube->edge[i] = edge[i];
+    }
+}
+
+
 void CubeTwist(Cube* cube, int move) {
     CubeTwistCorner(cube, move);
     CubeTwistEdge(cube, move);
 }
 
 void CubeTwistCorner(Cube* cube, int move) {
+    const int* table = corner_twist_table[move];
     for (int i = 0; i < 8; ++i) {
         int* item = &(cube->corner[i]);
-        int transform = corner_twist_table[move][*item / 3];
+        int transform = table[*item / 3];
         *item = transform - transform % 3 + (*item + transform) % 3;
     }
 }
 
 void CubeTwistEdge(Cube* cube, int move) {
+    const int* table = edge_twist_table[move];
     for (int i = 0; i < 12; ++i) {
-        int *item = &(cube->edge[i]);
-        *item = edge_twist_table[move][*item >> 1] ^ (*item & 1);
+        int* item = &(cube->edge[i]);
+        *item = table[*item >> 1] ^ (*item & 1);
     }
 }
 
@@ -136,4 +165,34 @@ void CubeRangeTwistFormula(
             }
         }
     }
+}
+
+void CubeTwistCube(Cube* cube, const Cube* state) {
+    for (int i = 0; i < 8; ++i) {
+        int* item = &(cube->corner[i]);
+        int transform = state->corner[*item / 3];
+        *item = transform - transform % 3 + (*item + transform) % 3;
+    }
+    for (int i = 0; i < 12; ++i) {
+        int* item = &(cube->edge[i]);
+        *item = state->edge[*item >> 1] ^ (*item & 1);
+    }
+}
+
+
+unsigned CubeMask(const Cube* cube) {
+    unsigned mask = 0;
+    for (int i = 0; i < 8; ++i) {
+        mask <<= 1;
+        if (cube->corner[i] != i * 3) {
+            mask |= 1;
+        }
+    }
+    for (int i = 0; i < 12; ++i) {
+        mask <<= 1;
+        if (cube->edge[i] != i << 1) {
+            mask |= 1;
+        }
+    }
+    return mask;
 }

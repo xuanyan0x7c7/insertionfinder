@@ -1,5 +1,7 @@
 #pragma once
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
 #include "formula.h"
 
 typedef struct Cube Cube;
@@ -9,6 +11,9 @@ struct Cube {
 };
 
 Cube* CubeConstruct(Cube* cube, const Formula* formula);
+
+void CubeSave(const Cube* cube, FILE* stream);
+void CubeLoad(Cube* cube, FILE* stream);
 
 void CubeTwist(Cube* cube, int move);
 void CubeTwistCorner(Cube* cube, int move);
@@ -26,3 +31,6 @@ void CubeRangeTwistFormula(
     bool twist_corners, bool twist_edges,
     bool reversed
 );
+void CubeTwistCube(Cube* cube, const Cube* state);
+
+unsigned CubeMask(const Cube* cube);

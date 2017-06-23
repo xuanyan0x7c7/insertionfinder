@@ -1,5 +1,6 @@
 #pragma once
 #include <stddef.h>
+#include <stdio.h>
 
 enum {
     TWIST_U0, TWIST_U, TWIST_U2, TWIST_U3,
@@ -28,6 +29,9 @@ struct Formula {
 
 Formula* FormulaConstruct(Formula* formula, const char* string);
 void FormulaDestroy(Formula* formula);
+
+void FormulaSave(const Formula* formula, FILE* stream);
+void FormulaLoad(Formula* formula, FILE* stream);
 
 size_t FormulaLength(const Formula* formula);
 int FormulaGetMove(const Formula* formula, size_t index);

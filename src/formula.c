@@ -173,9 +173,30 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
     return formula;
 }
 
-
 void FormulaDestroy(Formula* formula) {
     free(formula->move);
+    formula->move = NULL;
+}
+
+
+void FormulaSave(const Formula* formula, FILE* stream) {
+    fwrite(&formula->length, sizeof(size_t), 1, stream);
+    int8_t compressed[formula->length];
+    for (size_t i = 0; i < formula->length; ++i) {
+        compressed[i] = formula->move[i];
+    }
+    fwrite(compressed, sizeof(int8_t), formula->length, stream);
+}
+
+void FormulaLoad(Formula* formula, FILE* stream) {
+    fread(&formula->length, sizeof(size_t), 1, stream);
+    formula->capacity = formula->length;
+    formula->move = (int*)malloc(formula->capacity * sizeof(int));
+    int8_t compressed[formula->length];
+    fread(compressed, sizeof(int8_t), formula->length, stream);
+    for (size_t i = 0; i < formula->length; ++i) {
+        formula->move[i] = compressed[i];
+    }
 }
 
 
