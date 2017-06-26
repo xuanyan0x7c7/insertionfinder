@@ -35,16 +35,23 @@ void AlgorithmSave(const Algorithm* algorithm, FILE* stream) {
     }
 }
 
-void AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
+Algorithm* AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
+    if (!algorithm) {
+        algorithm = (Algorithm*)malloc(sizeof(Algorithm));
+    }
     CubeLoad(&algorithm->state, stream);
-    fread(&algorithm->size, sizeof(size_t), 1, stream);
-    algorithm->capacity = algorithm->size;
-    algorithm->formula_list = (Formula*)malloc(
-        algorithm->capacity * sizeof(Formula)
+    size_t size;
+    fread(&size, sizeof(size_t), 1, stream);
+    algorithm->size = size;
+    algorithm->capacity = size;
+    algorithm->formula_list = (Formula*)realloc(
+        algorithm->formula_list,
+        size * sizeof(Formula)
     );
     for (size_t i = 0; i < algorithm->size; ++i) {
         FormulaLoad(&algorithm->formula_list[i], stream);
     }
+    return algorithm;
 }
 
 

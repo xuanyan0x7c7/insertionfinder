@@ -188,15 +188,33 @@ void FormulaSave(const Formula* formula, FILE* stream) {
     fwrite(compressed, sizeof(int8_t), formula->length, stream);
 }
 
-void FormulaLoad(Formula* formula, FILE* stream) {
-    fread(&formula->length, sizeof(size_t), 1, stream);
-    formula->capacity = formula->length;
-    formula->move = (int*)malloc(formula->capacity * sizeof(int));
-    int8_t compressed[formula->length];
-    fread(compressed, sizeof(int8_t), formula->length, stream);
-    for (size_t i = 0; i < formula->length; ++i) {
+Formula* FormulaLoad(Formula* formula, FILE* stream) {
+    if (!formula) {
+        formula = (Formula*)malloc(sizeof(Formula));
+    }
+    size_t length;
+    fread(&length, sizeof(size_t), 1, stream);
+    formula->length = length;
+    formula->capacity = length;
+    formula->move = (int*)realloc(formula->move, length * sizeof(int));
+    int8_t compressed[length];
+    fread(compressed, sizeof(int8_t), length, stream);
+    for (size_t i = 0; i < length; ++i) {
         formula->move[i] = compressed[i];
     }
+    return formula;
+}
+
+Formula* FormulaDuplicate(Formula* formula, const Formula* source) {
+    if (!formula) {
+        formula = (Formula*)malloc(sizeof(Formula));
+    }
+    size_t length = source->length;
+    formula->length = length;
+    formula->capacity = length;
+    formula->move = (int*)realloc(formula->move, length * sizeof(int));
+    memcpy(formula->move, source->move, length * sizeof(int));
+    return formula;
 }
 
 

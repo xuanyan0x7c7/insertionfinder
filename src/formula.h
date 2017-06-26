@@ -31,7 +31,8 @@ Formula* FormulaConstruct(Formula* formula, const char* string);
 void FormulaDestroy(Formula* formula);
 
 void FormulaSave(const Formula* formula, FILE* stream);
-void FormulaLoad(Formula* formula, FILE* stream);
+Formula* FormulaLoad(Formula* formula, FILE* stream);
+Formula* FormulaDuplicate(Formula* formula, const Formula* source);
 
 size_t FormulaLength(const Formula* formula);
 int FormulaGetMove(const Formula* formula, size_t index);
