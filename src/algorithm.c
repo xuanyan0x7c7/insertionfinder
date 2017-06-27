@@ -74,6 +74,6 @@ void AlgorithmAddFormula(Algorithm* algorithm, const Formula* formula) {
         );
     }
     Formula* dest = &algorithm->formula_list[algorithm->size++];
-    dest->move = NULL;
+    FormulaConstruct(dest, NULL);
     FormulaDuplicate(dest, formula);
 }

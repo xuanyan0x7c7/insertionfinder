@@ -41,3 +41,10 @@ void FormulaSetMove(Formula* formula, size_t index, int move);
 char* FormulaToString(const Formula* formula, char* string);
 
 size_t FormulaCancelMoves(Formula* formula);
+
+size_t FormulaInsert(
+    const Formula* formula,
+    size_t insert_place,
+    const Formula* insertion,
+    Formula* result
+);

@@ -71,6 +71,16 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
         {{"z'", "[f']", "[b]"}, {"URDL", ""}}
     };
 
+    if (!formula) {
+        formula = (Formula*)malloc(sizeof(Formula));
+    }
+    formula->length = 0;
+    formula->capacity = 16;
+    formula->move = (int*)malloc(formula->capacity * sizeof(int));
+    if (!string) {
+        return formula;
+    }
+
     LinkedList procedure;
     LinkedListConstruct(&procedure, free);
 
@@ -145,12 +155,6 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
         }
     }
 
-    if (!formula) {
-        formula = (Formula*)malloc(sizeof(Formula));
-    }
-    formula->length = 0;
-    formula->capacity = 16;
-    formula->move = (int*)malloc(formula->capacity * sizeof(int));
     for (
         const LinkedListNode* node = procedure.head;
         (node = node->next) != procedure.tail;
@@ -302,6 +306,40 @@ size_t FormulaCancelMoves(Formula* formula) {
 
     formula->length = y + 1;
     return index;
+}
+
+
+size_t FormulaInsert(
+    const Formula* formula,
+    size_t insert_place,
+    const Formula* insertion,
+    Formula* result
+) {
+    size_t length = formula->length + insertion->length;
+    if (!result) {
+        result = (Formula*)malloc(sizeof(Formula));
+        result->capacity = length;
+        result->move = (int*)malloc(length * sizeof(int));
+    } else if (result->capacity < length) {
+        result->capacity = length;
+        result->move = (int*)realloc(result->move, length * sizeof(int));
+    }
+
+    result->length = length;
+    memcpy(result->move, formula->move, insert_place * sizeof(int));
+    memcpy(
+        result->move + insert_place,
+        insertion->move,
+        insertion->length * sizeof(int)
+    );
+    memcpy(
+        result->move + (insert_place + insertion->length),
+        formula->move + insert_place,
+        (formula->length - insert_place) * sizeof(int)
+    );
+
+    size_t cancelled_place = FormulaCancelMoves(result);
+    return cancelled_place < insert_place ? cancelled_place : insert_place + 1;
 }
 
 
