@@ -22,6 +22,9 @@ Algorithm* AlgorithmConstruct(Algorithm* algorithm, const Cube* state) {
 }
 
 void AlgorithmDestroy(Algorithm* algorithm) {
+    for (size_t i = 0; i < algorithm->size; ++i) {
+        FormulaDestroy(&algorithm->formula_list[i]);
+    }
     free(algorithm->formula_list);
     algorithm->formula_list = NULL;
 }
