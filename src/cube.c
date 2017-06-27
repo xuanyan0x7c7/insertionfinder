@@ -184,6 +184,20 @@ void CubeTwistCube(Cube* cube, const Cube* state) {
 }
 
 
+Cube* CubeInverseState(Cube* cube, const Cube* state) {
+    if (!cube) {
+        cube = (Cube*)malloc(sizeof(Cube));
+    }
+    for (int i = 0; i < 8; ++i) {
+        cube->corner[state->corner[i] / 3] = i * 3 + (3 - state->corner[i]) % 3;
+    }
+    for (int i = 0; i < 12; ++i) {
+        cube->edge[state->edge[i] >> 1] = (i << 1) | (state->edge[i] & 1);
+    }
+    return cube;
+}
+
+
 unsigned CubeMask(const Cube* cube) {
     unsigned mask = 0;
     for (int i = 0; i < 8; ++i) {
@@ -199,4 +213,143 @@ unsigned CubeMask(const Cube* cube) {
         }
     }
     return mask;
+}
+
+
+bool CubeHasParity(const Cube* cube) {
+    bool visited[] = {false, false, false, false, false, false, false, false};
+    const int* corner = cube->corner;
+    bool parity = false;
+    for (int x = 0; x < 8; ++x) {
+        if (!visited[x]) {
+            parity = !parity;
+            int y = x;
+            do {
+                visited[y] = true;
+                y = corner[y] / 3;
+            } while (y != x);
+        }
+    }
+    return parity;
+}
+
+int CubeCornerCycles(const Cube* cube) {
+    bool visited[] = {false, false, false, false, false, false, false, false};
+    const int* corner = cube->corner;
+    int small_cycles[] = {0, 0, 0, 0, 0, 0, 0};
+    int cycles = 0;
+
+    for (int x = 0; x < 8; ++x) {
+        if (!visited[x]) {
+            int length = -1;
+            int orientation = 0;
+            int y = x;
+            do {
+                visited[y] = true;
+                ++length;
+                orientation += corner[y];
+                y = corner[y] / 3;
+            } while (y != x);
+            cycles += length >> 1;
+            orientation %= 3;
+            if (length == 0 && orientation) {
+                ++small_cycles[orientation - 1];
+            } else if ((length & 1) == 0 && orientation) {
+                ++small_cycles[orientation + 1];
+            } else if (length & 1) {
+                ++cycles;
+                ++small_cycles[orientation + 4];
+            }
+        }
+    }
+
+    if (small_cycles[5] < small_cycles[6]) {
+        small_cycles[3] += small_cycles[4] & 1;
+        small_cycles[2] += (small_cycles[6] - small_cycles[5]) >> 1;
+    } else {
+        small_cycles[2] += small_cycles[4] & 1;
+        small_cycles[3] += (small_cycles[5] - small_cycles[6]) >> 1;
+    }
+
+    int x = small_cycles[0] + small_cycles[2];
+    int y = small_cycles[1] + small_cycles[3];
+    cycles += (x / 3 + y / 3) << 1;
+    int twists = x % 3;
+    return cycles + twists + (small_cycles[2] + small_cycles[3] < twists);
+}
+
+int CubeEdgeCycles(const Cube* cube) {
+    bool visited[] = {
+        false, false, false, false, false, false,
+        false, false, false, false, false, false
+    };
+    const int* edge = cube->edge;
+    int small_cycles[] = {0, 0, 0};
+    int cycles = 0;
+
+    for (int x = 0; x < 12; ++x) {
+        if (!visited[x]) {
+            int length = -1;
+            bool flip = false;
+            int y = x;
+            do {
+                visited[y] = true;
+                ++length;
+                flip ^= edge[y] & 1;
+                y = edge[y] >> 1;
+            } while (y != x);
+            cycles += length >> 1;
+            if (length & 1) {
+                ++cycles;
+            }
+            if (flip) {
+                if (length == 0) {
+                    ++small_cycles[0];
+                } else if (length & 1) {
+                    small_cycles[2] ^= 1;
+                } else {
+                    ++small_cycles[1];
+                }
+            }
+        }
+    }
+
+    small_cycles[1] += small_cycles[2];
+    if (small_cycles[0] < small_cycles[1]) {
+        cycles += (small_cycles[0] + small_cycles[1]) >> 1;
+    } else {
+        static const int flip_cycles[] = {0, 2, 3, 5, 6, 8, 9};
+        cycles += small_cycles[1] + flip_cycles[
+            (small_cycles[0] - small_cycles[1]) >> 1
+        ];
+    }
+
+    return cycles;
+}
+
+
+int CubeCorner3CycleIndex(const Cube* cube) {
+    int x;
+    for (int i = 0; i < 8; ++i) {
+        if (cube->corner[i] != i * 3) {
+            x = i;
+            break;
+        }
+    }
+    int y = cube->corner[x];
+    int z = cube->corner[y / 3];
+    return x * 24 * 24 + y * 24 + z;
+}
+
+int CubeEdge3CycleIndex(const Cube* cube) {
+    int x;
+    for (int i = 0; i < 12; ++i) {
+        if (cube->edge[i] != i << 1) {
+            x = i;
+            break;
+        }
+    }
+    int y = cube->edge[x];
+    int z = cube->edge[y >> 1];
+    return x * 24 * 24 + y * 24 + z;
 }

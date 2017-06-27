@@ -33,4 +33,13 @@ void CubeRangeTwistFormula(
 );
 void CubeTwistCube(Cube* cube, const Cube* state);
 
+Cube* CubeInverseState(Cube* cube, const Cube* state);
+
 unsigned CubeMask(const Cube* cube);
+
+bool CubeHasParity(const Cube* cube);
+int CubeCornerCycles(const Cube* cube);
+int CubeEdgeCycles(const Cube* cube);
+
+int CubeCorner3CycleIndex(const Cube* cube);
+int CubeEdge3CycleIndex(const Cube* cube);
