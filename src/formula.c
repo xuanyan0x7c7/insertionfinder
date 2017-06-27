@@ -31,7 +31,7 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
     if (!regex_inited) {
         int status = regcomp(
             &moves_regex,
-            "([UDRLFBxyz](2'?|'|w2'?|w|)|\\[[udrlfb](2'?|'|)\\])",
+            "([UDRLFBxyz](2'?|'|w2'?|w'|w|)|\\[[udrlfb](2'?|'|)\\])",
             REG_EXTENDED
         );
         if (status) {

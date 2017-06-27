@@ -87,7 +87,10 @@ void CubeSave(const Cube* cube, FILE* stream) {
     fwrite(edge, sizeof(int8_t), 12, stream);
 }
 
-void CubeLoad(Cube* cube, FILE* stream) {
+Cube* CubeLoad(Cube* cube, FILE* stream) {
+    if (!cube) {
+        cube = (Cube*)malloc(sizeof(Cube));
+    }
     int8_t corner[8], edge[12];
     fread(corner, sizeof(int8_t), 8, stream);
     fread(edge, sizeof(int8_t), 12, stream);
@@ -97,6 +100,7 @@ void CubeLoad(Cube* cube, FILE* stream) {
     for (int i = 0; i < 12; ++i) {
         cube->edge[i] = edge[i];
     }
+    return cube;
 }
 
 
@@ -122,7 +126,7 @@ void CubeTwistEdge(Cube* cube, int move) {
     }
 }
 
-void CubeFormulaTwist(
+void CubeTwistFormula(
     Cube* cube,
     const Formula* formula,
     bool twist_corners, bool twist_edges,
