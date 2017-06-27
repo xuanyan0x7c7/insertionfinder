@@ -73,9 +73,7 @@ void AlgorithmAddFormula(Algorithm* algorithm, const Formula* formula) {
             (algorithm->capacity <<= 1) * sizeof(Formula)
         );
     }
-    memcpy(
-        &algorithm->formula_list[algorithm->size++],
-        formula,
-        sizeof(Formula)
-    );
+    Formula* dest = &algorithm->formula_list[algorithm->size++];
+    dest->move = NULL;
+    FormulaDuplicate(dest, formula);
 }
