@@ -12,13 +12,10 @@ typedef struct LinkedList LinkedList;
 struct LinkedList {
     LinkedListNode* head;
     LinkedListNode* tail;
-    Destructor destroy;
+    Destructor* destroy;
 };
 
-LinkedList* LinkedListConstruct(
-    LinkedList* list,
-    Destructor destructor
-);
+LinkedList* LinkedListConstruct(LinkedList* list, Destructor* destroy);
 void LinkedListDestroy(LinkedList* list);
 
 void LinkedListInsertBefore(LinkedListNode* node, void* data);

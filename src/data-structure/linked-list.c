@@ -1,12 +1,14 @@
 #include <stdlib.h>
 #include "linked-list.h"
 
+
 typedef LinkedList List;
 typedef LinkedListNode Node;
 
-static inline void Noop(void* data) {}
+static void Noop(void* data) {}
 
-List* LinkedListConstruct(List* list, Destructor destructor) {
+
+List* LinkedListConstruct(List* list, Destructor* destroy) {
     if (!list) {
         list = (List*)malloc(sizeof(List));
     }
@@ -18,7 +20,7 @@ List* LinkedListConstruct(List* list, Destructor destructor) {
     list->tail->data = NULL;
     list->tail->prev = list->head;
     list->tail->next = NULL;
-    list->destroy = destructor ? destructor : Noop;
+    list->destroy = destroy ? destroy : Noop;
     return list;
 }
 
@@ -33,6 +35,7 @@ void LinkedListDestroy(List* list) {
     free(list->head);
     free(list->tail);
 }
+
 
 void LinkedListInsertBefore(Node* node, void* data) {
     Node* new_node = (Node*)malloc(sizeof(Node));
@@ -58,6 +61,7 @@ void LinkedListRemove(List* list, Node* node) {
     list->destroy(node->data);
     free(node);
 }
+
 
 void LinkedListSetItem(List* list, Node* node, void* data) {
     list->destroy(node->data);
