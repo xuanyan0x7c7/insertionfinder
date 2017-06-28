@@ -21,8 +21,8 @@ static const char twist_str[][3] = {
 
 
 static char* ListGetItem(const LinkedListNode* node);
-
 static void CycleReplace(char* c, const char* pattern);
+static int QSortCompare(const void* p, const void* q);
 
 
 Formula* FormulaConstruct(Formula* formula, const char* string) {
@@ -343,14 +343,102 @@ size_t FormulaInsert(
 }
 
 
+void FormulaSwapAdjacent(Formula* formula, size_t index) {
+    int temp = formula->move[index - 1];
+    formula->move[index - 1] = formula->move[index];
+    formula->move[index] = temp;
+}
+
+void FormulaNormalize(Formula* formula) {
+    for (size_t i = 1; i < formula->length; ++i) {
+        if (
+            formula->move[i - 1] >> 3 == formula->move[i] >> 3
+            && formula->move[i - 1] > formula->move[i]
+        ) {
+            FormulaSwapAdjacent(formula, i++);
+        }
+    }
+}
+
+int FormulaCompare(const Formula* f1, const Formula* f2) {
+    if (f1->length != f2->length) {
+        return f1->length - f2->length;
+    }
+    for (size_t i = 0; i < f1->length; ++i) {
+        if (f1->move[i] != f2->move[i]) {
+            return f1->move[i] - f2->move[i];
+        }
+    }
+    return 0;
+}
+
+
+size_t FormulaGetIsomorphisms(const Formula* formula, Formula* result) {
+    static const int transform_table[][3] = {
+        {0, 2, 4}, {0, 4, 3}, {0, 3, 5}, {0, 5, 2},
+        {1, 2, 5}, {1, 4, 2}, {1, 3, 4}, {1, 5, 3},
+        {4, 0, 2}, {3, 0, 4}, {5, 0, 3}, {2, 0, 5},
+        {4, 1, 3}, {2, 1, 4}, {5, 1, 2}, {3, 1, 5},
+        {4, 3, 0}, {2, 4, 0}, {5, 2, 0}, {3, 5, 0},
+        {4, 2, 1}, {3, 4, 1}, {5, 3, 1}, {2, 5, 1}
+    };
+    size_t length = formula->length;
+    for (size_t i = 0; i < 96; ++i) {
+        result[i].length = length;
+        result[i].capacity = length;
+        result[i].move = (int*)malloc(length * sizeof(int));
+    }
+    for (size_t i = 0; i < 24; ++i) {
+        int* move_list = result[i].move;
+        int* reversed_list = result[i + 24].move;
+        int* flipped_list = result[i + 48].move;
+        int* reversed_flipped_list = result[i + 72].move;
+        const int* table = transform_table[i];
+        for (size_t j = 0; j < length; ++j) {
+            int inversed_index = length - 1 - j;
+            int move = formula->move[j];
+            int result_move = (table[move >> 3] << 2) ^ (move & 7);
+            move_list[j] = result_move;
+            reversed_list[inversed_index] = inverse_move_table[result_move];
+            flipped_list[j] = result_move < 16
+                ? inverse_move_table[result_move]
+                : 40 - result_move;
+            reversed_flipped_list[inversed_index] = inverse_move_table[
+                flipped_list[j]
+            ];
+        }
+    }
+    qsort(result, 96, sizeof(Formula), QSortCompare);
+    Formula* p = result;
+    Formula* q = result + 1;
+    while (true) {
+        while (q != result + 96 && FormulaCompare(p, q) == 0) {
+            FormulaDestroy(q++);
+        }
+        if (q == result + 96) {
+            break;
+        }
+        if (++p != q) {
+            memcpy(p, q, sizeof(Formula));
+            q->move = NULL;
+        }
+        ++q;
+    }
+    return p - result + 1;
+}
+
+
 char* ListGetItem(const LinkedListNode* node) {
     return (char*)node->data;
 }
-
 
 void CycleReplace(char* c, const char* pattern) {
     const char* position = strchr(pattern, *c);
     if (position) {
         *c = *++position ? *position : *pattern;
     }
+}
+
+int QSortCompare(const void* p, const void* q) {
+    return FormulaCompare((const Formula*)p, (const Formula*)q);
 }
