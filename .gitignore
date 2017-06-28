@@ -92,4 +92,6 @@ Makefile
 .deps
 .dirstamp
 
+/.gcc-flags.json
+
 /src/insertionfinder
