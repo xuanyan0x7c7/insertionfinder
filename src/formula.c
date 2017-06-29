@@ -268,6 +268,16 @@ char* FormulaToString(const Formula* formula, char* string) {
     return string;
 }
 
+void FormulaPrint(const Formula* formula, FILE* stream) {
+    if (formula->length == 0) {
+        return;
+    }
+    fprintf(stream, "%s", twist_str[formula->move[0]]);
+    for (size_t i = 1; i < formula->length; ++i) {
+        fprintf(stream, " %s", twist_str[formula->move[i]]);
+    }
+}
+
 
 size_t FormulaCancelMoves(Formula* formula) {
     int x = 0;

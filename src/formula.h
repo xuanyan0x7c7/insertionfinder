@@ -39,6 +39,7 @@ int FormulaGetMove(const Formula* formula, size_t index);
 void FormulaSetMove(Formula* formula, size_t index, int move);
 
 char* FormulaToString(const Formula* formula, char* string);
+void FormulaPrint(const Formula* formula, FILE* stream);
 
 size_t FormulaCancelMoves(Formula* formula);
 
