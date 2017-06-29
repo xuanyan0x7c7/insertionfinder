@@ -18,7 +18,8 @@ static const struct option long_options[] = {
 CliParser Parse(int argc, char** argv) {
     CliParser parsed_args;
     parsed_args.command = -1;
-    parsed_args.filepath = NULL;
+    parsed_args.files = 0;
+    parsed_args.file_list = (const char**)malloc(argc * sizeof(const char*));
     while (true) {
         int option_index;
         int c = getopt_long(argc, argv, "f:hsvV", long_options, &option_index);
@@ -36,7 +37,7 @@ CliParser Parse(int argc, char** argv) {
                         parsed_args.command = option_index;
                         break;
                     case PARAMETER_FILE:
-                        parsed_args.filepath = optarg;
+                        parsed_args.file_list[parsed_args.files++] = optarg;
                         break;
                 }
                 break;
@@ -53,7 +54,7 @@ CliParser Parse(int argc, char** argv) {
                 parsed_args.command = COMMAND_VERSION;
                 break;
             case SHORT_PARAMETER_FILE:
-                parsed_args.filepath = optarg;
+                parsed_args.file_list[parsed_args.files++] = optarg;
                 break;
         }
     }

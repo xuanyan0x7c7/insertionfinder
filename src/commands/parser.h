@@ -3,7 +3,8 @@
 typedef struct CliParser CliParser;
 struct CliParser {
     int command;
-    const char* filepath;
+    size_t files;
+    const char** file_list;
 };
 
 enum {
