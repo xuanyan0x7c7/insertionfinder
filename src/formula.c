@@ -31,7 +31,7 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
     if (!regex_inited) {
         int status = regcomp(
             &moves_regex,
-            "[UDRLFB]w?2?'?|[xyz]2?'?|\\[[udrlfb]2?'?\\]",
+            "\\s*([UDRLFB]w?2?'?|[xyz]2?'?|\\[[udrlfb]2?'?\\])\\s*",
             REG_EXTENDED
         );
         if (status) {
@@ -85,9 +85,14 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
     LinkedListConstruct(&procedure, free);
 
     const char* buffer = string;
-    regmatch_t pmatch[1];
-    while (buffer && regexec(&moves_regex, buffer, 1, pmatch, 0) == 0) {
-        regmatch_t* match = pmatch;
+    regmatch_t pmatch[2];
+    while (buffer && regexec(&moves_regex, buffer, 2, pmatch, 0) == 0) {
+        regmatch_t* full_match = &pmatch[0];
+        if (full_match->rm_so) {
+            FormulaDestroy(formula);
+            return NULL;
+        }
+        regmatch_t* match = &pmatch[1];
         size_t length = match->rm_eo - match->rm_so;
         char* move_string = (char*)malloc((length + 1) * sizeof(char));
         strncpy(move_string, buffer + match->rm_so, length);
