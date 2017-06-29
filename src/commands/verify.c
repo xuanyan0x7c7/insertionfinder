@@ -3,7 +3,7 @@
 #include "../cube.h"
 #include "../formula.h"
 #include "utils.h"
-#include "verify.h"
+#include "commands.h"
 
 
 bool Verify(const CliParser* parsed_args) {

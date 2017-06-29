@@ -1,4 +1,5 @@
 #pragma once
+#include <stddef.h>
 
 typedef struct CliParser CliParser;
 struct CliParser {

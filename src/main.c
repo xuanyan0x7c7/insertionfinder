@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <config.h>
 #include "commands/parser.h"
-#include "commands/verify.h"
+#include "commands/commands.h"
 
 
 int main(int argc, char** argv) {
