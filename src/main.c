@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <config.h>
-#include "commands/parser.h"
 #include "commands/commands.h"
+#include "commands/parser.h"
 
 
 int main(int argc, char** argv) {
@@ -26,5 +26,6 @@ int main(int argc, char** argv) {
             puts(PACKAGE_STRING);
             break;
     }
+
     exit(EXIT_SUCCESS);
 }
