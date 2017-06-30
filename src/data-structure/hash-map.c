@@ -58,7 +58,8 @@ HashMapNode* HashMapFind(const HashMap* map, const void* key) {
 
 HashMapNode* HashMapInsert(HashMap* map, void* key, void* value) {
     size_t buckets_mask = map->buckets - 1;
-    size_t index = map->hash(key) & buckets_mask;
+    size_t hash = map->hash(key);
+    size_t index = hash & buckets_mask;
     while (map->buffer[index].status == NODE_FILLED) {
         if (map->key_equal(map->buffer[index].key, key)) {
             return NULL;
@@ -77,17 +78,20 @@ HashMapNode* HashMapInsert(HashMap* map, void* key, void* value) {
             new_buffer[i].status = NODE_EMPTY;
         }
         for (size_t i = 0; i < map->buckets; ++i) {
-            size_t index = map->hash(map->buffer[i].key) & buckets_mask;
-            while (new_buffer[index].status == NODE_FILLED) {
-                index = (index + 1) & buckets_mask;
+            if (map->buffer[i].status == NODE_FILLED) {
+                size_t index = map->hash(map->buffer[i].key) & buckets_mask;
+                while (new_buffer[index].status == NODE_FILLED) {
+                    index = (index + 1) & buckets_mask;
+                }
+                new_buffer[index].status = NODE_FILLED;
+                new_buffer[index].key = map->buffer[i].key;
+                new_buffer[index].value = map->buffer[i].value;
             }
-            new_buffer[index].key = map->buffer[i].key;
-            new_buffer[index].value = map->buffer[i].value;
         }
         free(map->buffer);
         map->buckets = new_buckets;
         map->buffer = new_buffer;
-        size_t index = map->hash(key) & buckets_mask;
+        index = hash & buckets_mask;
         while (map->buffer[index].status == NODE_FILLED) {
             index = (index + 1) & buckets_mask;
         }
@@ -119,6 +123,7 @@ void HashMapRemove(HashMap* map, HashMapNode* node) {
             while (new_buffer[index].status == NODE_FILLED) {
                 index = (index + 1) & buckets_mask;
             }
+            new_buffer[index].status = NODE_FILLED;
             new_buffer[index].key = map->buffer[i].key;
             new_buffer[index].value = map->buffer[i].value;
         }
@@ -139,7 +144,7 @@ HashMapNode* HashMapIterStart(const HashMap* map) {
 
 HashMapNode* HashMapIterNext(const HashMap* map, const HashMapNode* node) {
     const HashMapNode* end = map->buffer + map->buckets;
-    for (HashMapNode* iter = (HashMapNode*)node; iter != end; ++iter) {
+    for (HashMapNode* iter = (HashMapNode*)node; ++iter != end;) {
         if (iter->status == NODE_FILLED) {
             return iter;
         }
