@@ -20,9 +20,8 @@ static const char twist_str[][3] = {
 };
 
 
-static char* ListGetItem(const LinkedListNode* node);
 static void CycleReplace(char* c, const char* pattern);
-static int QSortCompare(const void* p, const void* q);
+static int FormulaCompareGeneric(const void* p, const void* q);
 
 
 Formula* FormulaConstruct(Formula* formula, const char* string) {
@@ -134,7 +133,7 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
             const Patterns* patterns = &rotation_replacement[i][1];
             bool found = false;
             for (size_t j = 0; j < 3; ++j) {
-                if (strcmp(ListGetItem(pointer), (*matches)[j]) == 0) {
+                if (strcmp((char*)pointer->data, (*matches)[j]) == 0) {
                     found = true;
                     break;
                 }
@@ -147,7 +146,7 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
                     for (size_t j = 0; ; ++j) {
                         const char* pattern = (*patterns)[j];
                         if (pattern[0]) {
-                            CycleReplace(ListGetItem(node), pattern);
+                            CycleReplace((char*)node->data, pattern);
                         } else {
                             break;
                         }
@@ -165,7 +164,7 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
         (node = node->next) != procedure.tail;
     ) {
         for (size_t i = 0; i < ArrayLength(twist_str); ++i) {
-            if (strcmp(ListGetItem(node), twist_str[i]) == 0) {
+            if (strcmp((char*)node->data, twist_str[i]) == 0) {
                 if (formula->length == formula->capacity) {
                     formula->move = (int*)realloc(
                         formula->move,
@@ -422,8 +421,12 @@ size_t FormulaGetIsomorphisms(const Formula* formula, Formula* result) {
                 flipped_list[j]
             ];
         }
+        FormulaNormalize(&result[i]);
+        FormulaNormalize(&result[i + 24]);
+        FormulaNormalize(&result[i + 48]);
+        FormulaNormalize(&result[i + 72]);
     }
-    qsort(result, 96, sizeof(Formula), QSortCompare);
+    qsort(result, 96, sizeof(Formula), FormulaCompareGeneric);
     Formula* p = result;
     Formula* q = result + 1;
     while (true) {
@@ -443,10 +446,6 @@ size_t FormulaGetIsomorphisms(const Formula* formula, Formula* result) {
 }
 
 
-char* ListGetItem(const LinkedListNode* node) {
-    return (char*)node->data;
-}
-
 void CycleReplace(char* c, const char* pattern) {
     const char* position = strchr(pattern, *c);
     if (position) {
@@ -454,6 +453,6 @@ void CycleReplace(char* c, const char* pattern) {
     }
 }
 
-int QSortCompare(const void* p, const void* q) {
+int FormulaCompareGeneric(const void* p, const void* q) {
     return FormulaCompare((const Formula*)p, (const Formula*)q);
 }
