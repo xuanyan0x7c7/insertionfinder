@@ -35,62 +35,60 @@ void GenerateAlgfiles(const CliParser* parsed_args) {
             if (!string) {
                 break;
             } else if (string[0] == '\0') {
+                free(string);
                 continue;
             }
             Formula formula;
-            if (!FormulaConstruct(&formula, string)) {
-                fprintf(stderr, "Invalid formula: %s\n", string);
-                free(string);
-                continue;
-            }
-            Cube cube;
-            CubeConstruct(&cube, &formula);
-            if (CubeHasParity(&cube)) {
-                fprintf(stderr, "Formula has parity: %s\n", string);
-                FormulaDestroy(&formula);
-                free(string);
-                continue;
-            } else if (CubeMask(&cube) == 0) {
-                fprintf(
-                    stderr,
-                    "Formula does not change the state: %s\n",
-                    string
-                );
-                FormulaDestroy(&formula);
-                free(string);
-                continue;
-            }
-            free(string);
-            FormulaNormalize(&formula);
-            HashMapNode* node = HashMapFind(&map, &cube);
-            if (
-                node
-                && AlgorithmContainsFormula((Algorithm*)node->value, &formula)
-            ) {
-                continue;
-            }
-
-            Formula isomorphism_list[96];
-            size_t isomorphism_count = FormulaGetIsomorphisms(
-                &formula,
-                isomorphism_list
-            );
-            FormulaDestroy(&formula);
-            for (size_t i = 0; i < isomorphism_count; ++i) {
-                Formula* formula = &isomorphism_list[i];
-                Cube* cube = CubeConstruct(NULL, formula);
-                HashMapNode* node = HashMapFind(&map, cube);
-                if (node) {
-                    Algorithm* algorithm = (Algorithm*)node->value;
-                    AlgorithmAddFormula(algorithm, formula);
-                    free(cube);
-                } else {
-                    Algorithm* algorithm = AlgorithmConstruct(NULL, cube);
-                    AlgorithmAddFormula(algorithm, formula);
-                    HashMapInsert(&map, cube, algorithm);
+            do {
+                if (!FormulaConstruct(&formula, string)) {
+                    fprintf(stderr, "Invalid formula: %s\n", string);
+                    break;
                 }
-                FormulaDestroy(formula);
-            }
+                Cube cube;
+                CubeConstruct(&cube, &formula);
+                if (CubeHasParity(&cube)) {
+                    fprintf(stderr, "Formula has parity: %s\n", string);
+                    break;
+                } else if (CubeMask(&cube) == 0) {
+                    fprintf(
+                        stderr,
+                        "Formula does not change the state: %s\n",
+                        string
+                    );
+                    break;
+                }
+                FormulaNormalize(&formula);
+                HashMapNode* node = HashMapFind(&map, &cube);
+                if (node && AlgorithmContainsFormula(
+                    (Algorithm*)node->value,
+                    &formula
+                )) {
+                    break;
+                }
+
+                Formula isomorphism_list[96];
+                size_t isomorphism_count = FormulaGetIsomorphisms(
+                    &formula,
+                    isomorphism_list
+                );
+                for (size_t i = 0; i < isomorphism_count; ++i) {
+                    Formula* formula = &isomorphism_list[i];
+                    Cube* cube = CubeConstruct(NULL, formula);
+                    HashMapNode* node = HashMapFind(&map, cube);
+                    if (node) {
+                        Algorithm* algorithm = (Algorithm*)node->value;
+                        AlgorithmAddFormula(algorithm, formula);
+                        free(cube);
+                    } else {
+                        Algorithm* algorithm = AlgorithmConstruct(NULL, cube);
+                        AlgorithmAddFormula(algorithm, formula);
+                        HashMapInsert(&map, cube, algorithm);
+                    }
+                    FormulaDestroy(formula);
+                }
+            } while (false);
+            free(string);
+            FormulaDestroy(&formula);
         }
 
         fclose(input);
