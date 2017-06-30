@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
- #include <string.h>
 #include "../data-structure/hash-map.h"
 #include "../algorithm.h"
 #include "../cube.h"
@@ -33,6 +32,11 @@ void GenerateAlgfiles(const CliParser* parsed_args) {
 
         while (true) {
             char* string = GetLine(input);
+            if (!string) {
+                break;
+            } else if (string[0] == '\0') {
+                continue;
+            }
             Formula formula;
             if (!FormulaConstruct(&formula, string)) {
                 fprintf(stderr, "Invalid formula: %s\n", string);
