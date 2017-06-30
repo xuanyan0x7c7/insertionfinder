@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+ #include <string.h>
 #include "../data-structure/hash-map.h"
 #include "../algorithm.h"
 #include "../cube.h"
@@ -30,28 +31,21 @@ void GenerateAlgfiles(const CliParser* parsed_args) {
             continue;
         }
 
-        char* string;
-        size_t length = 0;
-        do {
-            if (getline(&string, &length, input) == EOF) {
-                break;
-            }
-            StripNewline(string);
-            if (string[0] == '\0') {
-                break;
-            }
-
+        while (true) {
+            char* string = GetLine(input);
             Formula formula;
             if (!FormulaConstruct(&formula, string)) {
                 fprintf(stderr, "Invalid formula: %s\n", string);
-                break;
+                free(string);
+                continue;
             }
             Cube cube;
             CubeConstruct(&cube, &formula);
             if (CubeHasParity(&cube)) {
                 fprintf(stderr, "Formula has parity: %s\n", string);
                 FormulaDestroy(&formula);
-                break;
+                free(string);
+                continue;
             } else if (CubeMask(&cube) == 0) {
                 fprintf(
                     stderr,
@@ -59,7 +53,17 @@ void GenerateAlgfiles(const CliParser* parsed_args) {
                     string
                 );
                 FormulaDestroy(&formula);
-                break;
+                free(string);
+                continue;
+            }
+            free(string);
+            FormulaNormalize(&formula);
+            HashMapNode* node = HashMapFind(&map, &cube);
+            if (
+                node
+                && AlgorithmContainsFormula((Algorithm*)node->value, &formula)
+            ) {
+                continue;
             }
 
             Formula isomorphism_list[96];
@@ -67,6 +71,7 @@ void GenerateAlgfiles(const CliParser* parsed_args) {
                 &formula,
                 isomorphism_list
             );
+            FormulaDestroy(&formula);
             for (size_t i = 0; i < isomorphism_count; ++i) {
                 Formula* formula = &isomorphism_list[i];
                 Cube* cube = CubeConstruct(NULL, formula);
@@ -82,9 +87,8 @@ void GenerateAlgfiles(const CliParser* parsed_args) {
                 }
                 FormulaDestroy(formula);
             }
-        } while (false);
+        }
 
-        free(string);
         fclose(input);
     }
 
@@ -103,6 +107,7 @@ void GenerateAlgfiles(const CliParser* parsed_args) {
     for (size_t i = 0; i < map.size; ++i) {
         AlgorithmSave(list[i], stdout);
     }
+    free(list);
 }
 
 

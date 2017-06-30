@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "utils.h"
 
@@ -13,4 +15,14 @@ char* StripNewline(char* string) {
         }
     }
     return string;
+}
+
+char* GetLine(FILE* stream) {
+    char* string;
+    size_t temp = 0;
+    if (getline(&string, &temp, stream) == EOF) {
+        free(string);
+        return NULL;
+    }
+    return StripNewline(string);
 }
