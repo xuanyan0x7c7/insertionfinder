@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
             }
             break;
         case COMMAND_GENERATE_ALGFILE:
-            puts("Under development");
+            GenerateAlgfiles(&parsed_args);
             break;
         case COMMAND_HELP:
             puts(PACKAGE_STRING);
