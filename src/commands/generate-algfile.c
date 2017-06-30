@@ -52,6 +52,14 @@ void GenerateAlgfiles(const CliParser* parsed_args) {
                 fprintf(stderr, "Formula has parity: %s\n", string);
                 FormulaDestroy(&formula);
                 break;
+            } else if (CubeMask(&cube) == 0) {
+                fprintf(
+                    stderr,
+                    "Formula does not change the state: %s\n",
+                    string
+                );
+                FormulaDestroy(&formula);
+                break;
             }
 
             Formula isomorphism_list[96];
