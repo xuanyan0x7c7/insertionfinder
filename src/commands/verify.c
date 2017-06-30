@@ -8,9 +8,13 @@
 
 bool Verify(const CliParser* parsed_args) {
     const char* filepath = parsed_args->file_list[0];
-    FILE* input = filepath ? fopen(filepath, "r") : stdin;
     char *scramble_string = NULL;
     char* partial_solve_string = NULL;
+    FILE* input = filepath ? fopen(filepath, "r") : stdin;
+    if (!input) {
+        fprintf(stderr, "Fail to open file: %s\n", filepath);
+        return false;
+    }
 
     bool success = true;
     do {

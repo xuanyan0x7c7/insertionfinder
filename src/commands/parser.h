@@ -4,7 +4,7 @@
 typedef struct CliParser CliParser;
 struct CliParser {
     int command;
-    size_t files;
+    size_t file_count;
     const char** file_list;
 };
 
