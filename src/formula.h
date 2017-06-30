@@ -34,10 +34,6 @@ void FormulaSave(const Formula* formula, FILE* stream);
 Formula* FormulaLoad(Formula* formula, FILE* stream);
 Formula* FormulaDuplicate(Formula* formula, const Formula* source);
 
-size_t FormulaLength(const Formula* formula);
-int FormulaGetMove(const Formula* formula, size_t index);
-void FormulaSetMove(Formula* formula, size_t index, int move);
-
 char* FormulaToString(const Formula* formula, char* string);
 void FormulaPrint(const Formula* formula, FILE* stream);
 

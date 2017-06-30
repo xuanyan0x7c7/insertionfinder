@@ -65,15 +65,6 @@ Algorithm* AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
     return algorithm;
 }
 
-
-size_t AlgorithmSize(const Algorithm* algorithm) {
-    return algorithm->size;
-}
-
-const Formula* AlgorithmGetFormulaList(const Algorithm* algorithm) {
-    return algorithm->formula_list;
-}
-
 bool AlgorithmContainsFormula(
     const Algorithm* algorithm,
     const Formula* formula

@@ -22,8 +22,6 @@ void AlgorithmDestroy(Algorithm* algorithm);
 void AlgorithmSave(const Algorithm* algorithm, FILE* stream);
 Algorithm* AlgorithmLoad(Algorithm* algorithm, FILE* stream);
 
-size_t AlgorithmSize(const Algorithm* algorithm);
-const Formula* AlgorithmGetFormulaList(const Algorithm* algorithm);
 bool AlgorithmContainsFormula(
     const Algorithm* algorithm,
     const Formula* formula

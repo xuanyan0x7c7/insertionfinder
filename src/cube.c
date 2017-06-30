@@ -135,7 +135,7 @@ void CubeTwistFormula(
     CubeRangeTwistFormula(
         cube,
         formula,
-        0, FormulaLength(formula),
+        0, formula->length,
         twist_corners, twist_edges,
         reversed
     );
@@ -150,7 +150,7 @@ void CubeRangeTwistFormula(
 ) {
     if (reversed) {
         for (size_t i = end; i > begin; --i) {
-            int move = inverse_move_table[FormulaGetMove(formula, i - 1)];
+            int move = inverse_move_table[formula->move[i - 1]];
             if (twist_corners) {
                 CubeTwistCorner(cube, move);
             }
@@ -160,7 +160,7 @@ void CubeRangeTwistFormula(
         }
     } else {
         for (size_t i = begin; i < end; ++i) {
-            int move = FormulaGetMove(formula, i);
+            int move = formula->move[i];
             if (twist_corners) {
                 CubeTwistCorner(cube, move);
             }

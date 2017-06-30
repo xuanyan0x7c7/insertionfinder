@@ -226,19 +226,6 @@ Formula* FormulaDuplicate(Formula* formula, const Formula* source) {
 }
 
 
-size_t FormulaLength(const Formula* formula) {
-    return formula->length;
-}
-
-int FormulaGetMove(const Formula* formula, size_t index) {
-    return formula->move[index];
-}
-
-void FormulaSetMove(Formula* formula, size_t index, int move) {
-    formula->move[index] = move;
-}
-
-
 char* FormulaToString(const Formula* formula, char* string) {
     if (formula->length == 0) {
         if (string) {
