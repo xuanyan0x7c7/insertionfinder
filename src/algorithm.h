@@ -9,8 +9,8 @@ typedef struct Algorithm Algorithm;
 struct Algorithm {
     Cube state;
     unsigned mask;
-    bool corner_changed;
-    bool edge_changed;
+    int corner_cycles;
+    int edge_cycles;
     size_t size;
     size_t capacity;
     Formula* formula_list;
@@ -25,3 +25,5 @@ Algorithm* AlgorithmLoad(Algorithm* algorithm, FILE* stream);
 size_t AlgorithmSize(const Algorithm* algorithm);
 const Formula* AlgorithmGetFormulaList(const Algorithm* algorithm);
 void AlgorithmAddFormula(Algorithm* algorithm, const Formula* formula);
+
+int AlgorithmCompare(const Algorithm* x, const Algorithm* y);
