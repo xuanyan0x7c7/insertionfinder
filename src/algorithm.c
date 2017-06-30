@@ -74,6 +74,18 @@ const Formula* AlgorithmGetFormulaList(const Algorithm* algorithm) {
     return algorithm->formula_list;
 }
 
+bool AlgorithmContainsFormula(
+    const Algorithm* algorithm,
+    const Formula* formula
+) {
+    return bsearch(
+        formula,
+        algorithm->formula_list,
+        algorithm->size, sizeof(Formula),
+        FormulaCompareGeneric
+    );
+}
+
 void AlgorithmAddFormula(Algorithm* algorithm, const Formula* formula) {
     if (algorithm->size == algorithm->capacity) {
         algorithm->formula_list = (Formula*)realloc(

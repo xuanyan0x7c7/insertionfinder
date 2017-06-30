@@ -24,6 +24,10 @@ Algorithm* AlgorithmLoad(Algorithm* algorithm, FILE* stream);
 
 size_t AlgorithmSize(const Algorithm* algorithm);
 const Formula* AlgorithmGetFormulaList(const Algorithm* algorithm);
+bool AlgorithmContainsFormula(
+    const Algorithm* algorithm,
+    const Formula* formula
+);
 void AlgorithmAddFormula(Algorithm* algorithm, const Formula* formula);
 
 int AlgorithmCompare(const Algorithm* x, const Algorithm* y);
