@@ -374,7 +374,7 @@ int FormulaCompare(const Formula* f1, const Formula* f2) {
 }
 
 
-size_t FormulaGetIsomorphisms(const Formula* formula, Formula* result) {
+size_t FormulaGenerateIsomorphisms(const Formula* formula, Formula* result) {
     static const int transform_table[][3] = {
         {0, 2, 4}, {0, 4, 3}, {0, 3, 5}, {0, 5, 2},
         {1, 2, 5}, {1, 4, 2}, {1, 3, 4}, {1, 5, 3},

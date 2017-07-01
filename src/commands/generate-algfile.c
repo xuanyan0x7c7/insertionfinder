@@ -67,7 +67,7 @@ void GenerateAlgfiles(const CliParser* parsed_args) {
                 }
 
                 Formula isomorphism_list[96];
-                size_t isomorphism_count = FormulaGetIsomorphisms(
+                size_t isomorphism_count = FormulaGenerateIsomorphisms(
                     &formula,
                     isomorphism_list
                 );

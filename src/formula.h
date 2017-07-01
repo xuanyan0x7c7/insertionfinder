@@ -50,4 +50,4 @@ void FormulaSwapAdjacent(Formula* formula, size_t index);
 void FormulaNormalize(Formula* formula);
 int FormulaCompare(const Formula* f1, const Formula* f2);
 
-size_t FormulaGetIsomorphisms(const Formula* formula, Formula* result);
+size_t FormulaGenerateIsomorphisms(const Formula* formula, Formula* result);
