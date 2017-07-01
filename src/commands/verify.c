@@ -18,20 +18,14 @@ bool Verify(const CliParser* parsed_args) {
 
     bool success = true;
     do {
-        size_t length = 0;
-        if (getline(&scramble_string, &length, input) == EOF) {
+        if (!(
+            (scramble_string = GetLine(input))
+            && (partial_solve_string = GetLine(input))
+        )) {
             fputs("Error input", stderr);
             success = false;
             break;
         }
-        length = 0;
-        if (getline(&partial_solve_string, &length, input) == EOF) {
-            fputs("Error input", stderr);
-            success = false;
-            break;
-        }
-        StripNewline(scramble_string);
-        StripNewline(partial_solve_string);
 
         Formula scramble;
         Formula partial_solve;

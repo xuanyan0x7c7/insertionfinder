@@ -1,20 +1,26 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
 
 
-char* StripNewline(char* string) {
-    size_t length = strlen(string);
-    while (length) {
-        char c = string[length - 1];
-        if (c == '\n' || c == '\r') {
-            string[--length] = '\0';
-        } else {
-            break;
-        }
+char* Trim(const char* string) {
+    const char* begin = string;
+    const char* end = string;
+    while (*end != '\0') {
+        ++end;
     }
-    return string;
+    while (begin != end && isspace(*begin)) {
+        ++begin;
+    }
+    while (begin != end && isspace(*(end - 1))) {
+        --end;
+    }
+    char* result = (char*)malloc((end - begin + 1) * sizeof(char));
+    strncpy(result, begin, end - begin);
+    *(result + (end - begin)) = '\0';
+    return result;
 }
 
 char* GetLine(FILE* stream) {
@@ -24,5 +30,7 @@ char* GetLine(FILE* stream) {
         free(string);
         return NULL;
     }
-    return StripNewline(string);
+    char* result = Trim(string);
+    free(string);
+    return result;
 }

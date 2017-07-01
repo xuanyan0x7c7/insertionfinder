@@ -1,5 +1,5 @@
 #pragma once
 #include <stdio.h>
 
-char* StripNewline(char* string);
+char* Trim(const char* string);
 char* GetLine(FILE* stream);
