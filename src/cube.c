@@ -378,29 +378,25 @@ int CubeEdgeCycles(const Cube* cube) {
 
 
 int CubeCorner3CycleIndex(const Cube* cube) {
-    int x;
     for (int i = 0; i < 8; ++i) {
         if (cube->corner[i] != i * 3) {
-            x = i;
-            break;
+            int j = cube->corner[i];
+            int k = cube->corner[j / 3];
+            return k / 3 == i ? -1 : i * 24 * 24 + j * 24 + k;
         }
     }
-    int y = cube->corner[x];
-    int z = cube->corner[y / 3];
-    return x * 24 * 24 + y * 24 + z;
+    return -1;
 }
 
 int CubeEdge3CycleIndex(const Cube* cube) {
-    int x;
     for (int i = 0; i < 12; ++i) {
         if (cube->edge[i] != i << 1) {
-            x = i;
-            break;
+            int j = cube->edge[i];
+            int k = cube->edge[j >> 1];
+            return k >> 1 == i ? -1 : i * 24 * 24 + j * 24 + k;
         }
     }
-    int y = cube->edge[x];
-    int z = cube->edge[y >> 1];
-    return x * 24 * 24 + y * 24 + z;
+    return -1;
 }
 
 int CubeCornerNext3CycleIndex(int index, int move) {
