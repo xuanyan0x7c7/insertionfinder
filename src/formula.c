@@ -74,7 +74,7 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
         formula = (Formula*)malloc(sizeof(Formula));
     }
     formula->length = 0;
-    formula->capacity = 16;
+    formula->capacity = 64;
     formula->move = (int*)malloc(formula->capacity * sizeof(int));
     if (!string) {
         return formula;
@@ -203,8 +203,12 @@ Formula* FormulaLoad(Formula* formula, FILE* stream) {
     size_t length;
     fread(&length, sizeof(size_t), 1, stream);
     formula->length = length;
-    formula->capacity = length;
-    formula->move = (int*)realloc(formula->move, length * sizeof(int));
+    formula->capacity = 32;
+    while ((formula->capacity <<= 1) < length);
+    formula->move = (int*)realloc(
+        formula->move,
+        formula->capacity * sizeof(int)
+    );
     int8_t compressed[length];
     fread(compressed, sizeof(int8_t), length, stream);
     for (size_t i = 0; i < length; ++i) {
@@ -219,8 +223,12 @@ Formula* FormulaDuplicate(Formula* formula, const Formula* source) {
     }
     size_t length = source->length;
     formula->length = length;
-    formula->capacity = length;
-    formula->move = (int*)realloc(formula->move, length * sizeof(int));
+    formula->capacity = 32;
+    while ((formula->capacity <<= 1) < length);
+    formula->move = (int*)realloc(
+        formula->move,
+        formula->capacity * sizeof(int)
+    );
     memcpy(formula->move, source->move, length * sizeof(int));
     return formula;
 }
@@ -385,8 +393,9 @@ size_t FormulaGenerateIsomorphisms(const Formula* formula, Formula* result) {
     size_t length = formula->length;
     for (size_t i = 0; i < 96; ++i) {
         result[i].length = length;
-        result[i].capacity = length;
-        result[i].move = (int*)malloc(length * sizeof(int));
+        result[i].capacity = 32;
+        while ((result[i].capacity <<= 1) < length);
+        result[i].move = (int*)malloc(result[i].capacity * sizeof(int));
     }
     for (size_t i = 0; i < 24; ++i) {
         int* move_list = result[i].move;
