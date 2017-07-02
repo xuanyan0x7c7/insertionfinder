@@ -233,6 +233,36 @@ void CubeTwistCubeBefore(
 }
 
 
+bool CubeTwistPositive(
+    Cube* cube,
+    const Cube* c1, const Cube* c2,
+    bool corner_changed, bool edge_changed
+) {
+    if (corner_changed) {
+        for (int i = 0; i < 8; ++i) {
+            int item = c1->corner[i];
+            int transform = c2->corner[item / 3];
+            int result = transform - transform % 3 + (item + transform) % 3;
+            if (result / 3 == i && result % 3 && item != result) {
+                return false;
+            }
+            cube->corner[i] = result;
+        }
+    }
+    if (edge_changed) {
+        for (int i = 0; i < 12; ++i) {
+            int item = c1->edge[i];
+            int result = c2->corner[item >> 1] ^ (item & 1);
+            if (result == ((i << 1) | 1) && item != result) {
+                return false;
+            }
+            cube->edge[i] = result;
+        }
+    }
+    return true;
+}
+
+
 Cube* CubeInverseState(Cube* cube, const Cube* state) {
     if (!cube) {
         cube = (Cube*)malloc(sizeof(Cube));

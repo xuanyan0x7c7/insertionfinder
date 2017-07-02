@@ -46,6 +46,12 @@ void CubeTwistCubeBefore(
     bool twist_corners, bool twist_edges
 );
 
+bool CubeTwistPositive(
+    Cube* cube,
+    const Cube* c1, const Cube* c2,
+    bool corner_changed, bool edge_changed
+);
+
 Cube* CubeInverseState(Cube* cube, const Cube* state);
 
 unsigned CubeMask(const Cube* cube);
