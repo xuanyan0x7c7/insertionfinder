@@ -106,25 +106,21 @@ Cube* CubeLoad(Cube* cube, FILE* stream) {
 }
 
 
-void CubeTwist(Cube* cube, int move) {
-    CubeTwistCorner(cube, move);
-    CubeTwistEdge(cube, move);
-}
-
-void CubeTwistCorner(Cube* cube, int move) {
-    const int* table = corner_twist_table[move];
-    for (int i = 0; i < 8; ++i) {
-        int* item = &(cube->corner[i]);
-        int transform = table[*item / 3];
-        *item = transform - transform % 3 + (*item + transform) % 3;
+void CubeTwist(Cube* cube, int move, bool twist_corners, bool twist_edges) {
+    if (twist_corners) {
+        const int* table = corner_twist_table[move];
+        for (int i = 0; i < 8; ++i) {
+            int* item = &(cube->corner[i]);
+            int transform = table[*item / 3];
+            *item = transform - transform % 3 + (*item + transform) % 3;
+        }
     }
-}
-
-void CubeTwistEdge(Cube* cube, int move) {
-    const int* table = edge_twist_table[move];
-    for (int i = 0; i < 12; ++i) {
-        int* item = &(cube->edge[i]);
-        *item = table[*item >> 1] ^ (*item & 1);
+    if (twist_edges) {
+        const int* table = edge_twist_table[move];
+        for (int i = 0; i < 12; ++i) {
+            int* item = &(cube->edge[i]);
+            *item = table[*item >> 1] ^ (*item & 1);
+        }
     }
 }
 
@@ -154,20 +150,20 @@ void CubeRangeTwistFormula(
         for (size_t i = end; i > begin; --i) {
             int move = inverse_move_table[formula->move[i - 1]];
             if (twist_corners) {
-                CubeTwistCorner(cube, move);
+                CubeTwist(cube, move, true, false);
             }
             if (twist_edges) {
-                CubeTwistEdge(cube, move);
+                CubeTwist(cube, move, false, true);
             }
         }
     } else {
         for (size_t i = begin; i < end; ++i) {
             int move = formula->move[i];
             if (twist_corners) {
-                CubeTwistCorner(cube, move);
+                CubeTwist(cube, move, true, false);
             }
             if (twist_edges) {
-                CubeTwistEdge(cube, move);
+                CubeTwist(cube, move, false, true);
             }
         }
     }
