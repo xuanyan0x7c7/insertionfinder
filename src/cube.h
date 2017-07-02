@@ -29,7 +29,22 @@ void CubeRangeTwistFormula(
     bool twist_corners, bool twist_edges,
     bool reversed
 );
-void CubeTwistCube(Cube* cube, const Cube* state);
+void CubeTwistCube(
+    Cube* cube,
+    const Cube* state,
+    bool twist_corners, bool twist_edges
+);
+
+void CubeTwistBefore(
+    Cube* cube,
+    int move,
+    bool twist_corners, bool twist_edges
+);
+void CubeTwistCubeBefore(
+    Cube* cube,
+    const Cube* state,
+    bool twist_corners, bool twist_edges
+);
 
 Cube* CubeInverseState(Cube* cube, const Cube* state);
 

@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include "formula.h"
 #include "cube.h"
 
@@ -58,8 +59,11 @@ static const int edge_twist_table[][12] = {
     {23, 2, 4, 6, 17, 10, 12, 14, 1, 18, 20, 9}
 };
 
+static Cube* GenerateOneMoveCube();
 static Cube Corner3CycleCube(int index);
 static Cube Edge3CycleCube(int index);
+
+static const Cube* one_move_cube = GenerateOneMoveCube();
 
 
 Cube* CubeConstruct(Cube* cube, const Formula* formula) {
@@ -169,15 +173,56 @@ void CubeRangeTwistFormula(
     }
 }
 
-void CubeTwistCube(Cube* cube, const Cube* state) {
-    for (int i = 0; i < 8; ++i) {
-        int* item = &(cube->corner[i]);
-        int transform = state->corner[*item / 3];
-        *item = transform - transform % 3 + (*item + transform) % 3;
+void CubeTwistCube(
+    Cube* cube,
+    const Cube* state,
+    bool twist_corners, bool twist_edges
+) {
+    if (twist_corners) {
+        for (int i = 0; i < 8; ++i) {
+            int* item = &(cube->corner[i]);
+            int transform = state->corner[*item / 3];
+            *item = transform - transform % 3 + (*item + transform) % 3;
+        }
     }
-    for (int i = 0; i < 12; ++i) {
-        int* item = &(cube->edge[i]);
-        *item = state->edge[*item >> 1] ^ (*item & 1);
+    if (twist_edges) {
+        for (int i = 0; i < 12; ++i) {
+            int* item = &(cube->edge[i]);
+            *item = state->edge[*item >> 1] ^ (*item & 1);
+        }
+    }
+}
+
+
+void CubeTwistBefore(
+    Cube* cube,
+    int move,
+    bool twist_corners, bool twist_edges
+) {
+    CubeTwistCubeBefore(cube, &one_move_cube[move], twist_corners, twist_edges);
+}
+
+void CubeTwistCubeBefore(
+    Cube* cube,
+    const Cube* state,
+    bool twist_corners, bool twist_edges
+) {
+    if (twist_corners) {
+        int corners[8];
+        for (int i = 0; i < 8; ++i) {
+            int item = state->corner[i];
+            int transform = cube->corner[item / 3];
+            corners[i] = transform - transform % 3 + (item + transform) % 3;
+        }
+        memcpy(cube->corner, corners, 8 * sizeof(int));
+    }
+    if (twist_edges) {
+        int edges[12];
+        for (int i = 0; i < 12; ++i) {
+            int item = state->edge[i];
+            edges[i] = cube->corner[item >> 1] ^ (item & 1);
+        }
+        memcpy(cube->edge, edges, 12 * sizeof(int));
     }
 }
 
@@ -350,6 +395,17 @@ int CubeEdge3CycleIndex(const Cube* cube) {
     int y = cube->edge[x];
     int z = cube->edge[y >> 1];
     return x * 24 * 24 + y * 24 + z;
+}
+
+
+Cube* GenerateOneMoveCube() {
+    Cube* cube_list = (Cube*)malloc(24 * sizeof(Cube));
+    for (int i = 0; i < 24; ++i) {
+        Cube* cube = &cube_list[i];
+        CubeConstruct(cube, NULL);
+        CubeTwist(cube, i, true, true);
+    }
+    return cube_list;
 }
 
 
