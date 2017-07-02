@@ -10,6 +10,8 @@ struct Cube {
     int edge[12];
 };
 
+void CubeInitialize();
+
 Cube* CubeConstruct(Cube* cube, const Formula* formula);
 
 void CubeSave(const Cube* cube, FILE* stream);

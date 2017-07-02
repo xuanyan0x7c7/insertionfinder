@@ -59,17 +59,24 @@ static const int edge_twist_table[][12] = {
     {23, 2, 4, 6, 17, 10, 12, 14, 1, 18, 20, 9}
 };
 
-static Cube* GenerateOneMoveCube();
+static Cube one_move_cube[24];
+static int corner_cycle_transform_table[6 * 24 * 24][24];
+static int edge_cycle_transform_table[10 * 24 * 24][24];
 
-static int** GenerateCornerCycleTable();
-static int** GenerateEdgeCycleTable();
+static void GenerateOneMoveCube(Cube* cube_list);
+
+static void GenerateCornerCycleTable(int table[][24]);
+static void GenerateEdgeCycleTable(int table[][24]);
 
 static Cube Corner3CycleCube(int index);
 static Cube Edge3CycleCube(int index);
 
-static const Cube* one_move_cube = GenerateOneMoveCube();
-static int* const* corner_cycle_transform_table = GenerateCornerCycleTable();
-static int* const* edge_cycle_transform_table = GenerateEdgeCycleTable();
+
+void CubeInitialize() {
+    GenerateOneMoveCube(one_move_cube);
+    GenerateCornerCycleTable(corner_cycle_transform_table);
+    GenerateEdgeCycleTable(edge_cycle_transform_table);
+}
 
 
 Cube* CubeConstruct(Cube* cube, const Formula* formula) {
@@ -82,7 +89,9 @@ Cube* CubeConstruct(Cube* cube, const Formula* formula) {
     for (int i = 0; i < 12; ++i) {
         cube->edge[i] = i << 1;
     }
-    CubeTwistFormula(cube, formula, true, true, false);
+    if (formula) {
+        CubeTwistFormula(cube, formula, true, true, false);
+    }
     return cube;
 }
 
@@ -438,23 +447,19 @@ int CubeEdgeNext3CycleIndex(int index, int move) {
 }
 
 
-Cube* GenerateOneMoveCube() {
-    Cube* cube_list = (Cube*)malloc(24 * sizeof(Cube));
+void GenerateOneMoveCube(Cube* cube_list) {
     for (int i = 0; i < 24; ++i) {
         Cube* cube = &cube_list[i];
         CubeConstruct(cube, NULL);
         CubeTwist(cube, i, true, true);
     }
-    return cube_list;
 }
 
 
-int** GenerateCornerCycleTable() {
-    int** table = (int**)malloc(6 * 24 * 24 * sizeof(int*));
+void GenerateCornerCycleTable(int table[][24]) {
     Cube identity;
     CubeConstruct(&identity, NULL);
     for (int i = 0; i < 6 * 24 * 24; ++i) {
-        table[i] = (int*)malloc(24 * sizeof(int));
         Cube cube = Corner3CycleCube(i);
         if (CubeMask(&cube) == 0) {
             for (int j = 0; j < 24; ++j) {
@@ -478,15 +483,12 @@ int** GenerateCornerCycleTable() {
             }
         }
     }
-    return table;
 }
 
-int** GenerateEdgeCycleTable() {
-    int** table = (int**)malloc(10 * 24 * 24 * sizeof(int*));
+void GenerateEdgeCycleTable(int table[][24]) {
     Cube identity;
     CubeConstruct(&identity, NULL);
     for (int i = 0; i < 10 * 24 * 24; ++i) {
-        table[i] = (int*)malloc(24 * sizeof(int));
         Cube cube = Edge3CycleCube(i);
         if (CubeMask(&cube) == 0) {
             for (int j = 0; j < 24; ++j) {
@@ -510,7 +512,6 @@ int** GenerateEdgeCycleTable() {
             }
         }
     }
-    return table;
 }
 
 
