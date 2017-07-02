@@ -60,10 +60,16 @@ static const int edge_twist_table[][12] = {
 };
 
 static Cube* GenerateOneMoveCube();
+
+static int** GenerateCornerCycleTable();
+static int** GenerateEdgeCycleTable();
+
 static Cube Corner3CycleCube(int index);
 static Cube Edge3CycleCube(int index);
 
 static const Cube* one_move_cube = GenerateOneMoveCube();
+static int* const* corner_cycle_transform_table = GenerateCornerCycleTable();
+static int* const* edge_cycle_transform_table = GenerateEdgeCycleTable();
 
 
 Cube* CubeConstruct(Cube* cube, const Formula* formula) {
@@ -397,6 +403,14 @@ int CubeEdge3CycleIndex(const Cube* cube) {
     return x * 24 * 24 + y * 24 + z;
 }
 
+int CubeCornerNext3CycleIndex(int index, int move) {
+    return corner_cycle_transform_table[index][move];
+}
+
+int CubeEdgeNext3CycleIndex(int index, int move) {
+    return edge_cycle_transform_table[index][move];
+}
+
 
 Cube* GenerateOneMoveCube() {
     Cube* cube_list = (Cube*)malloc(24 * sizeof(Cube));
@@ -406,6 +420,71 @@ Cube* GenerateOneMoveCube() {
         CubeTwist(cube, i, true, true);
     }
     return cube_list;
+}
+
+
+int** GenerateCornerCycleTable() {
+    int** table = (int**)malloc(6 * 24 * 24 * sizeof(int*));
+    Cube identity;
+    CubeConstruct(&identity, NULL);
+    for (int i = 0; i < 6 * 24 * 24; ++i) {
+        table[i] = (int*)malloc(24 * sizeof(int));
+        Cube cube = Corner3CycleCube(i);
+        if (CubeMask(&cube) == 0) {
+            for (int j = 0; j < 24; ++j) {
+                table[i][j] = i;
+            }
+        } else {
+            for (int j = 0; j < 24; ++j) {
+                if (j & 3) {
+                    Cube new_cube;
+                    memcpy(new_cube.corner, cube.corner, 8 * sizeof(int));
+                    CubeTwistBefore(
+                        &new_cube,
+                        inverse_move_table[j],
+                        true, false
+                    );
+                    CubeTwist(&new_cube, j, true, false);
+                    table[i][j] = CubeCorner3CycleIndex(&new_cube);
+                } else {
+                    table[i][j] = i;
+                }
+            }
+        }
+    }
+    return table;
+}
+
+int** GenerateEdgeCycleTable() {
+    int** table = (int**)malloc(10 * 24 * 24 * sizeof(int*));
+    Cube identity;
+    CubeConstruct(&identity, NULL);
+    for (int i = 0; i < 10 * 24 * 24; ++i) {
+        table[i] = (int*)malloc(24 * sizeof(int));
+        Cube cube = Edge3CycleCube(i);
+        if (CubeMask(&cube) == 0) {
+            for (int j = 0; j < 24; ++j) {
+                table[i][j] = i;
+            }
+        } else {
+            for (int j = 0; j < 24; ++j) {
+                if (j & 3) {
+                    Cube new_cube;
+                    memcpy(new_cube.edge, cube.edge, 12 * sizeof(int));
+                    CubeTwistBefore(
+                        &new_cube,
+                        inverse_move_table[j],
+                        false, true
+                    );
+                    CubeTwist(&new_cube, j, false, true);
+                    table[i][j] = CubeCorner3CycleIndex(&new_cube);
+                } else {
+                    table[i][j] = i;
+                }
+            }
+        }
+    }
+    return table;
 }
 
 
@@ -420,9 +499,11 @@ Cube Corner3CycleCube(int index) {
     for (int i = 0; i < 12; ++i) {
         cube.edge[i] = i << 1;
     }
-    cube.corner[x] = y;
-    cube.corner[y / 3] = z;
-    cube.corner[z / 3] = x * 3 + (48 - y - z) % 3;
+    if (x != y / 3 && x != z / 3 && y / 3 != z / 3) {
+        cube.corner[x] = y;
+        cube.corner[y / 3] = z;
+        cube.corner[z / 3] = x * 3 + (48 - y - z) % 3;
+    }
     return cube;
 }
 
@@ -437,8 +518,10 @@ Cube Edge3CycleCube(int index) {
     for (int i = 0; i < 12; ++i) {
         cube.edge[i] = i << 1;
     }
-    cube.edge[x] = y;
-    cube.edge[y >> 1] = z;
-    cube.edge[z >> 1] = (x << 1) | ((y + z) & 1);
+    if (x != y >> 1 && x != z >> 1 && y >> 1 != z >> 1) {
+        cube.edge[x] = y;
+        cube.edge[y >> 1] = z;
+        cube.edge[z >> 1] = (x << 1) | ((y + z) & 1);
+    }
     return cube;
 }

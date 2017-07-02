@@ -56,3 +56,5 @@ int CubeEdgeCycles(const Cube* cube);
 
 int CubeCorner3CycleIndex(const Cube* cube);
 int CubeEdge3CycleIndex(const Cube* cube);
+int CubeCornerNext3CycleIndex(int index, int move);
+int CubeEdgeNext3CycleIndex(int index, int move);
