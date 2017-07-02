@@ -40,9 +40,10 @@ void FormulaPrint(const Formula* formula, FILE* stream);
 size_t FormulaCancelMoves(Formula* formula);
 
 size_t FormulaInsert(
-    Formula* formula,
+    const Formula* formula,
     size_t insert_place,
-    const Formula* insertion
+    const Formula* insertion,
+    Formula* result
 );
 
 void FormulaSwapAdjacent(Formula* formula, size_t index);
