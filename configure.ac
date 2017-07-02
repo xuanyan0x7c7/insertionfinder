@@ -15,6 +15,7 @@ AC_CONFIG_FILES([
     src/Makefile
     src/commands/Makefile
     src/data-structure/Makefile
+    src/finder/Makefile
 ])
 
 AC_OUTPUT
