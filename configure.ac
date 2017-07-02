@@ -13,9 +13,12 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
     Makefile
     src/Makefile
+    src/algorithm/Makefile
     src/commands/Makefile
+    src/cube/Makefile
     src/data-structure/Makefile
     src/finder/Makefile
+    src/formula/Makefile
 ])
 
 AC_OUTPUT

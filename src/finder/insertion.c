@@ -1,6 +1,5 @@
-#include <limits.h>
 #include <stdlib.h>
-#include "../formula.h"
+#include "../formula/formula.h"
 #include "finder.h"
 
 

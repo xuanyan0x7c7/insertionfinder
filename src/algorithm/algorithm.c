@@ -1,11 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
-#include "cube.h"
-#include "formula.h"
+#include "../cube/cube.h"
+#include "../formula/formula.h"
 #include "algorithm.h"
 
 
-static int FormulaCompareGeneric(const void* p, const void* q);
 static int CubeCompare(const Cube* x, const Cube* y);
 
 
@@ -65,44 +64,6 @@ Algorithm* AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
     return algorithm;
 }
 
-bool AlgorithmContainsFormula(
-    const Algorithm* algorithm,
-    const Formula* formula
-) {
-    return bsearch(
-        formula,
-        algorithm->formula_list,
-        algorithm->size, sizeof(Formula),
-        FormulaCompareGeneric
-    );
-}
-
-void AlgorithmAddFormula(Algorithm* algorithm, const Formula* formula) {
-    if (algorithm->size == algorithm->capacity) {
-        algorithm->formula_list = (Formula*)realloc(
-            algorithm->formula_list,
-            (algorithm->capacity <<= 1) * sizeof(Formula)
-        );
-    }
-    if (!bsearch(
-        formula,
-        algorithm->formula_list,
-        algorithm->size, sizeof(Formula),
-        FormulaCompareGeneric
-    )) {
-        Formula* pointer = algorithm->formula_list + algorithm->size;
-        while (--pointer >= algorithm->formula_list) {
-            if (FormulaCompare(pointer, formula) > 0) {
-                memcpy(pointer + 1, pointer, sizeof(Formula));
-            } else {
-                break;
-            }
-        }
-        FormulaDuplicate(pointer + 1, formula);
-    }
-    ++algorithm->size;
-}
-
 
 int AlgorithmCompare(const Algorithm* x, const Algorithm* y) {
     int cycles_diff = (x->corner_cycles + x->edge_cycles) - (
@@ -118,10 +79,6 @@ int AlgorithmCompare(const Algorithm* x, const Algorithm* y) {
 }
 
 
-int FormulaCompareGeneric(const void* p, const void* q) {
-    return FormulaCompare((const Formula*)p, (const Formula*)q);
-}
-
 int CubeCompare(const Cube* x, const Cube* y) {
     const int* corner1 = x->corner;
     const int* corner2 = y->corner;
@@ -129,13 +86,13 @@ int CubeCompare(const Cube* x, const Cube* y) {
     const int* edge2 = y->edge;
     for (int i = 0; i < 8; ++i) {
         if (corner1[i] != corner2[i]) {
-            return false;
+            return corner1[i] - corner2[i];
         }
     }
     for (int i = 0; i < 12; ++i) {
         if (edge1[i] != edge2[i]) {
-            return false;
+            return edge1[i] - edge2[i];
         }
     }
-    return true;
+    return 0;
 }

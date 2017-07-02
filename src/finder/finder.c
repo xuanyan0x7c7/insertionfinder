@@ -1,8 +1,9 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../cube.h"
-#include "../formula.h"
+#include "../algorithm/algorithm.h"
+#include "../cube/cube.h"
+#include "../formula/formula.h"
 #include "finder.h"
 
 

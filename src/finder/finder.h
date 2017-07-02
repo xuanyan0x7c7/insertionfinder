@@ -1,8 +1,8 @@
 #pragma once
 #include <stddef.h>
-#include "../algorithm.h"
-#include "../cube.h"
-#include "../formula.h"
+#include "../algorithm/algorithm.h"
+#include "../cube/cube.h"
+#include "../formula/formula.h"
 
 typedef struct Finder Finder;
 typedef struct FinderWorker FinderWorker;

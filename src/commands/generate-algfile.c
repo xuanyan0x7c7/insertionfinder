@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "../algorithm/algorithm.h"
+#include "../cube/cube.h"
 #include "../data-structure/hash-map.h"
-#include "../algorithm.h"
-#include "../cube.h"
 #include "utils.h"
 #include "commands.h"
 

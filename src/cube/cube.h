@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
-#include "formula.h"
+#include "../formula/formula.h"
 
 typedef struct Cube Cube;
 struct Cube {

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <regex.h>
-#include "data-structure/linked-list.h"
+#include "../data-structure/linked-list.h"
 #include "formula.h"
 
 

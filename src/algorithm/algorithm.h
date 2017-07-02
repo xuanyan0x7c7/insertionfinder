@@ -2,8 +2,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
-#include "cube.h"
-#include "formula.h"
+#include "../cube/cube.h"
+#include "../formula/formula.h"
 
 typedef struct Algorithm Algorithm;
 struct Algorithm {

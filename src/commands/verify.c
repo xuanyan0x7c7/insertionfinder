@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../cube.h"
-#include "../formula.h"
+#include "../cube/cube.h"
+#include "../formula/formula.h"
 #include "utils.h"
 #include "commands.h"
 
