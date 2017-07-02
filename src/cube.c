@@ -31,7 +31,6 @@ static const int corner_twist_table[][8] = {
     {10, 3, 6, 23, 2, 15, 18, 13}
 };
 
-
 static const int edge_twist_table[][12] = {
     {},
     {6, 0, 2, 4, 8, 10, 12, 14, 16, 18, 20, 22},
@@ -58,6 +57,9 @@ static const int edge_twist_table[][12] = {
     {8, 2, 4, 6, 0, 10, 12, 14, 22, 18, 20, 16},
     {23, 2, 4, 6, 17, 10, 12, 14, 1, 18, 20, 9}
 };
+
+static Cube Corner3CycleCube(int index);
+static Cube Edge3CycleCube(int index);
 
 
 Cube* CubeConstruct(Cube* cube, const Formula* formula) {
@@ -352,4 +354,39 @@ int CubeEdge3CycleIndex(const Cube* cube) {
     int y = cube->edge[x];
     int z = cube->edge[y >> 1];
     return x * 24 * 24 + y * 24 + z;
+}
+
+
+Cube Corner3CycleCube(int index) {
+    Cube cube;
+    int x = index / 24 / 24;
+    int y = (index / 24) % 24;
+    int z = index % 24;
+    for (int i = 0; i < 8; ++i) {
+        cube.corner[i] = i * 3;
+    }
+    for (int i = 0; i < 12; ++i) {
+        cube.edge[i] = i << 1;
+    }
+    cube.corner[x] = y;
+    cube.corner[y / 3] = z;
+    cube.corner[z / 3] = x * 3 + (48 - y - z) % 3;
+    return cube;
+}
+
+Cube Edge3CycleCube(int index) {
+    Cube cube;
+    int x = index / 24 / 24;
+    int y = (index / 24) % 24;
+    int z = index % 24;
+    for (int i = 0; i < 8; ++i) {
+        cube.corner[i] = i * 3;
+    }
+    for (int i = 0; i < 12; ++i) {
+        cube.edge[i] = i << 1;
+    }
+    cube.edge[x] = y;
+    cube.edge[y >> 1] = z;
+    cube.edge[z >> 1] = (x << 1) | ((y + z) & 1);
+    return cube;
 }
