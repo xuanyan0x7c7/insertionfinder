@@ -286,7 +286,7 @@ size_t FormulaCancelMoves(Formula* formula) {
                 move[y] = move[x - 1];
             }
         } else if (move[x] >> 2 != move[y] >> 2) {
-            if (y > 0 && move[y - 1] >> 3 == move[y] >> 3) {
+            if (y > 0 && FormulaSwappable(formula, y)) {
                 int orientation = (move[y - 1] + move[x++]) & 3;
                 if (index > y) {
                     index = y;
@@ -351,6 +351,10 @@ size_t FormulaInsert(
 }
 
 
+bool FormulaSwappable(const Formula* formula, size_t index) {
+    return formula->move[index - 1] >> 3 == formula->move[index] >> 3;
+}
+
 void FormulaSwapAdjacent(Formula* formula, size_t index) {
     int temp = formula->move[index - 1];
     formula->move[index - 1] = formula->move[index];
@@ -360,7 +364,7 @@ void FormulaSwapAdjacent(Formula* formula, size_t index) {
 void FormulaNormalize(Formula* formula) {
     for (size_t i = 1; i < formula->length; ++i) {
         if (
-            formula->move[i - 1] >> 3 == formula->move[i] >> 3
+            FormulaSwappable(formula, i)
             && formula->move[i - 1] > formula->move[i]
         ) {
             FormulaSwapAdjacent(formula, i++);

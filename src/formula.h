@@ -46,6 +46,7 @@ size_t FormulaInsert(
     Formula* result
 );
 
+bool FormulaSwappable(const Formula* formula, size_t index);
 void FormulaSwapAdjacent(Formula* formula, size_t index);
 void FormulaNormalize(Formula* formula);
 int FormulaCompare(const Formula* f1, const Formula* f2);
