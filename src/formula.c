@@ -311,35 +311,34 @@ size_t FormulaCancelMoves(Formula* formula) {
 
 
 size_t FormulaInsert(
-    const Formula* formula,
+    Formula* formula,
     size_t insert_place,
-    const Formula* insertion,
-    Formula* result
+    const Formula* insertion
 ) {
     size_t length = formula->length + insertion->length;
-    if (!result) {
-        result = (Formula*)malloc(sizeof(Formula));
-        result->capacity = length;
-        result->move = (int*)malloc(length * sizeof(int));
-    } else if (result->capacity < length) {
-        result->capacity = length;
-        result->move = (int*)realloc(result->move, length * sizeof(int));
+    if (formula->capacity < length) {
+        while ((formula->capacity <<= 1) < length);
+        formula->move = (int*)realloc(
+            formula->move,
+            formula->capacity * sizeof(int)
+        );
     }
 
-    result->length = length;
-    memcpy(result->move, formula->move, insert_place * sizeof(int));
+    if (insert_place < formula->length) {
+        memmove(
+            formula->move + insert_place + insertion->length,
+            formula->move + insert_place,
+            (formula->length - insert_place) * sizeof(int)
+        );
+    }
     memcpy(
-        result->move + insert_place,
+        formula->move + insert_place,
         insertion->move,
         insertion->length * sizeof(int)
     );
-    memcpy(
-        result->move + (insert_place + insertion->length),
-        formula->move + insert_place,
-        (formula->length - insert_place) * sizeof(int)
-    );
+    formula->length = length;
 
-    size_t cancelled_place = FormulaCancelMoves(result);
+    size_t cancelled_place = FormulaCancelMoves(formula);
     return cancelled_place < insert_place ? cancelled_place : insert_place + 1;
 }
 
