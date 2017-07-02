@@ -392,6 +392,7 @@ void UpdateFewestMoves(Worker* worker) {
         worker->solving_step_capacity * sizeof(Insertion)
     );
     for (size_t i = 0; i < depth; ++i) {
+        FormulaConstruct(&answer_steps[i].partial_solution, NULL);
         FormulaDuplicate(
             &answer_steps[i].partial_solution,
             &worker_steps[i].partial_solution

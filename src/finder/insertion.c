@@ -7,6 +7,7 @@ Insertion* InsertionConstruct(Insertion* insertion, const Formula* formula) {
     if (!insertion) {
         insertion = (Insertion*)malloc(sizeof(Insertion));
     }
+    FormulaConstruct(&insertion->partial_solution, NULL);
     FormulaDuplicate(&insertion->partial_solution, formula);
     return insertion;
 }

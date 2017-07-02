@@ -219,11 +219,14 @@ Formula* FormulaLoad(Formula* formula, FILE* stream) {
 Formula* FormulaDuplicate(Formula* formula, const Formula* source) {
     if (!formula) {
         formula = (Formula*)malloc(sizeof(Formula));
+        formula->capacity = 64;
+        formula->move = NULL;
     }
     size_t length = source->length;
     formula->length = length;
-    formula->capacity = 32;
-    while ((formula->capacity <<= 1) < length);
+    while (formula->capacity < length) {
+        formula->capacity <<= 1;
+    }
     formula->move = (int*)realloc(
         formula->move,
         formula->capacity * sizeof(int)
