@@ -98,7 +98,6 @@ void AlgorithmAddFormula(Algorithm* algorithm, const Formula* formula) {
                 break;
             }
         }
-        FormulaConstruct(pointer + 1, NULL);
         FormulaDuplicate(pointer + 1, formula);
     }
     ++algorithm->size;
