@@ -98,9 +98,8 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
         move_string[length] = '\0';
         char* position = strstr(move_string, "2'");
         if (position) {
-            while (*position) {
+            while (*++position) {
                 *position = *(position + 1);
-                ++position;
             }
         }
         LinkedListInsertBefore(procedure.tail, move_string);
