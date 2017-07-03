@@ -107,7 +107,7 @@ bool Solve(const CliParser* parsed_args) {
                         stdout
                     );
                 }
-                printf("\nInsert at [@%lu]: ", j + 1);
+                printf("\nInsert at @%lu: ", j + 1);
                 FormulaPrint(insertion->insertion, stdout);
                 putchar('\n');
             }
@@ -115,7 +115,7 @@ bool Solve(const CliParser* parsed_args) {
                 solution->depth
             ].partial_solution.length;
             printf(
-                "Fewest Moves: %lu,  %lu move%s cancelled.\n",
+                "Total moves: %lu,  %lu move%s cancelled.\n",
                 finder.fewest_moves,
                 cancelled_moves,
                 cancelled_moves == 1 ? "" : "s"
