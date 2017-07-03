@@ -186,7 +186,7 @@ void GenerateEdgeCycleTable(int table[][24]) {
                         false, true
                     );
                     CubeTwist(&new_cube, j, false, true);
-                    table[i][j] = CubeCorner3CycleIndex(&new_cube);
+                    table[i][j] = CubeEdge3CycleIndex(&new_cube);
                 } else {
                     table[i][j] = i;
                 }

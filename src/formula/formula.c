@@ -198,6 +198,7 @@ void FormulaSave(const Formula* formula, FILE* stream) {
 Formula* FormulaLoad(Formula* formula, FILE* stream) {
     if (!formula) {
         formula = (Formula*)malloc(sizeof(Formula));
+        formula->move = NULL;
     }
     size_t length;
     fread(&length, sizeof(size_t), 1, stream);

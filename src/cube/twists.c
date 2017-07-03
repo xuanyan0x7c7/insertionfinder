@@ -104,23 +104,15 @@ void CubeRangeTwistFormula(
 ) {
     if (reversed) {
         for (size_t i = end; i > begin; --i) {
-            int move = inverse_move_table[formula->move[i - 1]];
-            if (twist_corners) {
-                CubeTwist(cube, move, true, false);
-            }
-            if (twist_edges) {
-                CubeTwist(cube, move, false, true);
-            }
+            CubeTwist(
+                cube,
+                inverse_move_table[formula->move[i - 1]],
+                twist_corners, twist_edges
+            );
         }
     } else {
         for (size_t i = begin; i < end; ++i) {
-            int move = formula->move[i];
-            if (twist_corners) {
-                CubeTwist(cube, move, true, false);
-            }
-            if (twist_edges) {
-                CubeTwist(cube, move, false, true);
-            }
+            CubeTwist(cube, formula->move[i], twist_corners, twist_edges);
         }
     }
 }
