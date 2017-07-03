@@ -22,6 +22,7 @@ Finder* FinderConstruct(
     memset(finder->edge_cycle_index, -1, 10 * 24 * 24 * sizeof(int));
     finder->change_corner = false;
     finder->change_edge = false;
+
     for (size_t i = 0; i < algorithm_count; ++i) {
         const Algorithm* algorithm = algorithm_list[i];
         const Cube* state = &algorithm->state;

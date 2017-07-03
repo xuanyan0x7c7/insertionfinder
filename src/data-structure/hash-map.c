@@ -55,13 +55,16 @@ HashMapNode* HashMapFind(const HashMap* map, const void* key) {
     return NULL;
 }
 
-HashMapNode* HashMapInsert(HashMap* map, void* key, void* value) {
+bool HashMapInsert(HashMap* map, void* key, void* value, HashMapNode** node) {
     size_t buckets_mask = map->buckets - 1;
     size_t hash = map->hash(key);
     size_t index = hash & buckets_mask;
     while (map->buffer[index].status == NODE_FILLED) {
         if (map->key_equal(map->buffer[index].key, key)) {
-            return NULL;
+            if (node) {
+                *node = &map->buffer[index];
+            }
+            return false;
         } else {
             index = (index + 1) & buckets_mask;
         }
@@ -100,7 +103,10 @@ HashMapNode* HashMapInsert(HashMap* map, void* key, void* value) {
     map->buffer[index].status = NODE_FILLED;
     map->buffer[index].key = key;
     map->buffer[index].value = value;
-    return &map->buffer[index];
+    if (node) {
+        *node = &map->buffer[index];
+    }
+    return true;
 }
 
 void HashMapRemove(HashMap* map, HashMapNode* node) {

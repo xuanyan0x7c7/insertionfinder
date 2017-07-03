@@ -7,12 +7,6 @@
 #include "commands.h"
 
 
-static bool CubeEqualGeneric(const void* p, const void* q);
-static size_t CubeHashGeneric(const void* p);
-static int AlgorithmCompareGeneric(const void* p, const void* q);
-static void AlgorithmFreeGeneric(void* p);
-
-
 bool GenerateAlgfiles(const CliParser* parsed_args) {
     HashMap map;
     HashMapConstruct(
@@ -92,7 +86,7 @@ bool GenerateAlgfiles(const CliParser* parsed_args) {
                     } else {
                         Algorithm* algorithm = AlgorithmConstruct(NULL, cube);
                         AlgorithmAddFormula(algorithm, formula);
-                        HashMapInsert(&map, cube, algorithm);
+                        HashMapInsert(&map, cube, algorithm, NULL);
                     }
                     FormulaDestroy(formula);
                 }
@@ -125,46 +119,4 @@ bool GenerateAlgfiles(const CliParser* parsed_args) {
     }
 
     return true;
-}
-
-
-bool CubeEqualGeneric(const void* p, const void* q) {
-    const int* corner1 = ((const Cube*)p)->corner;
-    const int* corner2 = ((const Cube*)q)->corner;
-    const int* edge1 = ((const Cube*)p)->edge;
-    const int* edge2 = ((const Cube*)q)->edge;
-    for (int i = 0; i < 8; ++i) {
-        if (corner1[i] != corner2[i]) {
-            return false;
-        }
-    }
-    for (int i = 0; i < 12; ++i) {
-        if (edge1[i] != edge2[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
-size_t CubeHashGeneric(const void* p) {
-    const int* corner = ((const Cube*)p)->corner;
-    const int* edge = ((const Cube*)p)->edge;
-    size_t hash = 0;
-    for (int i = 0; i < 8; ++i) {
-        hash = hash * 31 + corner[i];
-    }
-    for (int i = 0; i < 12; ++i) {
-        hash = hash * 31 + edge[i];
-    }
-    return hash;
-}
-
-int AlgorithmCompareGeneric(const void* p, const void* q) {
-    return AlgorithmCompare(*(const Algorithm**)p, *(const Algorithm**)q);
-}
-
-void AlgorithmFreeGeneric(void* p) {
-    Algorithm* algorithm = (Algorithm*)p;
-    AlgorithmDestroy(algorithm);
-    free(algorithm);
 }

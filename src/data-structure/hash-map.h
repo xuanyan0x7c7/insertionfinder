@@ -35,7 +35,7 @@ HashMap* HashMapConstruct(
 void HashMapDestroy(HashMap* map);
 
 HashMapNode* HashMapFind(const HashMap* map, const void* key);
-HashMapNode* HashMapInsert(HashMap* map, void* key, void* value);
+bool HashMapInsert(HashMap* map, void* key, void* value, HashMapNode** node);
 void HashMapRemove(HashMap* map, HashMapNode* node);
 
 HashMapNode* HashMapIterStart(const HashMap* map);

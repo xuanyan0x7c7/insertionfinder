@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
+#include "../data-structure/hash-map.h"
 #include "../finder/finder.h"
 #include "../formula/formula.h"
 #include "utils.h"
@@ -9,29 +10,54 @@
 
 
 bool Solve(const CliParser* parsed_args) {
-    size_t algorithm_count = 0;
-    size_t algorithm_capacity = 1024;
-    Algorithm** algorithm_list = (Algorithm**)malloc(
-        algorithm_capacity * sizeof(Algorithm*)
+    HashMap map;
+    HashMapConstruct(
+        &map,
+        CubeEqualGeneric,
+        CubeHashGeneric,
+        NULL,
+        AlgorithmFreeGeneric
     );
+
     for (size_t i = 0; i < parsed_args->algfile_count; ++i) {
         FILE* algorithm_file = fopen(parsed_args->algfile_list[i], "r");
         size_t size;
         fread(&size, sizeof(size_t), 1, algorithm_file);
         for (size_t j = 0; j < size; ++j) {
-            if (algorithm_count == algorithm_capacity) {
-                algorithm_list = (Algorithm**)realloc(
-                    algorithm_list,
-                    (algorithm_capacity <<= 1) * sizeof(Algorithm*)
-                );
+            Algorithm* algorithm = AlgorithmLoad(NULL, algorithm_file);
+            HashMapNode* node;
+            if (!HashMapInsert(&map, &algorithm->state, algorithm, &node)) {
+                Algorithm* dest = (Algorithm*)node->value;
+                for (size_t k = 0; k < algorithm->size; ++k) {
+                    const Formula* formula = &algorithm->formula_list[k];
+                    if (!AlgorithmContainsFormula(dest, formula)) {
+                        AlgorithmAddFormula(dest, formula);
+                    }
+                }
+                AlgorithmDestroy(algorithm);
+                free(algorithm);
             }
-            algorithm_list[algorithm_count++] = AlgorithmLoad(
-                NULL,
-                algorithm_file
-            );
         }
         fclose(algorithm_file);
     }
+
+    Algorithm** algorithm_list = (Algorithm**)malloc(
+        map.size * sizeof(Algorithm*)
+    );
+    size_t index = 0;
+    for (
+        HashMapNode* node = HashMapIterStart(&map);
+        node;
+        node = HashMapIterNext(&map, node)
+    ) {
+        algorithm_list[index++] = (Algorithm*)node->value;
+    }
+    qsort(
+        algorithm_list,
+        map.size,
+        sizeof(Algorithm*),
+        AlgorithmCompareGeneric
+    );
 
     const char* filepath = NULL;
     if (parsed_args->file_count) {
@@ -79,7 +105,7 @@ bool Solve(const CliParser* parsed_args) {
         printf("\n");
 
         Finder finder;
-        FinderConstruct(&finder, algorithm_count, algorithm_list, &scramble);
+        FinderConstruct(&finder, map.size, algorithm_list, &scramble);
         FinderSolve(&finder, &partial_solution);
 
         for (size_t i = 0; i < finder.solution_count; ++i) {
@@ -138,10 +164,7 @@ bool Solve(const CliParser* parsed_args) {
         }
     } while (false);
 
-    for (size_t i = 0; i < algorithm_count; ++i) {
-        AlgorithmDestroy(algorithm_list[i]);
-        free(algorithm_list[i]);
-    }
+    HashMapDestroy(&map);
     free(algorithm_list);
     free(scramble_string);
     free(partial_solve_string);
