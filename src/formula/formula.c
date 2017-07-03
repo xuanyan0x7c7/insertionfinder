@@ -326,7 +326,8 @@ size_t FormulaInsert(
 
 
 bool FormulaSwappable(const Formula* formula, size_t index) {
-    return formula->move[index - 1] >> 3 == formula->move[index] >> 3;
+    return index > 0 && index < formula->length
+        && formula->move[index - 1] >> 3 == formula->move[index] >> 3;
 }
 
 void FormulaSwapAdjacent(Formula* formula, size_t index) {

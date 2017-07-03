@@ -124,11 +124,7 @@ void FinderWorkerSearch(
             corner_cycles, edge_cycles
         );
 
-        if (
-            insert_place > 0
-            && insert_place < partial_solution->length
-            && FormulaSwappable(partial_solution, insert_place)
-        ) {
+        if (FormulaSwappable(partial_solution, insert_place)) {
             FormulaSwapAdjacent(partial_solution, insert_place);
             const int moves[2] = {
                 partial_solution->move[insert_place - 1],
@@ -217,11 +213,7 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
             }
         }
 
-        if (
-            insert_place > 0
-            && insert_place < partial_solution->length
-            && FormulaSwappable(partial_solution, insert_place)
-        ) {
+        if (FormulaSwappable(partial_solution, insert_place)) {
             FormulaSwapAdjacent(partial_solution, insert_place);
             int swapped_index = CubeCornerNext3CycleIndex(
                 index,
@@ -290,11 +282,7 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
             }
         }
 
-        if (
-            insert_place > 0
-            && insert_place < partial_solution->length
-            && FormulaSwappable(partial_solution, insert_place)
-        ) {
+        if (FormulaSwappable(partial_solution, insert_place)) {
             FormulaSwapAdjacent(partial_solution, insert_place);
             int swapped_index = CubeEdgeNext3CycleIndex(
                 index,
