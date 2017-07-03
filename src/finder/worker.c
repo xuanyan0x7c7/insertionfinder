@@ -448,11 +448,6 @@ void UpdateFewestMoves(Worker* worker) {
         }
         finder->solution_count = 0;
     }
-    size_t cancelled_moves = worker_steps[0].partial_solution.length;
-    for (size_t i = 0; i < depth; ++i) {
-        cancelled_moves += worker_steps[i].insertion->length;
-    }
-    cancelled_moves -= worker_steps[depth].partial_solution.length;
 
     if (finder->solution_count == finder->solution_capacity) {
         finder->solution_list = (Worker*)realloc(
