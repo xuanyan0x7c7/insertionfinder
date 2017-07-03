@@ -6,33 +6,41 @@
 #include "commands/parser.h"
 
 
+typedef bool Executor(const CliParser* parsed_args);
+
+bool Version(const CliParser* parsed_args) {
+    puts(PACKAGE_STRING);
+    return true;
+}
+
+
 int main(int argc, char** argv) {
     CubeInitialize();
 
+    Executor* executor = NULL;
     CliParser parsed_args = Parse(argc, argv);
     switch (parsed_args.command) {
         case COMMAND_SOLVE:
-            if (!Solve(&parsed_args)) {
-                exit(EXIT_FAILURE);
-            }
+            executor = Solve;
             break;
         case COMMAND_VERIFY:
-            if (!Verify(&parsed_args)) {
-                exit(EXIT_FAILURE);
-            }
+            executor = Verify;
             break;
         case COMMAND_GENERATE_ALGFILE:
-            if (!GenerateAlgfiles(&parsed_args)) {
-                exit(EXIT_FAILURE);
-            }
+            executor = GenerateAlgfiles;
             break;
         case COMMAND_HELP:
-            puts(PACKAGE_STRING);
-            break;
         case COMMAND_VERSION:
-            puts(PACKAGE_STRING);
+            executor = Version;
+            break;
+        default:
+            executor = NULL;
             break;
     }
 
-    exit(EXIT_SUCCESS);
+    if (executor && !executor(&parsed_args)) {
+        exit(EXIT_FAILURE);
+    } else {
+        exit(EXIT_SUCCESS);
+    }
 }
