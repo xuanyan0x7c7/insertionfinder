@@ -53,13 +53,16 @@ FinderWorker* FinderWorkerConstruct(
     worker->solving_step = (Insertion*)malloc(
         worker->solving_step_capacity * sizeof(Insertion)
     );
-    InsertionConstruct(worker->solving_step, partial_solution);
+    FormulaDuplicate(
+        &worker->solving_step[0].partial_solution,
+        partial_solution
+    );
     return worker;
 }
 
 void FinderWorkerDestroy(Worker* worker) {
     for (size_t i = 0; i <= worker->depth; ++i) {
-        InsertionDestroy(&worker->solving_step[i]);
+        FormulaDestroy(&worker->solving_step[i].partial_solution);
     }
     free(worker->solving_step);
 }
@@ -396,7 +399,10 @@ void PushInsertion(Worker* worker, const Formula* inserted) {
         );
     }
     if (inserted) {
-        InsertionConstruct(&worker->solving_step[worker->depth], inserted);
+        FormulaDuplicate(
+            &worker->solving_step[worker->depth].partial_solution,
+            inserted
+        );
     } else {
         Formula formula;
         FormulaInsert(
@@ -405,7 +411,10 @@ void PushInsertion(Worker* worker, const Formula* inserted) {
             worker->solving_step[worker->depth - 1].insertion,
             &formula
         );
-        InsertionConstruct(&worker->solving_step[worker->depth], &formula);
+        FormulaDuplicate(
+            &worker->solving_step[worker->depth].partial_solution,
+            &formula
+        );
         FormulaDestroy(&formula);
     }
 }
@@ -460,12 +469,15 @@ void UpdateFewestMoves(Worker* worker) {
     );
     Insertion* answer_steps = answer->solving_step;
     for (size_t i = 0; i < depth; ++i) {
-        InsertionConstruct(&answer_steps[i], &worker_steps[i].partial_solution);
+        FormulaDuplicate(
+            &answer_steps[i].partial_solution,
+            &worker_steps[i].partial_solution
+        );
         answer_steps[i].insert_place = worker_steps[i].insert_place;
         answer_steps[i].insertion = worker_steps[i].insertion;
     }
-    InsertionConstruct(
-        &answer_steps[depth],
+    FormulaDuplicate(
+        &answer_steps[depth].partial_solution,
         &worker_steps[depth].partial_solution
     );
 }

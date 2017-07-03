@@ -59,6 +59,3 @@ void FinderWorkerSearch(
     int corner_cycles, int edge_cycles,
     size_t begin, size_t end
 );
-
-Insertion* InsertionConstruct(Insertion* insertion, const Formula* formula);
-void InsertionDestroy(Insertion* insertion);
