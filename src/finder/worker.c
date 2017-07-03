@@ -14,6 +14,7 @@ static void TryInsertion(
     Worker* worker,
     size_t insert_place,
     const Cube* state,
+    bool swapped,
     int corner_cycles, int edge_cycles
 );
 
@@ -113,7 +114,13 @@ void FinderWorkerSearch(
             );
             CubeTwist(&state, move, finder->change_corner, finder->change_edge);
         }
-        TryInsertion(worker, insert_place, &state, corner_cycles, edge_cycles);
+        TryInsertion(
+            worker,
+            insert_place,
+            &state,
+            false,
+            corner_cycles, edge_cycles
+        );
 
         if (
             insert_place > 0
@@ -156,6 +163,7 @@ void FinderWorkerSearch(
                 worker,
                 insert_place,
                 &swapped_state,
+                true,
                 corner_cycles, edge_cycles
             );
             FormulaSwapAdjacent(partial_solution, insert_place);
@@ -286,15 +294,15 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
             && FormulaSwappable(partial_solution, insert_place)
         ) {
             FormulaSwapAdjacent(partial_solution, insert_place);
-            int swapped_index = CubeCornerNext3CycleIndex(
+            int swapped_index = CubeEdgeNext3CycleIndex(
                 index,
                 partial_solution->move[insert_place - 1]
             );
-            swapped_index = CubeCornerNext3CycleIndex(
+            swapped_index = CubeEdgeNext3CycleIndex(
                 swapped_index,
                 inverse_move_table[partial_solution->move[insert_place]]
             );
-            int x = finder->corner_cycle_index[swapped_index];
+            int x = finder->edge_cycle_index[swapped_index];
             if (x != -1) {
                 const Algorithm* algorithm = finder->algorithm_list[x];
                 insertion->insert_place = insert_place;
@@ -315,6 +323,7 @@ void TryInsertion(
     Worker* worker,
     size_t insert_place,
     const Cube* state,
+    bool swapped,
     int corner_cycles, int edge_cycles
 ) {
     const Finder* finder = worker->finder;
@@ -359,7 +368,7 @@ void TryInsertion(
                     partial_solution,
                     insert_place,
                     new_begin,
-                    true
+                    swapped
                 ) && ContinueSearching(
                     worker,
                     corner_cycles_new + edge_cycles_new
