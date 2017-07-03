@@ -12,7 +12,9 @@ int main(int argc, char** argv) {
     CliParser parsed_args = Parse(argc, argv);
     switch (parsed_args.command) {
         case COMMAND_SOLVE:
-            puts("Under development");
+            if (!Solve(&parsed_args)) {
+                exit(EXIT_FAILURE);
+            }
             break;
         case COMMAND_VERIFY:
             if (!Verify(&parsed_args)) {

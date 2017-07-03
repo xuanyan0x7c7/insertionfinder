@@ -4,6 +4,8 @@
 #include "parser.h"
 
 
+static const char* short_options = "a:f:hsvV";
+
 static const struct option long_options[] = {
     {"solve", no_argument, NULL, SHORT_COMMAND_SOLVE},
     {"verify", no_argument, NULL, SHORT_COMMAND_VERIFY},
@@ -11,6 +13,7 @@ static const struct option long_options[] = {
     {"help", no_argument, NULL, SHORT_COMMAND_HELP},
     {"version", no_argument, NULL, SHORT_COMMAND_VERSION},
     {"file", required_argument, NULL, SHORT_PARAMETER_FILE},
+    {"algfile", required_argument, NULL, SHORT_PARAMETER_ALGFILE},
     {NULL, 0, NULL, 0}
 };
 
@@ -20,9 +23,14 @@ CliParser Parse(int argc, char** argv) {
     parsed_args.command = -1;
     parsed_args.file_count = 0;
     parsed_args.file_list = (const char**)malloc(argc * sizeof(const char*));
+    parsed_args.algfile_list = (const char**)malloc(argc * sizeof(const char*));
     while (true) {
         int option_index;
-        int c = getopt_long(argc, argv, "f:hsvV", long_options, &option_index);
+        int c = getopt_long(
+            argc, argv,
+            short_options, long_options,
+            &option_index
+        );
         if (c == -1) {
             break;
         }
@@ -37,7 +45,14 @@ CliParser Parse(int argc, char** argv) {
                         parsed_args.command = option_index;
                         break;
                     case PARAMETER_FILE:
-                        parsed_args.file_list[parsed_args.file_count++] = optarg;
+                        parsed_args.file_list[
+                            parsed_args.file_count++
+                        ] = optarg;
+                        break;
+                    case PARAMETER_ALGFILE:
+                        parsed_args.algfile_list[
+                            parsed_args.algfile_count++
+                        ] = optarg;
                         break;
                 }
                 break;
@@ -55,6 +70,9 @@ CliParser Parse(int argc, char** argv) {
                 break;
             case SHORT_PARAMETER_FILE:
                 parsed_args.file_list[parsed_args.file_count++] = optarg;
+                break;
+            case SHORT_PARAMETER_ALGFILE:
+                parsed_args.algfile_list[parsed_args.algfile_count++] = optarg;
                 break;
         }
     }

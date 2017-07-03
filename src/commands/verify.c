@@ -28,13 +28,13 @@ bool Verify(const CliParser* parsed_args) {
         }
 
         Formula scramble;
-        Formula partial_solve;
+        Formula partial_solution;
         if (!FormulaConstruct(&scramble, scramble_string)) {
             fprintf(stderr, "Invalid scramble sequence: %s\n", scramble_string);
             success = false;
             break;
         }
-        if (!FormulaConstruct(&partial_solve, partial_solve_string)) {
+        if (!FormulaConstruct(&partial_solution, partial_solve_string)) {
             fprintf(
                 stderr,
                 "Invalid partial solve sequence: %s\n",
@@ -47,12 +47,12 @@ bool Verify(const CliParser* parsed_args) {
         FormulaPrint(&scramble, stdout);
         putchar('\n');
         printf("Partial Solve: ");
-        FormulaPrint(&partial_solve, stdout);
+        FormulaPrint(&partial_solution, stdout);
         putchar('\n');
 
         Cube cube;
         CubeConstruct(&cube, &scramble);
-        CubeTwistFormula(&cube, &partial_solve, true, true, false);
+        CubeTwistFormula(&cube, &partial_solution, true, true, false);
         if (CubeHasParity(&cube)) {
             puts("The cube has parity.");
         } else {
