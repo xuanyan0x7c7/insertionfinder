@@ -71,7 +71,7 @@ Cube* CubeInverseState(Cube* cube, const Cube* state) {
         cube = (Cube*)malloc(sizeof(Cube));
     }
     for (int i = 0; i < 8; ++i) {
-        cube->corner[state->corner[i] / 3] = i * 3 + (3 - state->corner[i]) % 3;
+        cube->corner[state->corner[i] / 3] = i * 3 + (24 - state->corner[i]) % 3;
     }
     for (int i = 0; i < 12; ++i) {
         cube->edge[state->edge[i] >> 1] = (i << 1) | (state->edge[i] & 1);

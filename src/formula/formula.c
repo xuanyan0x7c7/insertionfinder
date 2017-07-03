@@ -340,7 +340,7 @@ size_t FormulaInsert(
     memcpy(result->move, formula->move, insert_place * sizeof(int));
     memcpy(
         result->move + insert_place,
-        insertion,
+        insertion->move,
         insertion->length * sizeof(int)
     );
     memcpy(
