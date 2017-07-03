@@ -9,7 +9,7 @@
 
 Finder* FinderConstruct(
     Finder* finder,
-    size_t algorithm_count, const Algorithm** algorithm_list,
+    size_t algorithm_count, Algorithm** algorithm_list,
     const Formula* scramble
 ) {
     if (!finder) {
@@ -17,11 +17,7 @@ Finder* FinderConstruct(
     }
 
     finder->algorithm_count = algorithm_count;
-    memcpy(
-        finder->algorithm_list,
-        algorithm_list,
-        algorithm_count * sizeof(Algorithm*)
-    );
+    finder->algorithm_list = algorithm_list;
     memset(finder->corner_cycle_index, -1, 6 * 24 * 24 * sizeof(int));
     memset(finder->edge_cycle_index, -1, 10 * 24 * 24 * sizeof(int));
     finder->change_corner = false;
@@ -67,4 +63,28 @@ void FinderDestroy(Finder* finder) {
     }
     free(finder->solution_list);
     finder->solution_list = NULL;
+}
+
+
+void FinderSolve(Finder* finder, const Formula* partial_solution) {
+    FinderWorker worker;
+    FinderWorkerConstruct(&worker, finder, partial_solution);
+    Cube cube;
+    CubeConstruct(&cube, &finder->scramble);
+    CubeTwistFormula(&cube, partial_solution, true, true, false);
+    if (CubeHasParity(&cube)) {
+        return;
+    }
+    int corner_cycles = CubeCornerCycles(&cube);
+    int edge_cycles = CubeEdgeCycles(&cube);
+    if (corner_cycles && !finder->change_corner) {
+        return;
+    } else if (edge_cycles && !finder->change_edge) {
+        return;
+    }
+    FinderWorkerSearch(
+        &worker,
+        corner_cycles, edge_cycles,
+        0, partial_solution->length
+    );
 }

@@ -10,7 +10,7 @@ typedef struct Insertion Insertion;
 
 struct Finder {
     size_t algorithm_count;
-    const Algorithm** algorithm_list;
+    Algorithm** algorithm_list;
     int corner_cycle_index[6 * 24 * 24];
     int edge_cycle_index[10 * 24 * 24];
     bool change_corner;
@@ -40,12 +40,18 @@ struct Insertion {
 Finder* FinderConstruct(
     Finder* finder,
     size_t algorithm_count,
-    const Algorithm** algorithm_list,
+    Algorithm** algorithm_list,
     const Formula* scramble
 );
 void FinderDestroy(Finder* finder);
 
-FinderWorker* FinderWorkerConstruct(FinderWorker* worker, Finder* finder);
+void FinderSolve(Finder* finder, const Formula* partial_solution);
+
+FinderWorker* FinderWorkerConstruct(
+    FinderWorker* worker,
+    Finder* finder,
+    const Formula* partial_solution
+);
 void FinderWorkerDestroy(FinderWorker* worker);
 
 void FinderWorkerSearch(
