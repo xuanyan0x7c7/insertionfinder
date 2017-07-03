@@ -33,7 +33,10 @@ bool Solve(const CliParser* parsed_args) {
         fclose(algorithm_file);
     }
 
-    const char* filepath = parsed_args->file_list[0];
+    const char* filepath = NULL;
+    if (parsed_args->file_count) {
+        filepath = parsed_args->file_list[0];
+    }
     char* scramble_string = NULL;
     char* partial_solve_string = NULL;
     FILE* input = filepath ? fopen(filepath, "r") : stdin;

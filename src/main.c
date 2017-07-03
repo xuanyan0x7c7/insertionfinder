@@ -22,7 +22,9 @@ int main(int argc, char** argv) {
             }
             break;
         case COMMAND_GENERATE_ALGFILE:
-            GenerateAlgfiles(&parsed_args);
+            if (!GenerateAlgfiles(&parsed_args)) {
+                exit(EXIT_FAILURE);
+            }
             break;
         case COMMAND_HELP:
             puts(PACKAGE_STRING);

@@ -13,7 +13,7 @@ static int AlgorithmCompareGeneric(const void* p, const void* q);
 static void AlgorithmFreeGeneric(void* p);
 
 
-void GenerateAlgfiles(const CliParser* parsed_args) {
+bool GenerateAlgfiles(const CliParser* parsed_args) {
     HashMap map;
     HashMapConstruct(
         &map,
@@ -22,6 +22,16 @@ void GenerateAlgfiles(const CliParser* parsed_args) {
         free,
         AlgorithmFreeGeneric
     );
+
+    const char* filepath = NULL;
+    if (parsed_args->algfile_count) {
+        filepath = parsed_args->algfile_list[0];
+    }
+    FILE* output = filepath ? fopen(filepath, "wb") : stdout;
+    if (!output) {
+        fprintf(stderr, "Fail to open output file: %s\n", filepath);
+        return false;
+    }
 
     for (size_t i = 0; i < parsed_args->file_count; ++i) {
         FILE* input = fopen(parsed_args->file_list[i], "r");
@@ -105,11 +115,16 @@ void GenerateAlgfiles(const CliParser* parsed_args) {
     }
     qsort(list, map.size, sizeof(Algorithm*), AlgorithmCompareGeneric);
 
-    fwrite(&map.size, sizeof(size_t), 1, stdout);
+    fwrite(&map.size, sizeof(size_t), 1, output);
     for (size_t i = 0; i < map.size; ++i) {
-        AlgorithmSave(list[i], stdout);
+        AlgorithmSave(list[i], output);
     }
     free(list);
+    if (output != stdout) {
+        fclose(output);
+    }
+
+    return true;
 }
 
 
