@@ -81,7 +81,7 @@ bool Solve(const CliParser* parsed_args) {
 
         for (size_t i = 0; i < finder.solution_count; ++i) {
             printf("\nSolution #%lu:\n", i + 1);
-            const FinderWorker* solution = &finder.solution_list[i];
+            FinderWorker* solution = &finder.solution_list[i];
             size_t cancelled_moves = solution->solving_step[
                 0
             ].partial_solution.length;
@@ -127,6 +127,8 @@ bool Solve(const CliParser* parsed_args) {
             );
             printf("\n");
         }
+
+        FinderDestroy(&finder);
 
         if (input != stdin) {
             fclose(input);

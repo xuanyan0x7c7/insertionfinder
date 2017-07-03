@@ -86,4 +86,5 @@ void FinderSolve(Finder* finder, const Formula* partial_solution) {
         corner_cycles, edge_cycles,
         0, partial_solution->length
     );
+    FinderWorkerDestroy(&worker);
 }
