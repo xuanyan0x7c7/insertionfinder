@@ -275,6 +275,20 @@ void FormulaPrint(const Formula* formula, FILE* stream) {
     }
 }
 
+void FormulaPrintRange(
+    const Formula* formula,
+    size_t begin, size_t end,
+    FILE* stream
+) {
+    if (begin == end) {
+        return;
+    }
+    fprintf(stream, "%s", twist_str[formula->move[begin]]);
+    for (size_t i = begin; ++i < end;) {
+        fprintf(stream, " %s", twist_str[formula->move[i]]);
+    }
+}
+
 
 size_t FormulaCancelMoves(Formula* formula) {
     int x = 0;
