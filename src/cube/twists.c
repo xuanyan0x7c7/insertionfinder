@@ -190,7 +190,7 @@ bool CubeTwistPositive(
     if (edge_changed) {
         for (int i = 0; i < 12; ++i) {
             int item = c1->edge[i];
-            int result = c2->corner[item >> 1] ^ (item & 1);
+            int result = c2->edge[item >> 1] ^ (item & 1);
             if (result == ((i << 1) | 1) && item != result) {
                 return false;
             }
