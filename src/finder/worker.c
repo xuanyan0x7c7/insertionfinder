@@ -130,11 +130,11 @@ void FinderWorkerSearch(
             && FormulaSwappable(partial_solution, insert_place)
         ) {
             FormulaSwapAdjacent(partial_solution, insert_place);
-            Cube swapped_state;
             const int moves[2] = {
                 partial_solution->move[insert_place - 1],
                 partial_solution->move[insert_place]
             };
+            Cube swapped_state;
             CubeConstruct(&swapped_state, NULL);
             CubeTwist(
                 &swapped_state,
@@ -398,24 +398,19 @@ void PushInsertion(Worker* worker, const Formula* inserted) {
             (worker->solving_step_capacity <<= 1) * sizeof(Insertion)
         );
     }
+    Formula* formula = &worker->solving_step[worker->depth].partial_solution;
     if (inserted) {
-        FormulaDuplicate(
-            &worker->solving_step[worker->depth].partial_solution,
-            inserted
-        );
+        formula->length = inserted->length;
+        formula->capacity = inserted->capacity;
+        formula->move = inserted->move;
     } else {
-        Formula formula;
+        const Insertion* previous = &worker->solving_step[worker->depth - 1];
         FormulaInsert(
-            &worker->solving_step[worker->depth - 1].partial_solution,
-            worker->solving_step[worker->depth - 1].insert_place,
-            worker->solving_step[worker->depth - 1].insertion,
-            &formula
+            &previous->partial_solution,
+            previous->insert_place,
+            previous->insertion,
+            formula
         );
-        FormulaDuplicate(
-            &worker->solving_step[worker->depth].partial_solution,
-            &formula
-        );
-        FormulaDestroy(&formula);
     }
 }
 
