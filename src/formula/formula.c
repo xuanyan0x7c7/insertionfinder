@@ -182,7 +182,6 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
 
 void FormulaDestroy(Formula* formula) {
     free(formula->move);
-    formula->move = NULL;
 }
 
 
@@ -198,17 +197,13 @@ void FormulaSave(const Formula* formula, FILE* stream) {
 Formula* FormulaLoad(Formula* formula, FILE* stream) {
     if (!formula) {
         formula = (Formula*)malloc(sizeof(Formula));
-        formula->move = NULL;
     }
     size_t length;
     fread(&length, sizeof(size_t), 1, stream);
     formula->length = length;
     formula->capacity = 32;
     while ((formula->capacity <<= 1) < length);
-    formula->move = (int*)realloc(
-        formula->move,
-        formula->capacity * sizeof(int)
-    );
+    formula->move = (int*)malloc(formula->capacity * sizeof(int));
     int8_t compressed[length];
     fread(compressed, sizeof(int8_t), length, stream);
     for (size_t i = 0; i < length; ++i) {
@@ -220,50 +215,16 @@ Formula* FormulaLoad(Formula* formula, FILE* stream) {
 Formula* FormulaDuplicate(Formula* formula, const Formula* source) {
     if (!formula) {
         formula = (Formula*)malloc(sizeof(Formula));
-        formula->capacity = 64;
-        formula->move = NULL;
     }
     size_t length = source->length;
     formula->length = length;
-    while (formula->capacity < length) {
-        formula->capacity <<= 1;
-    }
-    formula->move = (int*)realloc(
-        formula->move,
-        formula->capacity * sizeof(int)
-    );
+    formula->capacity = 32;
+    while ((formula->capacity <<= 1) < length);
+    formula->move = (int*)malloc(formula->capacity * sizeof(int));
     memcpy(formula->move, source->move, length * sizeof(int));
     return formula;
 }
 
-
-char* FormulaToString(const Formula* formula, char* string) {
-    if (formula->length == 0) {
-        if (string) {
-            return strcpy(string, "");
-        } else {
-            return strdup("");
-        }
-    }
-
-    if (!string) {
-        size_t string_length = formula->length - 1;
-        for (size_t i = 0; i < formula->length; ++i) {
-            string_length += strlen(twist_str[formula->move[i]]);
-        }
-        string = (char*)malloc((string_length + 1) * sizeof(char));
-    }
-
-    strcpy(string, twist_str[formula->move[0]]);
-    size_t offset = strlen(twist_str[formula->move[0]]);
-    for (size_t i = 1; i < formula->length; ++i) {
-        strcpy(string + offset++, " ");
-        const char* s = twist_str[formula->move[i]];
-        strcpy(string + offset, s);
-        offset += strlen(s);
-    }
-    return string;
-}
 
 void FormulaPrint(const Formula* formula, FILE* stream) {
     if (formula->length == 0) {
@@ -345,13 +306,9 @@ size_t FormulaInsert(
         result = (Formula*)malloc(sizeof(Formula));
     }
     result->length = formula->length + insertion->length;
-    if (result->capacity < result->length) {
-        while ((result->capacity <<= 1) < result->length);
-        result->move = (int*)realloc(
-            result->move,
-            result->capacity * sizeof(int)
-        );
-    }
+    result->capacity = 32;
+    while ((result->capacity <<= 1) < result->length);
+    result->move = (int*)malloc(result->capacity * sizeof(int));
     memcpy(result->move, formula->move, insert_place * sizeof(int));
     memcpy(
         result->move + insert_place,
@@ -454,7 +411,6 @@ size_t FormulaGenerateIsomorphisms(const Formula* formula, Formula* result) {
         }
         if (++p != q) {
             memcpy(p, q, sizeof(Formula));
-            q->move = NULL;
         }
         ++q;
     }

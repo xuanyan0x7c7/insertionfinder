@@ -35,7 +35,6 @@ void FormulaSave(const Formula* formula, FILE* stream);
 Formula* FormulaLoad(Formula* formula, FILE* stream);
 Formula* FormulaDuplicate(Formula* formula, const Formula* source);
 
-char* FormulaToString(const Formula* formula, char* string);
 void FormulaPrint(const Formula* formula, FILE* stream);
 void FormulaPrintRange(
     const Formula* formula,

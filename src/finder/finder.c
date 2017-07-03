@@ -62,7 +62,6 @@ void FinderDestroy(Finder* finder) {
         FinderWorkerDestroy(&finder->solution_list[i]);
     }
     free(finder->solution_list);
-    finder->solution_list = NULL;
 }
 
 

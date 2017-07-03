@@ -10,8 +10,6 @@ extern Cube one_move_cube[24];
 extern int corner_cycle_transform_table[6 * 24 * 24][24];
 extern int edge_cycle_transform_table[10 * 24 * 24][24];
 
-static void GenerateOneMoveCube(Cube* cube_list);
-
 
 void CubeInitialize() {
     GenerateOneMoveCube(one_move_cube);
@@ -113,13 +111,4 @@ bool CubeHasParity(const Cube* cube) {
         }
     }
     return parity;
-}
-
-
-void GenerateOneMoveCube(Cube* cube_list) {
-    for (int i = 0; i < 24; ++i) {
-        Cube* cube = &cube_list[i];
-        CubeConstruct(cube, NULL);
-        CubeTwist(cube, i, true, true);
-    }
 }

@@ -199,3 +199,11 @@ bool CubeTwistPositive(
     }
     return true;
 }
+
+
+void GenerateOneMoveCube(Cube* cube_list) {
+    for (int i = 0; i < 24; ++i) {
+        memcpy(cube_list[i].corner, corner_twist_table[i], 8 * sizeof(int));
+        memcpy(cube_list[i].edge, edge_twist_table[i], 12 * sizeof(int));
+    }
+}

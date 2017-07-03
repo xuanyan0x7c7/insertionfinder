@@ -29,7 +29,6 @@ void AlgorithmDestroy(Algorithm* algorithm) {
         FormulaDestroy(&algorithm->formula_list[i]);
     }
     free(algorithm->formula_list);
-    algorithm->formula_list = NULL;
 }
 
 
@@ -44,7 +43,6 @@ void AlgorithmSave(const Algorithm* algorithm, FILE* stream) {
 Algorithm* AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
     if (!algorithm) {
         algorithm = (Algorithm*)malloc(sizeof(Algorithm));
-        algorithm->formula_list = NULL;
     }
     Cube* state = &algorithm->state;
     CubeLoad(state, stream);
@@ -55,12 +53,8 @@ Algorithm* AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
     fread(&size, sizeof(size_t), 1, stream);
     algorithm->size = size;
     algorithm->capacity = size;
-    algorithm->formula_list = (Formula*)realloc(
-        algorithm->formula_list,
-        size * sizeof(Formula)
-    );
+    algorithm->formula_list = (Formula*)malloc(size * sizeof(Formula));
     for (size_t i = 0; i < algorithm->size; ++i) {
-        algorithm->formula_list[i].move = NULL;
         FormulaLoad(&algorithm->formula_list[i], stream);
     }
     return algorithm;

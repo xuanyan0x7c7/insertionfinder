@@ -62,7 +62,6 @@ void FinderWorkerDestroy(Worker* worker) {
         InsertionDestroy(&worker->solving_step[i]);
     }
     free(worker->solving_step);
-    worker->solving_step = NULL;
 }
 
 
@@ -357,7 +356,6 @@ void TryInsertion(
         ) {
             for (size_t j = 0; j < algorithm->size; ++j) {
                 Formula formula;
-                FormulaConstruct(&formula, NULL);
                 size_t new_begin = FormulaInsert(
                     partial_solution,
                     insert_place,
@@ -401,7 +399,6 @@ void PushInsertion(Worker* worker, const Formula* inserted) {
         InsertionConstruct(&worker->solving_step[worker->depth], inserted);
     } else {
         Formula formula;
-        FormulaConstruct(&formula, NULL);
         FormulaInsert(
             &worker->solving_step[worker->depth - 1].partial_solution,
             worker->solving_step[worker->depth - 1].insert_place,

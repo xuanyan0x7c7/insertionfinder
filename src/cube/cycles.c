@@ -4,6 +4,7 @@
 #include "common.h"
 
 
+extern Cube one_move_cube[24];
 extern int corner_cycle_transform_table[6 * 24 * 24][24];
 extern int edge_cycle_transform_table[10 * 24 * 24][24];
 
@@ -138,8 +139,6 @@ int CubeEdgeNext3CycleIndex(int index, int move) {
 
 
 void GenerateCornerCycleTable(int table[][24]) {
-    Cube identity;
-    CubeConstruct(&identity, NULL);
     for (int i = 0; i < 6 * 24 * 24; ++i) {
         Cube cube = Corner3CycleCube(i);
         if (CubeMask(&cube) == 0) {
@@ -150,12 +149,12 @@ void GenerateCornerCycleTable(int table[][24]) {
             for (int j = 0; j < 24; ++j) {
                 if (j & 3) {
                     Cube new_cube;
-                    memcpy(new_cube.corner, cube.corner, 8 * sizeof(int));
-                    CubeTwistBefore(
-                        &new_cube,
-                        inverse_move_table[j],
-                        true, false
+                    memcpy(
+                        new_cube.corner,
+                        one_move_cube[inverse_move_table[j]].corner,
+                        8 * sizeof(int)
                     );
+                    CubeTwistCube(&new_cube, &cube, true, false);
                     CubeTwist(&new_cube, j, true, false);
                     table[i][j] = CubeCorner3CycleIndex(&new_cube);
                 } else {
@@ -167,8 +166,6 @@ void GenerateCornerCycleTable(int table[][24]) {
 }
 
 void GenerateEdgeCycleTable(int table[][24]) {
-    Cube identity;
-    CubeConstruct(&identity, NULL);
     for (int i = 0; i < 10 * 24 * 24; ++i) {
         Cube cube = Edge3CycleCube(i);
         if (CubeMask(&cube) == 0) {
@@ -179,12 +176,12 @@ void GenerateEdgeCycleTable(int table[][24]) {
             for (int j = 0; j < 24; ++j) {
                 if (j & 3) {
                     Cube new_cube;
-                    memcpy(new_cube.edge, cube.edge, 12 * sizeof(int));
-                    CubeTwistBefore(
-                        &new_cube,
-                        inverse_move_table[j],
-                        false, true
+                    memcpy(
+                        new_cube.edge,
+                        one_move_cube[inverse_move_table[j]].edge,
+                        12 * sizeof(int)
                     );
+                    CubeTwistCube(&new_cube, &cube, false, true);
                     CubeTwist(&new_cube, j, false, true);
                     table[i][j] = CubeEdge3CycleIndex(&new_cube);
                 } else {
