@@ -164,7 +164,7 @@ void CubeTwistCubeBefore(
         int edges[12];
         for (int i = 0; i < 12; ++i) {
             int item = state->edge[i];
-            edges[i] = cube->corner[item >> 1] ^ (item & 1);
+            edges[i] = cube->edge[item >> 1] ^ (item & 1);
         }
         memcpy(cube->edge, edges, 12 * sizeof(int));
     }
