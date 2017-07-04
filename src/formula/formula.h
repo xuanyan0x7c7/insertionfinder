@@ -52,7 +52,12 @@ size_t FormulaInsert(
     const Formula* insertion,
     Formula* result
 );
-size_t FormulaInsertIsWorthy(
+bool FormulaInsertIsWorthy(
+    const Formula* formula,
+    size_t insert_place,
+    const Formula* insertion
+);
+bool FormulaInsertFinalIsWorthy(
     const Formula* formula,
     size_t insert_place,
     const Formula* insertion,

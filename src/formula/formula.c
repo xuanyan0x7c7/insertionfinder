@@ -321,7 +321,45 @@ size_t FormulaInsert(
     return place <= insert_place ? place : insert_place + 1;
 }
 
-size_t FormulaInsertIsWorthy(
+bool FormulaInsertIsWorthy(
+    const Formula* formula,
+    size_t insert_place,
+    const Formula* insertion
+) {
+    if (insert_place == 0) {
+        return true;
+    }
+    size_t l1 = formula->length;
+    size_t l2 = insertion->length;
+    const int* f1 = formula->move;
+    const int* f2 = insertion->move;
+    const int* x = &f1[insert_place - 1];
+    const int* y = f2;
+    if (inverse_move_table[*x] == *y) {
+        return false;
+    }
+    if (*x >> 3 == *y >> 3) {
+        if (l1 > 1) {
+            if (inverse_move_table[*(x - 1)] == *y) {
+                return false;
+            }
+        }
+        if (l2 > 1) {
+            if (inverse_move_table[*x] == *(y + 1)) {
+                return false;
+            }
+        }
+    }
+    if (l2 > 1) {
+        const int* z = &f2[l2 - 1];
+        if (*y >> 2 == *z >> 2 && inverse_move_table[*z] == f1[insert_place]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool FormulaInsertFinalIsWorthy(
     const Formula* formula,
     size_t insert_place,
     const Formula* insertion,
@@ -339,7 +377,7 @@ size_t FormulaInsertIsWorthy(
             if ((x + y) & 3) {
                 ++sum;
             } else {
-                sum += insert_place << 1;
+                return false;
             }
         } else if (x >> 3 == y >> 3) {
             sum += insert_place << 1;
@@ -352,6 +390,11 @@ size_t FormulaInsertIsWorthy(
             if ((x + y) & 3) {
                 ++sum;
             } else {
+                if (l2 > 1 && x >> 3 == f2[0] >> 3) {
+                    if (x >> 2 == f2[0] >> 2 || x >> 2 == f2[1] >> 2) {
+                        return false;
+                    }
+                }
                 sum += (l1 - insert_place) << 1;
             }
         } else if (x >> 3 == y >> 3) {

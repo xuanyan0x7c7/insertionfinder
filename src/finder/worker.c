@@ -206,7 +206,7 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
                 ssize_t moves_to_cancel =
                     skeleton->length + insertion->insertion->length
                     - finder->fewest_moves;
-                if (moves_to_cancel > 0 && !FormulaInsertIsWorthy(
+                if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
                     skeleton,
                     insert_place,
                     insertion->insertion,
@@ -239,7 +239,7 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
                     ssize_t moves_to_cancel =
                         skeleton->length + insertion->insertion->length
                         - finder->fewest_moves;
-                    if (moves_to_cancel > 0 && !FormulaInsertIsWorthy(
+                    if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
                         skeleton,
                         insert_place,
                         insertion->insertion,
@@ -297,7 +297,7 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
                 ssize_t moves_to_cancel =
                     skeleton->length + insertion->insertion->length
                     - finder->fewest_moves;
-                if (moves_to_cancel > 0 && !FormulaInsertIsWorthy(
+                if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
                     skeleton,
                     insert_place,
                     insertion->insertion,
@@ -330,7 +330,7 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
                     ssize_t moves_to_cancel =
                         skeleton->length + insertion->insertion->length
                         - finder->fewest_moves;
-                    if (moves_to_cancel > 0 && !FormulaInsertIsWorthy(
+                    if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
                         skeleton,
                         insert_place,
                         insertion->insertion,
@@ -386,29 +386,37 @@ void TryInsertion(
             < corner_cycles + edge_cycles
         ) {
             for (size_t j = 0; j < algorithm->size; ++j) {
+                insertion->insertion = &algorithm->formula_list[j];
+                if (!FormulaInsertIsWorthy(
+                    skeleton,
+                    insert_place,
+                    insertion->insertion
+                )) {
+                    continue;
+                }
                 Formula formula;
                 size_t new_begin = FormulaInsert(
                     skeleton,
                     insert_place,
-                    &algorithm->formula_list[j],
+                    insertion->insertion,
                     &formula
                 );
-                if (NotSearched(skeleton, insert_place, new_begin, swapped)
-                    && ContinueSearching(
-                        worker,
-                        corner_cycles_new + edge_cycles_new
-                    )
-                ) {
-                    insertion->insert_place = insert_place;
-                    insertion->insertion = &algorithm->formula_list[j];
-                    PushInsertion(worker, &formula);
-                    FinderWorkerSearch(
-                        worker,
-                        corner_cycles_new, edge_cycles_new,
-                        new_begin, formula.length
-                    );
-                    PopInsertion(worker);
+                if (!NotSearched(skeleton, insert_place, new_begin, swapped)) {
+                    continue;
+                } else if (!ContinueSearching(
+                    worker,
+                    corner_cycles_new + edge_cycles_new
+                )) {
+                    continue;
                 }
+                insertion->insert_place = insert_place;
+                PushInsertion(worker, &formula);
+                FinderWorkerSearch(
+                    worker,
+                    corner_cycles_new, edge_cycles_new,
+                    new_begin, formula.length
+                );
+                PopInsertion(worker);
             }
         }
     }
