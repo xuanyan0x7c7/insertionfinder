@@ -264,7 +264,7 @@ size_t FormulaCancelMoves(Formula* formula) {
                 move[y] = move[x - 1];
             }
         } else if (move[x] >> 2 != move[y] >> 2) {
-            if (y > 0 && FormulaSwappable(formula, y)) {
+            if (y > 0 && move[y - 1] >> 3 == move[y] >> 3) {
                 int orientation = (move[y - 1] + move[x++]) & 3;
                 if (index > y) {
                     index = y;

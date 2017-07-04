@@ -7,6 +7,9 @@
 #include "finder.h"
 
 
+static int SolutionCompare(const void* p, const void* q);
+
+
 void FinderConstruct(
     Finder* finder,
     size_t algorithm_count, Algorithm** algorithm_list,
@@ -95,4 +98,16 @@ void FinderSolve(Finder* finder, const Formula* partial_solution) {
         solution->cancelled_moves -= solution->solving_step[solution->depth]
             .partial_solution.length;
     }
+    qsort(
+        finder->solution_list,
+        finder->solution_count,
+        sizeof(FinderWorker),
+        SolutionCompare
+    );
+}
+
+
+int SolutionCompare(const void* p, const void* q) {
+    return ((const FinderWorker*)p)->cancelled_moves
+        - ((const FinderWorker*)q)->cancelled_moves;
 }

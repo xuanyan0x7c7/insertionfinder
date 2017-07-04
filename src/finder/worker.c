@@ -512,14 +512,17 @@ bool BitCountLessThan2(unsigned n) {
 
 bool NotSearched(
     const Formula* formula,
-    size_t index,
+    size_t insert_place,
     size_t new_begin,
     bool swappable
 ) {
-    if (swappable || index < 2 || FormulaSwappable(formula, index - 1)) {
-        return new_begin >= index;
+    if (
+        swappable || insert_place < 2
+        || FormulaSwappable(formula, insert_place - 1)
+    ) {
+        return new_begin >= insert_place;
     } else {
-        return new_begin >= index - 1;
+        return new_begin >= insert_place - 1;
     }
 }
 
