@@ -339,15 +339,11 @@ bool FormulaInsertIsWorthy(
         return false;
     }
     if (*x >> 3 == *y >> 3) {
-        if (l1 > 1) {
-            if (inverse_move_table[*(x - 1)] == *y) {
-                return false;
-            }
+        if (l1 > 1 && inverse_move_table[*(x - 1)] == *y) {
+            return false;
         }
-        if (l2 > 1) {
-            if (inverse_move_table[*x] == *(y + 1)) {
-                return false;
-            }
+        if (l2 > 1 && inverse_move_table[*x] == *(y + 1)) {
+            return false;
         }
     }
     if (l2 > 1) {
@@ -392,6 +388,12 @@ bool FormulaInsertFinalIsWorthy(
             }
         } else if (*x >> 3 == *y >> 3) {
             sum += insert_place << 1;
+            if (l1 > 1 && inverse_move_table[*(x - 1)] == *y) {
+                return false;
+            }
+            if (l2 > 1 && inverse_move_table[*x] == *(y + 1)) {
+                return false;
+            }
         }
     }
     if (insert_place < l1) {
