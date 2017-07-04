@@ -408,8 +408,7 @@ void TryInsertion(
                     FinderWorkerSearch(
                         worker,
                         corner_cycles_new, edge_cycles_new,
-                        new_begin,
-                        formula.length
+                        new_begin, formula.length
                     );
                     PopInsertion(worker);
                 }
