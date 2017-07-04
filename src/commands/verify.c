@@ -8,8 +8,8 @@
 
 bool Verify(const CliParser* parsed_args) {
     const char* filepath = NULL;
-    if (parsed_args->file_count) {
-        filepath = parsed_args->file_list[0];
+    if (parsed_args->casefile_count) {
+        filepath = parsed_args->casefile_list[0];
     }
     char* scramble_string = NULL;
     char* partial_solve_string = NULL;
