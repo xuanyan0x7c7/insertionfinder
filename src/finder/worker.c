@@ -39,14 +39,11 @@ static bool NotSearched(
 static bool ContinueSearching(const Worker* worker, int cycles);
 
 
-FinderWorker* FinderWorkerConstruct(
+void FinderWorkerConstruct(
     Worker* worker,
     Finder* finder,
     const Formula* partial_solution
 ) {
-    if (!worker) {
-        worker = (Worker*)malloc(sizeof(Worker));
-    }
     worker->finder = finder;
     worker->depth = 0;
     worker->solving_step_capacity = 8;
@@ -57,7 +54,6 @@ FinderWorker* FinderWorkerConstruct(
         &worker->solving_step[0].partial_solution,
         partial_solution
     );
-    return worker;
 }
 
 void FinderWorkerDestroy(Worker* worker) {
@@ -85,7 +81,7 @@ void FinderWorkerSearch(
     Insertion* insertion = &worker->solving_step[worker->depth];
     Formula* partial_solution = &insertion->partial_solution;
     Cube state;
-    CubeConstruct(&state, NULL);
+    CubeConstruct(&state);
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
         if (insert_place == begin) {
             CubeRangeTwistFormula(
@@ -131,7 +127,7 @@ void FinderWorkerSearch(
                 partial_solution->move[insert_place]
             };
             Cube swapped_state;
-            CubeConstruct(&swapped_state, NULL);
+            CubeConstruct(&swapped_state);
             CubeTwist(
                 &swapped_state,
                 moves[1],
@@ -178,7 +174,7 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
         int index;
         if (insert_place == begin) {
             Cube state;
-            CubeConstruct(&state, NULL);
+            CubeConstruct(&state);
             CubeRangeTwistFormula(
                 &state,
                 partial_solution,
@@ -247,7 +243,7 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
         int index;
         if (insert_place == begin) {
             Cube state;
-            CubeConstruct(&state, NULL);
+            CubeConstruct(&state);
             CubeRangeTwistFormula(
                 &state,
                 partial_solution,

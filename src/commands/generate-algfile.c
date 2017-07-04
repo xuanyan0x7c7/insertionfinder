@@ -49,7 +49,8 @@ bool GenerateAlgfiles(const CliParser* parsed_args) {
                     break;
                 }
                 Cube cube;
-                CubeConstruct(&cube, &formula);
+                CubeConstruct(&cube);
+                CubeTwistFormula(&cube, &formula, true, true, false);
                 if (CubeHasParity(&cube)) {
                     fprintf(stderr, "Formula has parity: %s\n", string);
                     break;
@@ -77,14 +78,19 @@ bool GenerateAlgfiles(const CliParser* parsed_args) {
                 );
                 for (size_t i = 0; i < isomorphism_count; ++i) {
                     Formula* formula = &isomorphism_list[i];
-                    Cube* cube = CubeConstruct(NULL, formula);
+                    Cube* cube = (Cube*)malloc(sizeof(Cube));
+                    CubeConstruct(cube);
+                    CubeTwistFormula(cube, formula, true, true, false);
                     HashMapNode* node = HashMapFind(&map, cube);
                     if (node) {
                         Algorithm* algorithm = (Algorithm*)node->value;
                         AlgorithmAddFormula(algorithm, formula);
                         free(cube);
                     } else {
-                        Algorithm* algorithm = AlgorithmConstruct(NULL, cube);
+                        Algorithm* algorithm = (Algorithm*)malloc(
+                            sizeof(Algorithm)
+                        );
+                        AlgorithmConstruct(algorithm, cube);
                         AlgorithmAddFormula(algorithm, formula);
                         HashMapInsert(&map, cube, algorithm, NULL);
                     }

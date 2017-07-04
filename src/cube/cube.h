@@ -12,10 +12,10 @@ struct Cube {
 
 void CubeInitialize();
 
-Cube* CubeConstruct(Cube* cube, const Formula* formula);
+void CubeConstruct(Cube* cube);
 
 void CubeSave(const Cube* cube, FILE* stream);
-Cube* CubeLoad(Cube* cube, FILE* stream);
+void CubeLoad(Cube* cube, FILE* stream);
 
 void CubeTwist(Cube* cube, int move, bool twist_corners, bool twist_edges);
 void CubeTwistFormula(
@@ -54,7 +54,7 @@ bool CubeTwistPositive(
     bool corner_changed, bool edge_changed
 );
 
-Cube* CubeInverseState(Cube* cube, const Cube* state);
+void CubeInverseState(const Cube* state, Cube* result);
 
 unsigned CubeMask(const Cube* cube);
 

@@ -16,11 +16,11 @@ struct Algorithm {
     Formula* formula_list;
 };
 
-Algorithm* AlgorithmConstruct(Algorithm* algorithm, const Cube* state);
+void AlgorithmConstruct(Algorithm* algorithm, const Cube* state);
 void AlgorithmDestroy(Algorithm* algorithm);
 
 void AlgorithmSave(const Algorithm* algorithm, FILE* stream);
-Algorithm* AlgorithmLoad(Algorithm* algorithm, FILE* stream);
+void AlgorithmLoad(Algorithm* algorithm, FILE* stream);
 
 bool AlgorithmContainsFormula(
     const Algorithm* algorithm,

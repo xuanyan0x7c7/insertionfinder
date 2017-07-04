@@ -8,10 +8,7 @@
 static int CubeCompare(const Cube* x, const Cube* y);
 
 
-Algorithm* AlgorithmConstruct(Algorithm* algorithm, const Cube* state) {
-    if (!algorithm) {
-        algorithm = (Algorithm*)malloc(sizeof(Algorithm));
-    }
+void AlgorithmConstruct(Algorithm* algorithm, const Cube* state) {
     memcpy(&algorithm->state, state, sizeof(Cube));
     algorithm->mask = CubeMask(state);
     algorithm->corner_cycles = CubeCornerCycles(state);
@@ -21,7 +18,6 @@ Algorithm* AlgorithmConstruct(Algorithm* algorithm, const Cube* state) {
     algorithm->formula_list = (Formula*)malloc(
         algorithm->capacity * sizeof(Formula)
     );
-    return algorithm;
 }
 
 void AlgorithmDestroy(Algorithm* algorithm) {
@@ -40,10 +36,7 @@ void AlgorithmSave(const Algorithm* algorithm, FILE* stream) {
     }
 }
 
-Algorithm* AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
-    if (!algorithm) {
-        algorithm = (Algorithm*)malloc(sizeof(Algorithm));
-    }
+void AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
     Cube* state = &algorithm->state;
     CubeLoad(state, stream);
     algorithm->mask = CubeMask(state);
@@ -54,10 +47,9 @@ Algorithm* AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
     algorithm->size = size;
     algorithm->capacity = size;
     algorithm->formula_list = (Formula*)malloc(size * sizeof(Formula));
-    for (size_t i = 0; i < algorithm->size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         FormulaLoad(&algorithm->formula_list[i], stream);
     }
-    return algorithm;
 }
 
 

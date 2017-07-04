@@ -25,7 +25,7 @@ struct HashMap {
     Destructor* destroy_value;
 };
 
-HashMap* HashMapConstruct(
+void HashMapConstruct(
     HashMap* map,
     EqualFunction* key_equal,
     HashFunction* hash,

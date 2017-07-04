@@ -37,7 +37,7 @@ struct Insertion {
     const Formula *insertion;
 };
 
-Finder* FinderConstruct(
+void FinderConstruct(
     Finder* finder,
     size_t algorithm_count,
     Algorithm** algorithm_list,
@@ -47,7 +47,7 @@ void FinderDestroy(Finder* finder);
 
 void FinderSolve(Finder* finder, const Formula* partial_solution);
 
-FinderWorker* FinderWorkerConstruct(
+void FinderWorkerConstruct(
     FinderWorker* worker,
     Finder* finder,
     const Formula* partial_solution

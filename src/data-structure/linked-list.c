@@ -8,10 +8,7 @@ typedef LinkedListNode Node;
 static void Noop(void* data) {}
 
 
-List* LinkedListConstruct(List* list, Destructor* destroy) {
-    if (!list) {
-        list = (List*)malloc(sizeof(List));
-    }
+void LinkedListConstruct(List* list, Destructor* destroy) {
     list->head = (Node*)malloc(sizeof(Node));
     list->tail = (Node*)malloc(sizeof(Node));
     list->head->data = NULL;
@@ -21,7 +18,6 @@ List* LinkedListConstruct(List* list, Destructor* destroy) {
     list->tail->prev = list->head;
     list->tail->next = NULL;
     list->destroy = destroy ? destroy : Noop;
-    return list;
 }
 
 void LinkedListDestroy(List* list) {

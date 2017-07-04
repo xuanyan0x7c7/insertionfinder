@@ -7,16 +7,13 @@
 static void Noop(void* data) {}
 
 
-HashMap* HashMapConstruct(
+void HashMapConstruct(
     HashMap* map,
     EqualFunction* key_equal,
     HashFunction* hash,
     Destructor* destroy_key,
     Destructor* destroy_value
 ) {
-    if (!map) {
-        map = (HashMap*)malloc(sizeof(HashMap));
-    }
     map->size = 0;
     map->buckets = 256;
     map->buffer = (HashMapNode*)malloc(map->buckets * sizeof(HashMapNode));
@@ -27,7 +24,6 @@ HashMap* HashMapConstruct(
     map->hash = hash;
     map->destroy_key = destroy_key ? destroy_key : Noop;
     map->destroy_value = destroy_value ? destroy_value : Noop;
-    return map;
 }
 
 void HashMapDestroy(HashMap* map) {

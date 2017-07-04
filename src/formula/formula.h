@@ -28,7 +28,7 @@ struct Formula {
     int* move;
 };
 
-Formula* FormulaConstruct(Formula* formula, const char* string);
+bool FormulaConstruct(Formula* formula, const char* string);
 void FormulaDestroy(Formula* formula);
 
 void FormulaSave(const Formula* formula, FILE* stream);

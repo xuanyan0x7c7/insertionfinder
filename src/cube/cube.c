@@ -18,20 +18,13 @@ void CubeInitialize() {
 }
 
 
-Cube* CubeConstruct(Cube* cube, const Formula* formula) {
-    if (!cube) {
-        cube = (Cube*)malloc(sizeof(Cube));
-    }
+void CubeConstruct(Cube* cube) {
     for (int i = 0; i < 8; ++i) {
         cube->corner[i] = i * 3;
     }
     for (int i = 0; i < 12; ++i) {
         cube->edge[i] = i << 1;
     }
-    if (formula) {
-        CubeTwistFormula(cube, formula, true, true, false);
-    }
-    return cube;
 }
 
 
@@ -47,10 +40,7 @@ void CubeSave(const Cube* cube, FILE* stream) {
     fwrite(edge, sizeof(int8_t), 12, stream);
 }
 
-Cube* CubeLoad(Cube* cube, FILE* stream) {
-    if (!cube) {
-        cube = (Cube*)malloc(sizeof(Cube));
-    }
+void CubeLoad(Cube* cube, FILE* stream) {
     int8_t corner[8], edge[12];
     fread(corner, sizeof(int8_t), 8, stream);
     fread(edge, sizeof(int8_t), 12, stream);
@@ -60,21 +50,18 @@ Cube* CubeLoad(Cube* cube, FILE* stream) {
     for (int i = 0; i < 12; ++i) {
         cube->edge[i] = edge[i];
     }
-    return cube;
 }
 
 
-Cube* CubeInverseState(Cube* cube, const Cube* state) {
-    if (!cube) {
-        cube = (Cube*)malloc(sizeof(Cube));
-    }
+void CubeInverseState(const Cube* state, Cube* result) {
     for (int i = 0; i < 8; ++i) {
-        cube->corner[state->corner[i] / 3] = i * 3 + (24 - state->corner[i]) % 3;
+        int item = state->corner[i];
+        result->corner[item / 3] = i * 3 + (24 - item) % 3;
     }
     for (int i = 0; i < 12; ++i) {
-        cube->edge[state->edge[i] >> 1] = (i << 1) | (state->edge[i] & 1);
+        int item = state->edge[i];
+        result->edge[item >> 1] = (i << 1) | (item & 1);
     }
-    return cube;
 }
 
 

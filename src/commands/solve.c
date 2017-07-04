@@ -24,7 +24,8 @@ bool Solve(const CliParser* parsed_args) {
         size_t size;
         fread(&size, sizeof(size_t), 1, algorithm_file);
         for (size_t j = 0; j < size; ++j) {
-            Algorithm* algorithm = AlgorithmLoad(NULL, algorithm_file);
+            Algorithm* algorithm = (Algorithm*)malloc(sizeof(Algorithm));
+            AlgorithmLoad(algorithm, algorithm_file);
             HashMapNode* node;
             if (!HashMapInsert(&map, &algorithm->state, algorithm, &node)) {
                 Algorithm* dest = (Algorithm*)node->value;

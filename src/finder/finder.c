@@ -7,15 +7,11 @@
 #include "finder.h"
 
 
-Finder* FinderConstruct(
+void FinderConstruct(
     Finder* finder,
     size_t algorithm_count, Algorithm** algorithm_list,
     const Formula* scramble
 ) {
-    if (!finder) {
-        finder = (Finder*)malloc(sizeof(Finder));
-    }
-
     finder->algorithm_count = algorithm_count;
     finder->algorithm_list = algorithm_list;
     memset(finder->corner_cycle_index, -1, 6 * 24 * 24 * sizeof(int));
@@ -44,8 +40,9 @@ Finder* FinderConstruct(
 
     FormulaConstruct(&finder->scramble, NULL);
     FormulaDuplicate(&finder->scramble, scramble);
-    CubeConstruct(&finder->scramble_cube, scramble);
-    CubeInverseState(&finder->inverse_scramble_cube, &finder->scramble_cube);
+    CubeConstruct(&finder->scramble_cube);
+    CubeTwistFormula(&finder->scramble_cube, scramble, true, true, false);
+    CubeInverseState(&finder->scramble_cube, &finder->inverse_scramble_cube);
 
     finder->fewest_moves = ULONG_MAX;
     finder->solution_count = 0;
@@ -53,8 +50,6 @@ Finder* FinderConstruct(
     finder->solution_list = (FinderWorker*)malloc(
         finder->solution_capacity * sizeof(FinderWorker)
     );
-
-    return finder;
 }
 
 void FinderDestroy(Finder* finder) {
@@ -70,7 +65,8 @@ void FinderSolve(Finder* finder, const Formula* partial_solution) {
     FinderWorker worker;
     FinderWorkerConstruct(&worker, finder, partial_solution);
     Cube cube;
-    CubeConstruct(&cube, &finder->scramble);
+    CubeConstruct(&cube);
+    CubeTwistFormula(&cube, &finder->scramble, true, true, false);
     CubeTwistFormula(&cube, partial_solution, true, true, false);
     if (CubeHasParity(&cube)) {
         return;

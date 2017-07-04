@@ -54,7 +54,8 @@ bool Verify(const CliParser* parsed_args) {
         putchar('\n');
 
         Cube cube;
-        CubeConstruct(&cube, &scramble);
+        CubeConstruct(&cube);
+        CubeTwistFormula(&cube, &scramble, true, true, false);
         CubeTwistFormula(&cube, &partial_solution, true, true, false);
         if (CubeHasParity(&cube)) {
             puts("The cube has parity.");

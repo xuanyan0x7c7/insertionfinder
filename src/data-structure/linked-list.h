@@ -15,7 +15,7 @@ struct LinkedList {
     Destructor* destroy;
 };
 
-LinkedList* LinkedListConstruct(LinkedList* list, Destructor* destroy);
+void LinkedListConstruct(LinkedList* list, Destructor* destroy);
 void LinkedListDestroy(LinkedList* list);
 
 void LinkedListInsertBefore(LinkedListNode* node, void* data);

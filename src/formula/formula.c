@@ -24,7 +24,7 @@ static void CycleReplace(char* c, const char* pattern);
 static int FormulaCompareGeneric(const void* p, const void* q);
 
 
-Formula* FormulaConstruct(Formula* formula, const char* string) {
+bool FormulaConstruct(Formula* formula, const char* string) {
     static regex_t moves_regex;
     static bool regex_inited = false;
     if (!regex_inited) {
@@ -70,14 +70,11 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
         {{"z'", "[f']", "[b]"}, {"URDL", ""}}
     };
 
-    if (!formula) {
-        formula = (Formula*)malloc(sizeof(Formula));
-    }
-    formula->length = 0;
-    formula->capacity = 64;
-    formula->move = (int*)malloc(formula->capacity * sizeof(int));
     if (!string) {
-        return formula;
+        formula->length = 0;
+        formula->capacity = 64;
+        formula->move = (int*)malloc(formula->capacity * sizeof(int));
+        return true;
     }
 
     LinkedList procedure;
@@ -89,7 +86,7 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
         regmatch_t* full_match = &pmatch[0];
         if (full_match->rm_so) {
             FormulaDestroy(formula);
-            return NULL;
+            return false;
         }
         regmatch_t* match = &pmatch[1];
         size_t length = match->rm_eo - match->rm_so;
@@ -158,6 +155,9 @@ Formula* FormulaConstruct(Formula* formula, const char* string) {
         }
     }
 
+    formula->length = 0;
+    formula->capacity = 64;
+    formula->move = (int*)malloc(formula->capacity * sizeof(int));
     for (
         const LinkedListNode* node = procedure.head;
         (node = node->next) != procedure.tail;
