@@ -371,33 +371,56 @@ bool FormulaInsertFinalIsWorthy(
     const int* f2 = insertion->move;
     ssize_t sum = 0;
     if (insert_place > 0) {
-        int x = f1[insert_place - 1];
-        int y = f2[0];
-        if (x >> 2 == y >> 2) {
-            if ((x + y) & 3) {
+        const int* x = &f1[insert_place - 1];
+        const int* y = f2;
+        if (*x >> 2 == *y >> 2) {
+            if ((*x + *y) & 3) {
                 ++sum;
+                if (insert_place > 1 && *(x - 1) >> 3 == *x >> 3) {
+                    if (l2 == 1) {
+                        sum += 2;
+                    } else if (*(y + 1) >> 3 == *y >> 3) {
+                        if ((*(x - 1) + *(y + 1)) & 3) {
+                            ++sum;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
             } else {
                 return false;
             }
-        } else if (x >> 3 == y >> 3) {
+        } else if (*x >> 3 == *y >> 3) {
             sum += insert_place << 1;
         }
     }
     if (insert_place < l1) {
-        int x = f1[insert_place];
-        int y = f2[l2 - 1];
-        if (x >> 2 == y >> 2) {
-            if ((x + y) & 3) {
+        const int* x = &f1[insert_place];
+        const int* y = &f2[l2 - 1];
+        if (*x >> 2 == *y >> 2) {
+            if ((*x + *y) & 3) {
                 ++sum;
+                if (insert_place < l1 - 1 && *(x + 1) >> 3 == *x >> 3) {
+                    if (l2 == 1) {
+                        sum += 2;
+                    } else if (*(y - 1) >> 3 == *y >> 3) {
+                        if ((*(x + 1) + *(y - 1)) & 3) {
+                            ++sum;
+                        } else {
+                            sum += 2;
+                        }
+                    }
+                }
             } else {
-                if (l2 > 1 && x >> 3 == f2[0] >> 3) {
-                    if (x >> 2 == f2[0] >> 2 || x >> 2 == f2[1] >> 2) {
+                const int* z = f2;
+                if (l2 > 1 && *x >> 3 == *z >> 3) {
+                    if (*x >> 2 == *z >> 2 || *x >> 2 == *(z + 1) >> 2) {
                         return false;
                     }
                 }
                 sum += (l1 - insert_place) << 1;
             }
-        } else if (x >> 3 == y >> 3) {
+        } else if (*x >> 3 == *y >> 3) {
             sum += (l1 - insert_place) << 1;
         }
     }
