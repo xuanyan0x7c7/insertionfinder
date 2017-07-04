@@ -194,10 +194,7 @@ void FormulaSave(const Formula* formula, FILE* stream) {
     fwrite(compressed, sizeof(int8_t), formula->length, stream);
 }
 
-Formula* FormulaLoad(Formula* formula, FILE* stream) {
-    if (!formula) {
-        formula = (Formula*)malloc(sizeof(Formula));
-    }
+void FormulaLoad(Formula* formula, FILE* stream) {
     size_t length;
     fread(&length, sizeof(size_t), 1, stream);
     formula->length = length;
@@ -209,20 +206,15 @@ Formula* FormulaLoad(Formula* formula, FILE* stream) {
     for (size_t i = 0; i < length; ++i) {
         formula->move[i] = compressed[i];
     }
-    return formula;
 }
 
-Formula* FormulaDuplicate(Formula* formula, const Formula* source) {
-    if (!formula) {
-        formula = (Formula*)malloc(sizeof(Formula));
-    }
+void FormulaDuplicate(Formula* formula, const Formula* source) {
     size_t length = source->length;
     formula->length = length;
     formula->capacity = 32;
     while ((formula->capacity <<= 1) < length);
     formula->move = (int*)malloc(formula->capacity * sizeof(int));
     memcpy(formula->move, source->move, length * sizeof(int));
-    return formula;
 }
 
 
@@ -444,7 +436,7 @@ void FormulaSwapAdjacent(Formula* formula, size_t index) {
 void FormulaNormalize(Formula* formula) {
     for (size_t i = 1; i < formula->length; ++i) {
         if (
-            FormulaSwappable(formula, i)
+            formula->move[i - 1] >> 3 == formula->move[i] >> 3
             && formula->move[i - 1] > formula->move[i]
         ) {
             FormulaSwapAdjacent(formula, i++);
