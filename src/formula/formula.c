@@ -273,7 +273,7 @@ size_t FormulaCancelMoves(Formula* formula) {
                     move[y - 1] = move[y];
                     --y;
                 } else {
-                    move[y - 1] = (move[y - 1] & ~3) + orientation;
+                    move[y - 1] = (move[y - 1] & ~3) | orientation;
                 }
             } else {
                 move[++y] = move[x++];
@@ -283,7 +283,7 @@ size_t FormulaCancelMoves(Formula* formula) {
             if (orientation == 0) {
                 --y;
             } else {
-                move[y] = (move[y] & ~3) + orientation;
+                move[y] = (move[y] & ~3) | orientation;
             }
             if (index > y + 1) {
                 index = y + 1;
