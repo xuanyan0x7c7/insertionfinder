@@ -19,29 +19,29 @@ static const char twist_str[][3] = {
     "", "B", "B2", "B'"
 };
 
+static regex_t moves_regex;
+
 
 static void CycleReplace(char* c, const char* pattern);
 static int FormulaCompareGeneric(const void* p, const void* q);
 
 
-bool FormulaConstruct(Formula* formula, const char* string) {
-    static regex_t moves_regex;
-    static bool regex_inited = false;
-    if (!regex_inited) {
-        int status = regcomp(
-            &moves_regex,
-            "\\s*([UDRLFB]w?2?'?|[xyz]2?'?|\\[[udrlfb]2?'?\\])\\s*",
-            REG_EXTENDED
-        );
-        if (status) {
-            char message[100];
-            regerror(status, &moves_regex, message, 99);
-            fprintf(stderr, "%s\n", message);
-            return NULL;
-        }
-        regex_inited = true;
+void FormulaInit() {
+    int status = regcomp(
+        &moves_regex,
+        "\\s*([UDRLFB]w?2?'?|[xyz]2?'?|\\[[udrlfb]2?'?\\])\\s*",
+        REG_EXTENDED
+    );
+    if (status) {
+        char message[100];
+        regerror(status, &moves_regex, message, 99);
+        fprintf(stderr, "%s\n", message);
+        exit(EXIT_FAILURE);
     }
+}
 
+
+bool FormulaConstruct(Formula* formula, const char* string) {
     typedef struct BlockMovePattern BlockMovePattern;
     struct BlockMovePattern {
         const char* pattern;

@@ -28,6 +28,8 @@ struct Formula {
     int* move;
 };
 
+void FormulaInit();
+
 bool FormulaConstruct(Formula* formula, const char* string);
 void FormulaDestroy(Formula* formula);
 

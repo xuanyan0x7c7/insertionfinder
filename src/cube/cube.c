@@ -11,7 +11,7 @@ extern int corner_cycle_transform_table[6 * 24 * 24][24];
 extern int edge_cycle_transform_table[10 * 24 * 24][24];
 
 
-void CubeInitialize() {
+void CubeInit() {
     GenerateOneMoveCube(one_move_cube);
     GenerateCornerCycleTable(corner_cycle_transform_table);
     GenerateEdgeCycleTable(edge_cycle_transform_table);

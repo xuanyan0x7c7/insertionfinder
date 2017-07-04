@@ -10,7 +10,7 @@ struct Cube {
     int edge[12];
 };
 
-void CubeInitialize();
+void CubeInit();
 
 void CubeConstruct(Cube* cube);
 

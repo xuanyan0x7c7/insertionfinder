@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <config.h>
-#include "cube/cube.h"
+#include "init.h"
 #include "commands/commands.h"
 #include "commands/parser.h"
 
@@ -15,7 +15,7 @@ bool Version(const CliParser* parsed_args) {
 
 
 int main(int argc, char** argv) {
-    CubeInitialize();
+    Init();
 
     Executor* executor = NULL;
     CliParser parsed_args = Parse(argc, argv);
