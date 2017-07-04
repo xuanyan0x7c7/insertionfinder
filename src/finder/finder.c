@@ -64,13 +64,13 @@ void FinderDestroy(Finder* finder) {
 }
 
 
-void FinderSolve(Finder* finder, const Formula* partial_solution) {
+void FinderSolve(Finder* finder, const Formula* skeleton) {
     FinderWorker worker;
-    FinderWorkerConstruct(&worker, finder, partial_solution);
+    FinderWorkerConstruct(&worker, finder, skeleton);
     Cube cube;
     CubeConstruct(&cube);
     CubeTwistFormula(&cube, &finder->scramble, true, true, false);
-    CubeTwistFormula(&cube, partial_solution, true, true, false);
+    CubeTwistFormula(&cube, skeleton, true, true, false);
     if (CubeHasParity(&cube)) {
         return;
     }
@@ -84,19 +84,18 @@ void FinderSolve(Finder* finder, const Formula* partial_solution) {
     FinderWorkerSearch(
         &worker,
         corner_cycles, edge_cycles,
-        0, partial_solution->length
+        0, skeleton->length
     );
     FinderWorkerDestroy(&worker);
     for (size_t i = 0; i < finder->solution_count; ++i) {
         FinderWorker* solution = &finder->solution_list[i];
-        solution->cancelled_moves = solution->solving_step[0]
-            .partial_solution.length;
+        solution->cancellation = solution->solving_step[0].skeleton.length;
         for (size_t j = 0; j < solution->depth; ++j) {
-            solution->cancelled_moves += solution->solving_step[j]
+            solution->cancellation += solution->solving_step[j]
                 .insertion->length;
         }
-        solution->cancelled_moves -= solution->solving_step[solution->depth]
-            .partial_solution.length;
+        solution->cancellation -= solution->solving_step[solution->depth]
+            .skeleton.length;
     }
     qsort(
         finder->solution_list,
@@ -108,6 +107,6 @@ void FinderSolve(Finder* finder, const Formula* partial_solution) {
 
 
 int SolutionCompare(const void* p, const void* q) {
-    return ((const FinderWorker*)p)->cancelled_moves
-        - ((const FinderWorker*)q)->cancelled_moves;
+    return ((const FinderWorker*)p)->cancellation
+        - ((const FinderWorker*)q)->cancellation;
 }

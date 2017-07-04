@@ -29,11 +29,11 @@ struct FinderWorker {
     size_t depth;
     size_t solving_step_capacity;
     Insertion* solving_step;
-    size_t cancelled_moves;
+    size_t cancellation;
 };
 
 struct Insertion {
-    Formula partial_solution;
+    Formula skeleton;
     size_t insert_place;
     const Formula *insertion;
 };
@@ -46,12 +46,12 @@ void FinderConstruct(
 );
 void FinderDestroy(Finder* finder);
 
-void FinderSolve(Finder* finder, const Formula* partial_solution);
+void FinderSolve(Finder* finder, const Formula* skeleton);
 
 void FinderWorkerConstruct(
     FinderWorker* worker,
     Finder* finder,
-    const Formula* partial_solution
+    const Formula* skeleton
 );
 void FinderWorkerDestroy(FinderWorker* worker);
 

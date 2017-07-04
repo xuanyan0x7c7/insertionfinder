@@ -12,7 +12,7 @@ bool Verify(const CliParser* parsed_args) {
         filepath = parsed_args->casefile_list[0];
     }
     char* scramble_string = NULL;
-    char* partial_solve_string = NULL;
+    char* skeleton_string = NULL;
     FILE* input = filepath ? fopen(filepath, "r") : stdin;
     if (!input) {
         fprintf(stderr, "Fail to open file: %s\n", filepath);
@@ -23,7 +23,7 @@ bool Verify(const CliParser* parsed_args) {
     do {
         if (!(
             (scramble_string = GetLine(input))
-            && (partial_solve_string = GetLine(input))
+            && (skeleton_string = GetLine(input))
         )) {
             fputs("Error input\n", stderr);
             success = false;
@@ -31,17 +31,17 @@ bool Verify(const CliParser* parsed_args) {
         }
 
         Formula scramble;
-        Formula partial_solution;
+        Formula skeleton;
         if (!FormulaConstruct(&scramble, scramble_string)) {
             fprintf(stderr, "Invalid scramble sequence: %s\n", scramble_string);
             success = false;
             break;
         }
-        if (!FormulaConstruct(&partial_solution, partial_solve_string)) {
+        if (!FormulaConstruct(&skeleton, skeleton_string)) {
             fprintf(
                 stderr,
-                "Invalid partial solve sequence: %s\n",
-                partial_solve_string
+                "Invalid skeleton sequence: %s\n",
+                skeleton_string
             );
             success = false;
             break;
@@ -49,14 +49,14 @@ bool Verify(const CliParser* parsed_args) {
         printf("Scramble: ");
         FormulaPrint(&scramble, stdout);
         putchar('\n');
-        printf("Partial Solve: ");
-        FormulaPrint(&partial_solution, stdout);
+        printf("Skeleton: ");
+        FormulaPrint(&skeleton, stdout);
         putchar('\n');
 
         Cube cube;
         CubeConstruct(&cube);
         CubeTwistFormula(&cube, &scramble, true, true, false);
-        CubeTwistFormula(&cube, &partial_solution, true, true, false);
+        CubeTwistFormula(&cube, &skeleton, true, true, false);
         if (CubeHasParity(&cube)) {
             puts("The cube has parity.");
         } else {
@@ -88,6 +88,6 @@ bool Verify(const CliParser* parsed_args) {
         }
     } while (false);
     free(scramble_string);
-    free(partial_solve_string);
+    free(skeleton_string);
     return success;
 }

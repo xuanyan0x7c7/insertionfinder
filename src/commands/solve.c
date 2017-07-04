@@ -65,7 +65,7 @@ bool Solve(const CliParser* parsed_args) {
         filepath = parsed_args->casefile_list[0];
     }
     char* scramble_string = NULL;
-    char* partial_solve_string = NULL;
+    char* skeleton_string = NULL;
     FILE* input = filepath ? fopen(filepath, "r") : stdin;
     if (!input) {
         fprintf(stderr, "Fail to open file: %s\n", filepath);
@@ -76,7 +76,7 @@ bool Solve(const CliParser* parsed_args) {
     do {
         if (!(
             (scramble_string = GetLine(input))
-            && (partial_solve_string = GetLine(input))
+            && (skeleton_string = GetLine(input))
         )) {
             fputs("Error input\n", stderr);
             success = false;
@@ -84,52 +84,48 @@ bool Solve(const CliParser* parsed_args) {
         }
 
         Formula scramble;
-        Formula partial_solution;
+        Formula skeleton;
         if (!FormulaConstruct(&scramble, scramble_string)) {
             fprintf(stderr, "Invalid scramble sequence: %s\n", scramble_string);
             success = false;
             break;
         }
-        if (!FormulaConstruct(&partial_solution, partial_solve_string)) {
+        if (!FormulaConstruct(&skeleton, skeleton_string)) {
             fprintf(
                 stderr,
-                "Invalid partial solve sequence: %s\n",
-                partial_solve_string
+                "Invalid skeleton sequence: %s\n",
+                skeleton_string
             );
             success = false;
             break;
         }
         printf("Scramble: ");
         FormulaPrint(&scramble, stdout);
-        printf("\nPartial Solution: ");
-        FormulaPrint(&partial_solution, stdout);
+        printf("\nSkeleton: ");
+        FormulaPrint(&skeleton, stdout);
         printf("\n");
 
         Finder finder;
         FinderConstruct(&finder, map.size, algorithm_list, &scramble);
-        FinderSolve(&finder, &partial_solution);
+        FinderSolve(&finder, &skeleton);
 
         for (size_t i = 0; i < finder.solution_count; ++i) {
             printf("\nSolution #%lu:\n", i + 1);
             FinderWorker* solution = &finder.solution_list[i];
             for (size_t j = 0; j < solution->depth; ++j) {
                 const Insertion* insertion = &solution->solving_step[j];
-                const Formula* partial_solution = &insertion->partial_solution;
+                const Formula* skeleton = &insertion->skeleton;
                 size_t insert_place = insertion->insert_place;
                 if (insert_place > 0) {
-                    FormulaPrintRange(
-                        partial_solution,
-                        0, insert_place,
-                        stdout
-                    );
+                    FormulaPrintRange(skeleton, 0, insert_place, stdout);
                     putchar(' ');
                 }
                 printf("[@%lu]", j + 1);
-                if (insert_place < partial_solution->length) {
+                if (insert_place < skeleton->length) {
                     putchar(' ');
                     FormulaPrintRange(
-                        partial_solution,
-                        insert_place, partial_solution->length,
+                        skeleton,
+                        insert_place, skeleton->length,
                         stdout
                     );
                 }
@@ -140,12 +136,12 @@ bool Solve(const CliParser* parsed_args) {
             printf(
                 "Total moves: %lu,  %lu move%s cancelled.\n",
                 finder.fewest_moves,
-                solution->cancelled_moves,
-                solution->cancelled_moves == 1 ? "" : "s"
+                solution->cancellation,
+                solution->cancellation == 1 ? "" : "s"
             );
             printf("Full solution: ");
             FormulaPrint(
-                &solution->solving_step[solution->depth].partial_solution,
+                &solution->solving_step[solution->depth].skeleton,
                 stdout
             );
             printf("\n");
@@ -161,6 +157,6 @@ bool Solve(const CliParser* parsed_args) {
     HashMapDestroy(&map);
     free(algorithm_list);
     free(scramble_string);
-    free(partial_solve_string);
+    free(skeleton_string);
     return success;
 }

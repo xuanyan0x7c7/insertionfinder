@@ -302,9 +302,6 @@ size_t FormulaInsert(
     const Formula* insertion,
     Formula* result
 ) {
-    if (!result) {
-        result = (Formula*)malloc(sizeof(Formula));
-    }
     result->length = formula->length + insertion->length;
     result->capacity = 32;
     while ((result->capacity <<= 1) < result->length);
@@ -320,8 +317,8 @@ size_t FormulaInsert(
         formula->move + insert_place,
         (formula->length - insert_place) * sizeof(int)
     );
-    size_t cancelled_place = FormulaCancelMoves(result);
-    return cancelled_place < insert_place ? cancelled_place : insert_place + 1;
+    size_t place = FormulaCancelMoves(result);
+    return place <= insert_place ? place : insert_place + 1;
 }
 
 size_t FormulaInsertIsWorthy(
