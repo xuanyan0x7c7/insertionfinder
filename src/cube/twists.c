@@ -60,22 +60,22 @@ static const int edge_twist_table[][12] = {
 };
 
 extern Cube one_move_cube[24];
+extern int computed_corner_twist_table[24][8][24];
+extern int computed_edge_twist_table[24][12][24];
 
 
 void CubeTwist(Cube* cube, int move, bool twist_corners, bool twist_edges) {
+    typedef int Array[24];
     if (twist_corners) {
-        const int* table = corner_twist_table[move];
+        Array* table = computed_corner_twist_table[move];
         for (int i = 0; i < 8; ++i) {
-            int* item = &(cube->corner[i]);
-            int transform = table[*item / 3];
-            *item = transform - transform % 3 + (*item + transform) % 3;
+            cube->corner[i] = table[i][cube->corner[i]];
         }
     }
     if (twist_edges) {
-        const int* table = edge_twist_table[move];
+        Array* table = computed_edge_twist_table[move];
         for (int i = 0; i < 12; ++i) {
-            int* item = &(cube->edge[i]);
-            *item = table[*item >> 1] ^ (*item & 1);
+            cube->edge[i] = table[i][cube->edge[i]];
         }
     }
 }
@@ -205,5 +205,33 @@ void GenerateOneMoveCube(Cube* cube_list) {
     for (int i = 0; i < 24; ++i) {
         memcpy(cube_list[i].corner, corner_twist_table[i], 8 * sizeof(int));
         memcpy(cube_list[i].edge, edge_twist_table[i], 12 * sizeof(int));
+    }
+}
+
+
+void GenerateComputedCornerTwistTable(int table[][8][24]) {
+    for (int move = 0; move < 24; ++move) {
+        if ((move & 3) == 0) {
+            continue;
+        }
+        for (int i = 0; i < 8; ++i) {
+            for (int j = 0; j < 24; ++j) {
+                int transform = corner_twist_table[move][j / 3];
+                table[move][i][j] = transform / 3 * 3 + (j + transform) % 3;
+            }
+        }
+    }
+}
+
+void GenerateComputedEdgeTwistTable(int table[][12][24]) {
+    for (int move = 0; move < 24; ++move) {
+        if ((move & 3) == 0) {
+            continue;
+        }
+        for (int i = 0; i < 12; ++i) {
+            for (int j = 0; j < 24; ++j) {
+                table[move][i][j] = edge_twist_table[move][j >> 1] ^ (j & 1);
+            }
+        }
     }
 }

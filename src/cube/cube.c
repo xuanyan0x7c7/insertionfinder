@@ -7,12 +7,16 @@
 
 
 extern Cube one_move_cube[24];
+extern int computed_corner_twist_table[24][8][24];
+extern int computed_edge_twist_table[24][12][24];
 extern int corner_cycle_transform_table[6 * 24 * 24][24];
 extern int edge_cycle_transform_table[10 * 24 * 24][24];
 
 
 void CubeInit() {
     GenerateOneMoveCube(one_move_cube);
+    GenerateComputedCornerTwistTable(computed_corner_twist_table);
+    GenerateComputedEdgeTwistTable(computed_edge_twist_table);
     GenerateCornerCycleTable(corner_cycle_transform_table);
     GenerateEdgeCycleTable(edge_cycle_transform_table);
 }
