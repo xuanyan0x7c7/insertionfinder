@@ -4,6 +4,15 @@
 #include "../cube/cube.h"
 #include "../formula/formula.h"
 
+
+enum FinderSolveStatus {
+    SOLVE_SUCCESS,
+    SOLVE_FAILURE_PARITY,
+    SOLVE_FAILURE_CORNER_CYCLE_ALGORITHMS_NEEDED,
+    SOLVE_FAILURE_EDGE_CYCLE_ALGORITHMS_NEEDED
+};
+typedef enum FinderSolveStatus FinderSolveStatus;
+
 typedef struct Finder Finder;
 typedef struct FinderWorker FinderWorker;
 typedef struct Insertion Insertion;
@@ -46,7 +55,7 @@ void FinderConstruct(
 );
 void FinderDestroy(Finder* finder);
 
-void FinderSolve(Finder* finder, const Formula* skeleton);
+FinderSolveStatus FinderSolve(Finder* finder, const Formula* skeleton);
 
 void FinderWorkerConstruct(
     FinderWorker* worker,

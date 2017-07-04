@@ -107,44 +107,59 @@ bool Solve(const CliParser* parsed_args) {
 
         Finder finder;
         FinderConstruct(&finder, map.size, algorithm_list, &scramble);
-        FinderSolve(&finder, &skeleton);
-
-        for (size_t i = 0; i < finder.solution_count; ++i) {
-            printf("\nSolution #%lu:\n", i + 1);
-            FinderWorker* solution = &finder.solution_list[i];
-            for (size_t j = 0; j < solution->depth; ++j) {
-                const Insertion* insertion = &solution->solving_step[j];
-                const Formula* skeleton = &insertion->skeleton;
-                size_t insert_place = insertion->insert_place;
-                if (insert_place > 0) {
-                    FormulaPrintRange(skeleton, 0, insert_place, stdout);
-                    putchar(' ');
-                }
-                printf("[@%lu]", j + 1);
-                if (insert_place < skeleton->length) {
-                    putchar(' ');
-                    FormulaPrintRange(
-                        skeleton,
-                        insert_place, skeleton->length,
+        switch (FinderSolve(&finder, &skeleton)) {
+            case SOLVE_SUCCESS:
+                for (size_t i = 0; i < finder.solution_count; ++i) {
+                    printf("\nSolution #%lu:\n", i + 1);
+                    const FinderWorker* solution = &finder.solution_list[i];
+                    for (size_t j = 0; j < solution->depth; ++j) {
+                        const Insertion* insertion = &solution->solving_step[j];
+                        const Formula* skeleton = &insertion->skeleton;
+                        size_t insert_place = insertion->insert_place;
+                        if (insert_place > 0) {
+                            FormulaPrintRange(
+                                skeleton,
+                                0, insert_place,
+                                stdout
+                            );
+                            putchar(' ');
+                        }
+                        printf("[@%lu]", j + 1);
+                        if (insert_place < skeleton->length) {
+                            putchar(' ');
+                            FormulaPrintRange(
+                                skeleton,
+                                insert_place, skeleton->length,
+                                stdout
+                            );
+                        }
+                        printf("\nInsert at @%lu: ", j + 1);
+                        FormulaPrint(insertion->insertion, stdout);
+                        putchar('\n');
+                    }
+                    printf(
+                        "Total moves: %lu,  %lu move%s cancelled.\n",
+                        finder.fewest_moves,
+                        solution->cancellation,
+                        solution->cancellation == 1 ? "" : "s"
+                    );
+                    printf("Full solution: ");
+                    FormulaPrint(
+                        &solution->solving_step[solution->depth].skeleton,
                         stdout
                     );
+                    printf("\n");
                 }
-                printf("\nInsert at @%lu: ", j + 1);
-                FormulaPrint(insertion->insertion, stdout);
-                putchar('\n');
-            }
-            printf(
-                "Total moves: %lu,  %lu move%s cancelled.\n",
-                finder.fewest_moves,
-                solution->cancellation,
-                solution->cancellation == 1 ? "" : "s"
-            );
-            printf("Full solution: ");
-            FormulaPrint(
-                &solution->solving_step[solution->depth].skeleton,
-                stdout
-            );
-            printf("\n");
+                break;
+            case SOLVE_FAILURE_PARITY:
+                puts("The cube has parity.");
+                break;
+            case SOLVE_FAILURE_CORNER_CYCLE_ALGORITHMS_NEEDED:
+                puts("Corner 3-cycle algorithms needed.");
+                break;
+            case SOLVE_FAILURE_EDGE_CYCLE_ALGORITHMS_NEEDED:
+                puts("Edge 3-cycle algorithms needed.");
+                break;
         }
 
         FinderDestroy(&finder);
