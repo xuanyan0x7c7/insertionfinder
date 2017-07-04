@@ -324,6 +324,26 @@ size_t FormulaInsert(
     return cancelled_place < insert_place ? cancelled_place : insert_place + 1;
 }
 
+size_t FormulaInsertIsWorthy(
+    const Formula* formula,
+    size_t insert_place,
+    const Formula* insertion,
+    ssize_t moves_to_cancel
+) {
+    size_t l1 = formula->length;
+    size_t l2 = insertion->length;
+    const int* f1 = formula->move;
+    const int* f2 = insertion->move;
+    ssize_t sum = 0;
+    if (insert_place > 0 && f1[insert_place - 1] >> 3 == f2[0] >> 3) {
+        sum += insert_place << 1;
+    }
+    if (insert_place < l1 && f1[insert_place] >> 3 == f2[l2 - 1] >> 3) {
+        sum += (l1 - insert_place) << 1;
+    }
+    return sum >= moves_to_cancel;
+}
+
 
 bool FormulaSwappable(const Formula* formula, size_t index) {
     return index > 0 && index < formula->length

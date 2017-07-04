@@ -203,6 +203,17 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
             insertion->insert_place = insert_place;
             for (size_t i = 0; i < algorithm->size; ++i) {
                 insertion->insertion = &algorithm->formula_list[i];
+                ssize_t moves_to_cancel =
+                    partial_solution->length + insertion->insertion->length
+                    - finder->fewest_moves;
+                if (moves_to_cancel > 0 && FormulaInsertIsWorthy(
+                    partial_solution,
+                    insert_place,
+                    insertion->insertion,
+                    moves_to_cancel
+                )) {
+                    continue;
+                }
                 PushInsertion(worker, NULL);
                 UpdateFewestMoves(worker);
                 PopInsertion(worker);
@@ -225,6 +236,17 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
                 insertion->insert_place = insert_place;
                 for (size_t i = 0; i < algorithm->size; ++i) {
                     insertion->insertion = &algorithm->formula_list[i];
+                    ssize_t moves_to_cancel =
+                        partial_solution->length + insertion->insertion->length
+                        - finder->fewest_moves;
+                    if (moves_to_cancel > 0 && FormulaInsertIsWorthy(
+                        partial_solution,
+                        insert_place,
+                        insertion->insertion,
+                        moves_to_cancel
+                    )) {
+                        continue;
+                    }
                     PushInsertion(worker, NULL);
                     UpdateFewestMoves(worker);
                     PopInsertion(worker);
@@ -272,6 +294,17 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
             insertion->insert_place = insert_place;
             for (size_t i = 0; i < algorithm->size; ++i) {
                 insertion->insertion = &algorithm->formula_list[i];
+                ssize_t moves_to_cancel =
+                    partial_solution->length + insertion->insertion->length
+                    - finder->fewest_moves;
+                if (moves_to_cancel > 0 && FormulaInsertIsWorthy(
+                    partial_solution,
+                    insert_place,
+                    insertion->insertion,
+                    moves_to_cancel
+                )) {
+                    continue;
+                }
                 PushInsertion(worker, NULL);
                 UpdateFewestMoves(worker);
                 PopInsertion(worker);
@@ -294,6 +327,17 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
                 insertion->insert_place = insert_place;
                 for (size_t i = 0; i < algorithm->size; ++i) {
                     insertion->insertion = &algorithm->formula_list[i];
+                    ssize_t moves_to_cancel =
+                        partial_solution->length + insertion->insertion->length
+                        - finder->fewest_moves;
+                    if (moves_to_cancel > 0 && FormulaInsertIsWorthy(
+                        partial_solution,
+                        insert_place,
+                        insertion->insertion,
+                        moves_to_cancel
+                    )) {
+                        continue;
+                    }
                     PushInsertion(worker, NULL);
                     UpdateFewestMoves(worker);
                     PopInsertion(worker);

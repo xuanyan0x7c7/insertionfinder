@@ -52,6 +52,12 @@ size_t FormulaInsert(
     const Formula* insertion,
     Formula* result
 );
+size_t FormulaInsertIsWorthy(
+    const Formula* formula,
+    size_t insert_place,
+    const Formula* insertion,
+    ssize_t moves_to_cancel
+);
 
 bool FormulaSwappable(const Formula* formula, size_t index);
 void FormulaSwapAdjacent(Formula* formula, size_t index);
