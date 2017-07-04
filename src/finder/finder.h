@@ -29,6 +29,7 @@ struct FinderWorker {
     size_t depth;
     size_t solving_step_capacity;
     Insertion* solving_step;
+    size_t cancelled_moves;
 };
 
 struct Insertion {

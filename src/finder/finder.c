@@ -84,4 +84,15 @@ void FinderSolve(Finder* finder, const Formula* partial_solution) {
         0, partial_solution->length
     );
     FinderWorkerDestroy(&worker);
+    for (size_t i = 0; i < finder->solution_count; ++i) {
+        FinderWorker* solution = &finder->solution_list[i];
+        solution->cancelled_moves = solution->solving_step[0]
+            .partial_solution.length;
+        for (size_t j = 0; j < solution->depth; ++j) {
+            solution->cancelled_moves += solution->solving_step[j]
+                .insertion->length;
+        }
+        solution->cancelled_moves -= solution->solving_step[solution->depth]
+            .partial_solution.length;
+    }
 }

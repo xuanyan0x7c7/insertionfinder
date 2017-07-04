@@ -112,13 +112,9 @@ bool Solve(const CliParser* parsed_args) {
         for (size_t i = 0; i < finder.solution_count; ++i) {
             printf("\nSolution #%lu:\n", i + 1);
             FinderWorker* solution = &finder.solution_list[i];
-            size_t cancelled_moves = solution->solving_step[
-                0
-            ].partial_solution.length;
             for (size_t j = 0; j < solution->depth; ++j) {
                 const Insertion* insertion = &solution->solving_step[j];
                 const Formula* partial_solution = &insertion->partial_solution;
-                cancelled_moves += insertion->insertion->length;
                 size_t insert_place = insertion->insert_place;
                 if (insert_place > 0) {
                     FormulaPrintRange(
@@ -141,14 +137,11 @@ bool Solve(const CliParser* parsed_args) {
                 FormulaPrint(insertion->insertion, stdout);
                 putchar('\n');
             }
-            cancelled_moves -= solution->solving_step[
-                solution->depth
-            ].partial_solution.length;
             printf(
                 "Total moves: %lu,  %lu move%s cancelled.\n",
                 finder.fewest_moves,
-                cancelled_moves,
-                cancelled_moves == 1 ? "" : "s"
+                solution->cancelled_moves,
+                solution->cancelled_moves == 1 ? "" : "s"
             );
             printf("Full solution: ");
             FormulaPrint(
