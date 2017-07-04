@@ -206,7 +206,7 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
                 ssize_t moves_to_cancel =
                     partial_solution->length + insertion->insertion->length
                     - finder->fewest_moves;
-                if (moves_to_cancel > 0 && FormulaInsertIsWorthy(
+                if (moves_to_cancel > 0 && !FormulaInsertIsWorthy(
                     partial_solution,
                     insert_place,
                     insertion->insertion,
@@ -239,7 +239,7 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
                     ssize_t moves_to_cancel =
                         partial_solution->length + insertion->insertion->length
                         - finder->fewest_moves;
-                    if (moves_to_cancel > 0 && FormulaInsertIsWorthy(
+                    if (moves_to_cancel > 0 && !FormulaInsertIsWorthy(
                         partial_solution,
                         insert_place,
                         insertion->insertion,
@@ -297,7 +297,7 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
                 ssize_t moves_to_cancel =
                     partial_solution->length + insertion->insertion->length
                     - finder->fewest_moves;
-                if (moves_to_cancel > 0 && FormulaInsertIsWorthy(
+                if (moves_to_cancel > 0 && !FormulaInsertIsWorthy(
                     partial_solution,
                     insert_place,
                     insertion->insertion,
@@ -330,7 +330,7 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
                     ssize_t moves_to_cancel =
                         partial_solution->length + insertion->insertion->length
                         - finder->fewest_moves;
-                    if (moves_to_cancel > 0 && FormulaInsertIsWorthy(
+                    if (moves_to_cancel > 0 && !FormulaInsertIsWorthy(
                         partial_solution,
                         insert_place,
                         insertion->insertion,
