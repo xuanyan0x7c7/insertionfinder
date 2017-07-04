@@ -36,7 +36,7 @@ bool FormulaConstruct(Formula* formula, const char* string) {
         if (status) {
             char message[100];
             regerror(status, &moves_regex, message, 99);
-            fputs(message, stderr);
+            fprintf(stderr, "%s\n", message);
             return NULL;
         }
         regex_inited = true;

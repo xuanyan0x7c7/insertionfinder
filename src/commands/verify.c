@@ -25,7 +25,7 @@ bool Verify(const CliParser* parsed_args) {
             (scramble_string = GetLine(input))
             && (partial_solve_string = GetLine(input))
         )) {
-            fputs("Error input", stderr);
+            fputs("Error input\n", stderr);
             success = false;
             break;
         }
