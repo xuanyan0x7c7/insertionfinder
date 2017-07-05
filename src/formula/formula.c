@@ -244,45 +244,45 @@ void FormulaPrintRange(
 
 
 size_t FormulaCancelMoves(Formula* formula) {
-    int x = 0;
-    int y = -1;
-    int length = formula->length;
-    int index = length + 1;
-    int* move = formula->move;
+    int* begin = formula->move;
+    int* end = begin + formula->length;
+    int* p = begin;
+    int* q = begin - 1;
+    int* needle = end + 1;
 
-    while (x < length) {
-        if (y < 0 || move[x] >> 3 != move[y] >> 3) {
-            move[++y] = move[x++];
-        } else if (move[x] >> 2 != move[y] >> 2) {
-            if (y > 0 && move[y - 1] >> 3 == move[y] >> 3) {
-                int orientation = (move[y - 1] + move[x++]) & 3;
-                if (index > y) {
-                    index = y;
+    while (p < end) {
+        if (q < begin || *p >> 3 != *q >> 3) {
+            *++q = *p++;
+        } else if (*p >> 2 != *q >> 2) {
+            if (q > begin && *(q - 1) >> 3 == *q >> 3) {
+                int orientation = (*(q - 1) + *p++) & 3;
+                if (needle > q) {
+                    needle = q;
                 }
                 if (orientation == 0) {
-                    move[y - 1] = move[y];
-                    --y;
+                    *(q - 1) = *q;
+                    --q;
                 } else {
-                    move[y - 1] = (move[y - 1] & ~3) | orientation;
+                    *(q - 1) = (*(q - 1) & ~3) | orientation;
                 }
             } else {
-                move[++y] = move[x++];
+                *++q = *p++;
             }
         } else {
-            int orientation = (move[y] + move[x++]) & 3;
+            int orientation = (*q + *p++) & 3;
             if (orientation == 0) {
-                --y;
+                --q;
             } else {
-                move[y] = (move[y] & ~3) | orientation;
+                *q = (*q & ~3) | orientation;
             }
-            if (index > y + 1) {
-                index = y + 1;
+            if (needle > q + 1) {
+                needle = q + 1;
             }
         }
     }
 
-    formula->length = y + 1;
-    return index;
+    formula->length = q + 1 - begin;
+    return needle - begin;
 }
 
 
