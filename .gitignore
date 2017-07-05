@@ -88,7 +88,13 @@ Makefile.in
 
 /texinfo.tex
 
+*~
+
 Makefile
 .deps
+.dirstamp
+
+/.gcc-flags.json
 
 /src/insertionfinder
+/insertionfinder-*.tar.gz
