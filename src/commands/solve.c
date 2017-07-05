@@ -132,51 +132,70 @@ bool Solve(const CliParser* parsed_args) {
             putchar('\n');
         }
 
-        Finder finder;
-        FinderConstruct(&finder, map.size, algorithm_list, &scramble);
-        bool parity;
-        int corner_cycles;
-        int edge_cycles;
-        switch (FinderSolve(
-            &finder,
-            &skeleton,
-            &parity,
-            &corner_cycles, &edge_cycles
-        )) {
-            case SOLVE_SUCCESS:
+        Cube cube;
+        CubeConstruct(&cube);
+        CubeTwistFormula(&cube, &scramble, true, true, false);
+        CubeTwistFormula(&cube, &skeleton, true, true, false);
+        if (CubeHasParity(&cube)) {
+            if (parsed_args->json) {
+                printf("\"parity\":true}");
+            } else {
+                puts("The cube has parity.");
+            }
+            break;
+        } else {
+            int corner_cycles = CubeCornerCycles(&cube);
+            int edge_cycles = CubeEdgeCycles(&cube);
+            if (parsed_args->json) {
+                printf(
+                    "\"corner_cycle_num\":%d,"
+                    "\"edge_cycle_num\":%d,",
+                    corner_cycles,
+                    edge_cycles
+                );
+            }
+            if (corner_cycles == 0 && edge_cycles == 0) {
                 if (parsed_args->json) {
                     printf(
-                        "\"corner_cycle_num\":%d,"
-                        "\"edge_cycle_num\":%d,",
-                        corner_cycles, edge_cycles
+                        "\"minimum_moves\":%lu,"
+                        "\"solutions\":[]}",
+                        skeleton.length
                     );
                 } else {
-                    printf("The cube has ");
-                    if (corner_cycles == 1) {
-                        printf("1 corner-3-cycle");
-                    } else if (corner_cycles) {
-                        printf("%d corner-3-cycles", corner_cycles);
-                    }
-                    if (corner_cycles && edge_cycles) {
-                        printf(" and ");
-                    }
-                    if (edge_cycles == 1) {
-                        printf("1 edge-3-cycle");
-                    } else if (edge_cycles) {
-                        printf("%d edge-3-cycles", edge_cycles);
-                    }
-                    printf(".\n");
+                    puts("The cube is solved.");
                 }
+                break;
+            } else if (!parsed_args->json) {
+                printf("The cube has ");
+                if (corner_cycles == 1) {
+                    printf("1 corner-3-cycle");
+                } else if (corner_cycles) {
+                    printf("%d corner-3-cycles", corner_cycles);
+                }
+                if (corner_cycles && edge_cycles) {
+                    printf(" and ");
+                }
+                if (edge_cycles == 1) {
+                    printf("1 edge-3-cycle");
+                } else if (edge_cycles) {
+                    printf("%d edge-3-cycles", edge_cycles);
+                }
+                printf(".\n");
+            }
+        }
+
+        Finder finder;
+        FinderConstruct(&finder, map.size, algorithm_list, &scramble);
+        if (parsed_args->json) {
+            printf("\"solutions\":[");
+        }
+        switch (FinderSolve(&finder, &skeleton)) {
+            case SOLVE_SUCCESS:
                 if (finder.solution_count == 0) {
-                    if (parsed_args->json) {
-                        printf("\"solutions\":[]}");
-                    } else {
+                    if (!parsed_args->json) {
                         puts("No solution found.");
                     }
                     break;
-                }
-                if (parsed_args->json) {
-                    printf("\"solutions\":[");
                 }
                 for (size_t i = 0; i < finder.solution_count; ++i) {
                     if (parsed_args->json) {
@@ -257,82 +276,22 @@ bool Solve(const CliParser* parsed_args) {
                         printf("\n");
                     }
                 }
-                if (parsed_args->json) {
-                    printf("]}");
-                }
-                break;
-            case SOLVE_SUCCESS_SOLVED:
-                if (parsed_args->json) {
-                    printf(
-                        "\"corner_cycle_num\":0,"
-                        "\"edge_cycle_num\":0,"
-                        "\"minimum_moves\":%lu,"
-                        "\"solutions\":\"[]\"}",
-                        skeleton.length
-                    );
-                } else {
-                    puts("The cube is solved.");
-                }
-                break;
-            case SOLVE_FAILURE_PARITY:
-                if (parsed_args->json) {
-                    printf("\"parity\":true}");
-                } else {
-                    puts("The cube has parity.");
-                }
                 break;
             case SOLVE_FAILURE_CORNER_CYCLE_ALGORITHMS_NEEDED:
-                if (parsed_args->json) {
-                    printf(
-                        "\"corner_cycle_num\":%d,"
-                        "\"edge_cycle_num\":%d}",
-                        corner_cycles, edge_cycles
-                    );
-                } else {
-                    printf("The cube has ");
-                    if (corner_cycles == 1) {
-                        printf("1 corner-3-cycle");
-                    } else if (corner_cycles) {
-                        printf("%d corner-3-cycles", corner_cycles);
-                    }
-                    if (corner_cycles && edge_cycles) {
-                        printf(" and ");
-                    }
-                    if (edge_cycles == 1) {
-                        printf("1 edge-3-cycle");
-                    } else if (edge_cycles) {
-                        printf("%d edge-3-cycles", edge_cycles);
-                    }
-                    puts(".");
+                if (!parsed_args->json) {
                     puts("Corner 3-cycle algorithms needed.");
                 }
                 break;
             case SOLVE_FAILURE_EDGE_CYCLE_ALGORITHMS_NEEDED:
-                if (parsed_args->json) {
-                    printf(
-                        "\"corner_cycle_num\":%d,"
-                        "\"edge_cycle_num\":%d}",
-                        corner_cycles, edge_cycles
-                    );
-                } else {
-                    printf("The cube has ");
-                    if (corner_cycles == 1) {
-                        printf("1 corner-3-cycle");
-                    } else if (corner_cycles) {
-                        printf("%d corner-3-cycles", corner_cycles);
-                    }
-                    if (corner_cycles && edge_cycles) {
-                        printf(" and ");
-                    }
-                    if (edge_cycles == 1) {
-                        printf("1 edge-3-cycle");
-                    } else if (edge_cycles) {
-                        printf("%d edge-3-cycles", edge_cycles);
-                    }
-                    puts(".");
+                if (!parsed_args->json) {
                     puts("Edge 3-cycle algorithms needed.");
                 }
                 break;
+            default:
+                break;
+        }
+        if (parsed_args->json) {
+            printf("]}");
         }
 
         FinderDestroy(&finder);

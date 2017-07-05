@@ -68,7 +68,7 @@ bool Verify(const CliParser* parsed_args) {
         CubeTwistFormula(&cube, &skeleton, true, true, false);
         if (CubeHasParity(&cube)) {
             if (parsed_args->json) {
-                printf("\"parity\":true");
+                printf("\"parity\":true}");
             } else {
                 puts("The cube has parity.");
             }

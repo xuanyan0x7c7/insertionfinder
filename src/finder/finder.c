@@ -64,34 +64,25 @@ void FinderDestroy(Finder* finder) {
 }
 
 
-FinderSolveStatus FinderSolve(
-    Finder* finder,
-    const Formula* skeleton,
-    bool* parity,
-    int* corner_cycles, int* edge_cycles
-) {
+FinderSolveStatus FinderSolve(Finder* finder, const Formula* skeleton) {
     Cube cube;
     CubeConstruct(&cube);
     CubeTwistFormula(&cube, &finder->scramble, true, true, false);
     CubeTwistFormula(&cube, skeleton, true, true, false);
-    if (CubeHasParity(&cube)) {
-        *parity = true;
-        return SOLVE_FAILURE_PARITY;
-    }
-    *corner_cycles = CubeCornerCycles(&cube);
-    *edge_cycles = CubeEdgeCycles(&cube);
-    if (!*corner_cycles && !*edge_cycles) {
+    int corner_cycles = CubeCornerCycles(&cube);
+    int edge_cycles = CubeEdgeCycles(&cube);
+    if (!corner_cycles && !edge_cycles) {
         return SOLVE_SUCCESS_SOLVED;
-    } else if (*corner_cycles && !finder->change_corner) {
+    } else if (corner_cycles && !finder->change_corner) {
         return SOLVE_FAILURE_CORNER_CYCLE_ALGORITHMS_NEEDED;
-    } else if (*edge_cycles && !finder->change_edge) {
+    } else if (edge_cycles && !finder->change_edge) {
         return SOLVE_FAILURE_EDGE_CYCLE_ALGORITHMS_NEEDED;
     }
     FinderWorker worker;
     FinderWorkerConstruct(&worker, finder, skeleton);
     FinderWorkerSearch(
         &worker,
-        *corner_cycles, *edge_cycles,
+        corner_cycles, edge_cycles,
         0, skeleton->length
     );
     FinderWorkerDestroy(&worker);
