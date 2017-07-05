@@ -27,6 +27,7 @@ AC_CONFIG_FILES([
     src/data-structure/Makefile
     src/finder/Makefile
     src/formula/Makefile
+    data/algorithms/Makefile
 ])
 
 AC_OUTPUT
