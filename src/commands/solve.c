@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <config.h>
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
 #include "../data-structure/hash-map.h"
@@ -20,7 +22,22 @@ bool Solve(const CliParser* parsed_args) {
     );
 
     for (size_t i = 0; i < parsed_args->algfile_count; ++i) {
-        FILE* algorithm_file = fopen(parsed_args->algfile_list[i], "r");
+        const char* path = parsed_args->algfile_list[i];
+        FILE* algorithm_file = fopen(path, "r");
+        if (!algorithm_file) {
+            const char* prefix = PREFIX "/share/"
+                PACKAGE_NAME "/" PACKAGE_VERSION "/algorithms/";
+            char shared_path[strlen(prefix) + strlen(path) + 6];
+            fprintf(stderr, "%s\n", prefix);
+            strcpy(shared_path, prefix);
+            strcat(shared_path, path);
+            strcat(shared_path, ".algs");
+            algorithm_file = fopen(shared_path, "r");
+            if (!algorithm_file) {
+                fprintf(stderr, "Cannot open algorithm file: %s\n", path);
+                continue;
+            }
+        }
         size_t size;
         fread(&size, sizeof(size_t), 1, algorithm_file);
         for (size_t j = 0; j < size; ++j) {
