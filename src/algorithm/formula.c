@@ -13,39 +13,36 @@ bool AlgorithmContainsFormula(
     const Algorithm* algorithm,
     const Formula* formula
 ) {
-    return bsearch(
-        formula,
-        algorithm->formula_list,
-        algorithm->size, sizeof(Formula),
-        FormulaCompareGeneric
-    );
+    const Formula* begin = algorithm->formula_list;
+    const Formula* end = begin + algorithm->size;
+    for (const Formula* p = begin; p < end; ++p) {
+        if (FormulaCompare(p, formula) == 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void AlgorithmAddFormula(Algorithm* algorithm, const Formula* formula) {
+    if (AlgorithmContainsFormula(algorithm, formula)) {
+        return;
+    }
     if (algorithm->size == algorithm->capacity) {
         algorithm->formula_list = (Formula*)realloc(
             algorithm->formula_list,
             (algorithm->capacity <<= 1) * sizeof(Formula)
         );
     }
-    if (!bsearch(
-        formula,
+    FormulaDuplicate(&algorithm->formula_list[algorithm->size++], formula);
+}
+
+void AlgorithmSortFormula(Algorithm* algorithm) {
+    qsort(
         algorithm->formula_list,
-        algorithm->size, sizeof(Formula),
+        algorithm->size,
+        sizeof(Formula),
         FormulaCompareGeneric
-    )) {
-        Formula* pointer = algorithm->formula_list + algorithm->size;
-        while (--pointer >= algorithm->formula_list) {
-            if (FormulaCompare(pointer, formula) > 0) {
-                memcpy(pointer + 1, pointer, sizeof(Formula));
-            } else {
-                break;
-            }
-        }
-        FormulaConstruct(pointer + 1, NULL);
-        FormulaDuplicate(pointer + 1, formula);
-    }
-    ++algorithm->size;
+    );
 }
 
 

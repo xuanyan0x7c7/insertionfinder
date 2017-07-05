@@ -116,6 +116,7 @@ bool GenerateAlgfiles(const CliParser* parsed_args) {
 
     fwrite(&map.size, sizeof(size_t), 1, output);
     for (size_t i = 0; i < map.size; ++i) {
+        AlgorithmSortFormula(list[i]);
         AlgorithmSave(list[i], output);
     }
     free(list);

@@ -27,5 +27,6 @@ bool AlgorithmContainsFormula(
     const Formula* formula
 );
 void AlgorithmAddFormula(Algorithm* algorithm, const Formula* formula);
+void AlgorithmSortFormula(Algorithm* algorithm);
 
 int AlgorithmCompare(const Algorithm* x, const Algorithm* y);

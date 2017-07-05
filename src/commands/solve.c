@@ -47,9 +47,7 @@ bool Solve(const CliParser* parsed_args) {
                 Algorithm* dest = (Algorithm*)node->value;
                 for (size_t k = 0; k < algorithm->size; ++k) {
                     const Formula* formula = &algorithm->formula_list[k];
-                    if (!AlgorithmContainsFormula(dest, formula)) {
-                        AlgorithmAddFormula(dest, formula);
-                    }
+                    AlgorithmAddFormula(dest, formula);
                 }
                 AlgorithmDestroy(algorithm);
                 free(algorithm);
@@ -67,7 +65,9 @@ bool Solve(const CliParser* parsed_args) {
         node;
         node = HashMapIterNext(&map, node)
     ) {
-        algorithm_list[index++] = (Algorithm*)node->value;
+        algorithm_list[index] = (Algorithm*)node->value;
+        AlgorithmSortFormula(algorithm_list[index]);
+        ++index;
     }
     qsort(
         algorithm_list,
