@@ -351,13 +351,13 @@ bool FormulaInsertFinalIsWorthy(
     const Formula* formula,
     size_t insert_place,
     const Formula* insertion,
-    ssize_t moves_to_cancel
+    ptrdiff_t moves_to_cancel
 ) {
     size_t l1 = formula->length;
     size_t l2 = insertion->length;
     const int* f1 = formula->move;
     const int* f2 = insertion->move;
-    ssize_t sum = 0;
+    ptrdiff_t sum = 0;
     if (insert_place > 0) {
         const int* x = &f1[insert_place - 1];
         const int* y = f2;
