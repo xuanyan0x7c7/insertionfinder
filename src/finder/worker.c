@@ -37,7 +37,7 @@ static bool NotSearched(
     size_t new_begin,
     bool swappable
 );
-static bool ContinueSearching(const Worker* worker, int cycles);
+static bool ContinueSearching(const Worker* worker, const Formula* formula);
 
 
 void FinderWorkerConstruct(
@@ -410,10 +410,7 @@ void TryInsertion(
                 );
                 if (!NotSearched(skeleton, insert_place, new_begin, swapped)) {
                     continue;
-                } else if (!ContinueSearching(
-                    worker,
-                    corner_cycles_new + edge_cycles_new
-                )) {
+                } else if (!ContinueSearching(worker, &formula)) {
                     continue;
                 }
                 insertion->insert_place = insert_place;
@@ -535,7 +532,6 @@ bool NotSearched(
     }
 }
 
-bool ContinueSearching(const Worker* worker, int cycles) {
-    return worker->solving_step[worker->depth].skeleton.length
-        <= worker->finder->fewest_moves;
+bool ContinueSearching(const Worker* worker, const Formula* formula) {
+    return formula->length <= worker->finder->fewest_moves;
 }
