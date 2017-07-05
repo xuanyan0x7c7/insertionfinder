@@ -291,7 +291,12 @@ bool Solve(const CliParser* parsed_args) {
                 break;
         }
         if (parsed_args->json) {
-            printf("]}");
+            printf("],");
+            if (finder.solution_count == 0) {
+                printf("\"minimum_moves\":null}");
+            } else {
+                printf("\"minimum_moves\":%lu}", finder.fewest_moves);
+            }
         }
 
         FinderDestroy(&finder);
