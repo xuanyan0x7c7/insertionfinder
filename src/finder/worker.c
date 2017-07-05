@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdlib.h>
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
@@ -203,16 +204,17 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
             insertion->insert_place = insert_place;
             for (size_t i = 0; i < algorithm->size; ++i) {
                 insertion->insertion = &algorithm->formula_list[i];
-                ptrdiff_t moves_to_cancel =
-                    skeleton->length + insertion->insertion->length
-                    - finder->fewest_moves;
-                if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
-                    skeleton,
-                    insert_place,
-                    insertion->insertion,
-                    moves_to_cancel
-                )) {
-                    continue;
+                if (finder->fewest_moves != ULONG_MAX) {
+                    ptrdiff_t moves_to_cancel = skeleton->length
+                        + insertion->insertion->length - finder->fewest_moves;
+                    if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
+                        skeleton,
+                        insert_place,
+                        insertion->insertion,
+                        moves_to_cancel
+                    )) {
+                        continue;
+                    }
                 }
                 PushInsertion(worker, NULL);
                 UpdateFewestMoves(worker);
@@ -236,16 +238,18 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
                 insertion->insert_place = insert_place;
                 for (size_t i = 0; i < algorithm->size; ++i) {
                     insertion->insertion = &algorithm->formula_list[i];
-                    ptrdiff_t moves_to_cancel =
-                        skeleton->length + insertion->insertion->length
-                        - finder->fewest_moves;
-                    if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
-                        skeleton,
-                        insert_place,
-                        insertion->insertion,
-                        moves_to_cancel
-                    )) {
-                        continue;
+                    if (finder->fewest_moves != ULONG_MAX) {
+                        ptrdiff_t moves_to_cancel = skeleton->length
+                            + insertion->insertion->length
+                            - finder->fewest_moves;
+                        if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
+                            skeleton,
+                            insert_place,
+                            insertion->insertion,
+                            moves_to_cancel
+                        )) {
+                            continue;
+                        }
                     }
                     PushInsertion(worker, NULL);
                     UpdateFewestMoves(worker);
@@ -294,16 +298,17 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
             insertion->insert_place = insert_place;
             for (size_t i = 0; i < algorithm->size; ++i) {
                 insertion->insertion = &algorithm->formula_list[i];
-                ptrdiff_t moves_to_cancel =
-                    skeleton->length + insertion->insertion->length
-                    - finder->fewest_moves;
-                if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
-                    skeleton,
-                    insert_place,
-                    insertion->insertion,
-                    moves_to_cancel
-                )) {
-                    continue;
+                if (finder->fewest_moves != ULONG_MAX) {
+                    ptrdiff_t moves_to_cancel = skeleton->length
+                        + insertion->insertion->length - finder->fewest_moves;
+                    if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
+                        skeleton,
+                        insert_place,
+                        insertion->insertion,
+                        moves_to_cancel
+                    )) {
+                        continue;
+                    }
                 }
                 PushInsertion(worker, NULL);
                 UpdateFewestMoves(worker);
@@ -327,16 +332,18 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
                 insertion->insert_place = insert_place;
                 for (size_t i = 0; i < algorithm->size; ++i) {
                     insertion->insertion = &algorithm->formula_list[i];
-                    ptrdiff_t moves_to_cancel =
-                        skeleton->length + insertion->insertion->length
-                        - finder->fewest_moves;
-                    if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
-                        skeleton,
-                        insert_place,
-                        insertion->insertion,
-                        moves_to_cancel
-                    )) {
-                        continue;
+                    if (finder->fewest_moves != ULONG_MAX) {
+                        ptrdiff_t moves_to_cancel = skeleton->length
+                            + insertion->insertion->length
+                            - finder->fewest_moves;
+                        if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
+                            skeleton,
+                            insert_place,
+                            insertion->insertion,
+                            moves_to_cancel
+                        )) {
+                            continue;
+                        }
                     }
                     PushInsertion(worker, NULL);
                     UpdateFewestMoves(worker);
