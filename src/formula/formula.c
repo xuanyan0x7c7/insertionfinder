@@ -252,9 +252,7 @@ size_t FormulaCancelMoves(Formula* formula) {
 
     while (x < length) {
         if (y < 0 || move[x] >> 3 != move[y] >> 3) {
-            if (++y != x++) {
-                move[y] = move[x - 1];
-            }
+            move[++y] = move[x++];
         } else if (move[x] >> 2 != move[y] >> 2) {
             if (y > 0 && move[y - 1] >> 3 == move[y] >> 3) {
                 int orientation = (move[y - 1] + move[x++]) & 3;
