@@ -28,7 +28,6 @@ bool Solve(const CliParser* parsed_args) {
             const char* prefix = PREFIX "/share/"
                 PACKAGE_NAME "/" PACKAGE_VERSION "/algorithms/";
             char shared_path[strlen(prefix) + strlen(path) + 6];
-            fprintf(stderr, "%s\n", prefix);
             strcpy(shared_path, prefix);
             strcat(shared_path, path);
             strcat(shared_path, ".algs");
