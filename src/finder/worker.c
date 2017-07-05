@@ -18,6 +18,7 @@ static void TryInsertion(
     bool swapped,
     int corner_cycles, int edge_cycles
 );
+static void TryLastInsertion(Worker* worker, size_t insert_place, int index);
 
 static void PushInsertion(Worker* worker, const Formula* inserted);
 static void PopInsertion(Worker* worker);
@@ -28,6 +29,7 @@ static void SolutionFound(
     const Algorithm* algorithm
 );
 static void UpdateFewestMoves(Worker* worker);
+static void SetFewestMoves(Worker* worker, size_t moves);
 
 static bool BitCountLessThan2(unsigned n);
 
@@ -198,29 +200,11 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
                 skeleton->move[insert_place - 1]
             );
         }
-        int x = finder->corner_cycle_index[index];
-        if (x != -1) {
-            const Algorithm* algorithm = finder->algorithm_list[x];
-            insertion->insert_place = insert_place;
-            for (size_t i = 0; i < algorithm->size; ++i) {
-                insertion->insertion = &algorithm->formula_list[i];
-                if (finder->fewest_moves != ULONG_MAX) {
-                    ptrdiff_t moves_to_cancel = skeleton->length
-                        + insertion->insertion->length - finder->fewest_moves;
-                    if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
-                        skeleton,
-                        insert_place,
-                        insertion->insertion,
-                        moves_to_cancel
-                    )) {
-                        continue;
-                    }
-                }
-                PushInsertion(worker, NULL);
-                UpdateFewestMoves(worker);
-                PopInsertion(worker);
-            }
-        }
+        TryLastInsertion(
+            worker,
+            insert_place,
+            finder->corner_cycle_index[index]
+        );
 
         if (FormulaSwappable(skeleton, insert_place)) {
             FormulaSwapAdjacent(skeleton, insert_place);
@@ -232,30 +216,11 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
                 swapped_index,
                 inverse_move_table[skeleton->move[insert_place]]
             );
-            int x = finder->corner_cycle_index[swapped_index];
-            if (x != -1) {
-                const Algorithm* algorithm = finder->algorithm_list[x];
-                insertion->insert_place = insert_place;
-                for (size_t i = 0; i < algorithm->size; ++i) {
-                    insertion->insertion = &algorithm->formula_list[i];
-                    if (finder->fewest_moves != ULONG_MAX) {
-                        ptrdiff_t moves_to_cancel = skeleton->length
-                            + insertion->insertion->length
-                            - finder->fewest_moves;
-                        if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
-                            skeleton,
-                            insert_place,
-                            insertion->insertion,
-                            moves_to_cancel
-                        )) {
-                            continue;
-                        }
-                    }
-                    PushInsertion(worker, NULL);
-                    UpdateFewestMoves(worker);
-                    PopInsertion(worker);
-                }
-            }
+            TryLastInsertion(
+                worker,
+                insert_place,
+                finder->corner_cycle_index[swapped_index]
+            );
             FormulaSwapAdjacent(skeleton, insert_place);
         }
     }
@@ -292,29 +257,7 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
                 skeleton->move[insert_place - 1]
             );
         }
-        int x = finder->edge_cycle_index[index];
-        if (x != -1) {
-            const Algorithm* algorithm = finder->algorithm_list[x];
-            insertion->insert_place = insert_place;
-            for (size_t i = 0; i < algorithm->size; ++i) {
-                insertion->insertion = &algorithm->formula_list[i];
-                if (finder->fewest_moves != ULONG_MAX) {
-                    ptrdiff_t moves_to_cancel = skeleton->length
-                        + insertion->insertion->length - finder->fewest_moves;
-                    if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
-                        skeleton,
-                        insert_place,
-                        insertion->insertion,
-                        moves_to_cancel
-                    )) {
-                        continue;
-                    }
-                }
-                PushInsertion(worker, NULL);
-                UpdateFewestMoves(worker);
-                PopInsertion(worker);
-            }
-        }
+        TryLastInsertion(worker, insert_place, finder->edge_cycle_index[index]);
 
         if (FormulaSwappable(skeleton, insert_place)) {
             FormulaSwapAdjacent(skeleton, insert_place);
@@ -326,30 +269,11 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
                 swapped_index,
                 inverse_move_table[skeleton->move[insert_place]]
             );
-            int x = finder->edge_cycle_index[swapped_index];
-            if (x != -1) {
-                const Algorithm* algorithm = finder->algorithm_list[x];
-                insertion->insert_place = insert_place;
-                for (size_t i = 0; i < algorithm->size; ++i) {
-                    insertion->insertion = &algorithm->formula_list[i];
-                    if (finder->fewest_moves != ULONG_MAX) {
-                        ptrdiff_t moves_to_cancel = skeleton->length
-                            + insertion->insertion->length
-                            - finder->fewest_moves;
-                        if (moves_to_cancel > 0 && !FormulaInsertFinalIsWorthy(
-                            skeleton,
-                            insert_place,
-                            insertion->insertion,
-                            moves_to_cancel
-                        )) {
-                            continue;
-                        }
-                    }
-                    PushInsertion(worker, NULL);
-                    UpdateFewestMoves(worker);
-                    PopInsertion(worker);
-                }
-            }
+            TryLastInsertion(
+                worker,
+                insert_place,
+                finder->edge_cycle_index[swapped_index]
+            );
             FormulaSwapAdjacent(skeleton, insert_place);
         }
     }
@@ -426,6 +350,44 @@ void TryInsertion(
     }
 }
 
+void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
+    if (index == -1) {
+        return;
+    }
+    const Finder* finder = worker->finder;
+    const Algorithm* algorithm = finder->algorithm_list[index];
+    Insertion* insertion = &worker->solving_step[worker->depth];
+    const Formula* skeleton = &insertion->skeleton;
+    insertion->insert_place = insert_place;
+    for (size_t i = 0; i < algorithm->size; ++i) {
+        insertion->insertion = &algorithm->formula_list[i];
+        size_t new_length = skeleton->length + insertion->insertion->length;
+        ptrdiff_t moves_to_cancel = new_length - finder->fewest_moves;
+        if (finder->fewest_moves == ULONG_MAX || moves_to_cancel <= 0) {
+            SetFewestMoves(worker, new_length);
+            if (!FormulaInsertIsWorthy(
+                skeleton,
+                insert_place,
+                insertion->insertion
+            )) {
+                continue;
+            }
+        } else {
+            if (!FormulaInsertFinalIsWorthy(
+                skeleton,
+                insert_place,
+                insertion->insertion,
+                moves_to_cancel
+            )) {
+                continue;
+            }
+        }
+        PushInsertion(worker, NULL);
+        UpdateFewestMoves(worker);
+        PopInsertion(worker);
+    }
+}
+
 
 void PushInsertion(Worker* worker, const Formula* inserted) {
     if (++worker->depth == worker->solving_step_capacity) {
@@ -478,13 +440,7 @@ void UpdateFewestMoves(Worker* worker) {
     if (moves > finder->fewest_moves) {
         return;
     }
-    if (moves < finder->fewest_moves) {
-        finder->fewest_moves = moves;
-        for (size_t i = 0; i < finder->solution_count; ++i) {
-            FinderWorkerDestroy(&finder->solution_list[i]);
-        }
-        finder->solution_count = 0;
-    }
+    SetFewestMoves(worker, moves);
 
     if (finder->solution_count == finder->solution_capacity) {
         finder->solution_list = (Worker*)realloc(
@@ -508,6 +464,17 @@ void UpdateFewestMoves(Worker* worker) {
         &answer_steps[depth].skeleton,
         &worker_steps[depth].skeleton
     );
+}
+
+void SetFewestMoves(Worker* worker, size_t moves) {
+    Finder* finder = worker->finder;
+    if (moves < finder->fewest_moves) {
+        finder->fewest_moves = moves;
+        for (size_t i = 0; i < finder->solution_count; ++i) {
+            FinderWorkerDestroy(&finder->solution_list[i]);
+        }
+        finder->solution_count = 0;
+    }
 }
 
 

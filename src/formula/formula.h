@@ -61,7 +61,7 @@ bool FormulaInsertFinalIsWorthy(
     const Formula* formula,
     size_t insert_place,
     const Formula* insertion,
-    ptrdiff_t moves_to_cancel
+    size_t moves_to_cancel
 );
 
 bool FormulaSwappable(const Formula* formula, size_t index);
