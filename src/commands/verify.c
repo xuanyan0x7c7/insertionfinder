@@ -46,40 +46,62 @@ bool Verify(const CliParser* parsed_args) {
             success = false;
             break;
         }
-        printf("Scramble: ");
-        FormulaPrint(&scramble, stdout);
-        putchar('\n');
-        printf("Skeleton: ");
-        FormulaPrint(&skeleton, stdout);
-        putchar('\n');
+
+        if (parsed_args->json) {
+            printf("{\"scramble\":\"");
+            FormulaPrint(&scramble, stdout);
+            printf("\",\"skeleton\":\"");
+            FormulaPrint(&skeleton, stdout);
+            printf("\",");
+        } else {
+            printf("Scramble: ");
+            FormulaPrint(&scramble, stdout);
+            putchar('\n');
+            printf("Skeleton: ");
+            FormulaPrint(&skeleton, stdout);
+            putchar('\n');
+        }
 
         Cube cube;
         CubeConstruct(&cube);
         CubeTwistFormula(&cube, &scramble, true, true, false);
         CubeTwistFormula(&cube, &skeleton, true, true, false);
         if (CubeHasParity(&cube)) {
-            puts("The cube has parity.");
+            if (parsed_args->json) {
+                printf("\"parity\":true");
+            } else {
+                puts("The cube has parity.");
+            }
         } else {
             int corner_cycles = CubeCornerCycles(&cube);
             int edge_cycles = CubeEdgeCycles(&cube);
-            if (corner_cycles == 0 && edge_cycles == 0) {
-                puts("The cube is solved.");
+            if (parsed_args->json) {
+                printf(
+                    "\"corner_cycle_num\":%d,"
+                    "\"edge_cycle_num\":%d}",
+                    corner_cycles,
+                    edge_cycles
+                );
             } else {
-                printf("The cube has ");
-                if (corner_cycles == 1) {
-                    printf("1 corner-3-cycle");
-                } else if (corner_cycles) {
-                    printf("%d corner-3-cycles", corner_cycles);
+                if (corner_cycles == 0 && edge_cycles == 0) {
+                    puts("The cube is solved.");
+                } else {
+                    printf("The cube has ");
+                    if (corner_cycles == 1) {
+                        printf("1 corner-3-cycle");
+                    } else if (corner_cycles) {
+                        printf("%d corner-3-cycles", corner_cycles);
+                    }
+                    if (corner_cycles && edge_cycles) {
+                        printf(" and ");
+                    }
+                    if (edge_cycles == 1) {
+                        printf("1 edge-3-cycle");
+                    } else if (edge_cycles) {
+                        printf("%d edge-3-cycles", edge_cycles);
+                    }
+                    printf(".\n");
                 }
-                if (corner_cycles && edge_cycles) {
-                    printf(" and ");
-                }
-                if (edge_cycles == 1) {
-                    printf("1 edge-3-cycle");
-                } else if (edge_cycles) {
-                    printf("%d edge-3-cycles", edge_cycles);
-                }
-                printf(".\n");
             }
         }
 
@@ -87,6 +109,7 @@ bool Verify(const CliParser* parsed_args) {
             fclose(input);
         }
     } while (false);
+
     free(scramble_string);
     free(skeleton_string);
     return success;

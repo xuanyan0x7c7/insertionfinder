@@ -12,6 +12,7 @@ static const struct option long_options[] = {
     {"generate-algfile", no_argument, NULL, 0},
     {"help", no_argument, NULL, SHORT_COMMAND_HELP},
     {"version", no_argument, NULL, SHORT_COMMAND_VERSION},
+    {"json", no_argument, NULL, 0},
     {"algfile", required_argument, NULL, SHORT_PARAMETER_ALGFILE},
     {"casefile", required_argument, NULL, SHORT_PARAMETER_CASEFILE},
     {"file", required_argument, NULL, SHORT_PARAMETER_FILE},
@@ -22,6 +23,7 @@ static const struct option long_options[] = {
 CliParser Parse(int argc, char** argv) {
     CliParser parsed_args;
     parsed_args.command = -1;
+    parsed_args.json = false;
     parsed_args.algfile_count = 0;
     parsed_args.algfile_list = (const char**)malloc(argc * sizeof(const char*));
     parsed_args.casefile_count = 0;
@@ -49,6 +51,9 @@ CliParser Parse(int argc, char** argv) {
                     case COMMAND_HELP:
                     case COMMAND_VERSION:
                         parsed_args.command = option_index;
+                        break;
+                    case PARAMETER_JSON:
+                        parsed_args.json = true;
                         break;
                     case PARAMETER_ALGFILE:
                         parsed_args.algfile_list[

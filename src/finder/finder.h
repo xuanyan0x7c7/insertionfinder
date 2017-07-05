@@ -7,6 +7,7 @@
 
 enum FinderSolveStatus {
     SOLVE_SUCCESS,
+    SOLVE_SUCCESS_SOLVED,
     SOLVE_FAILURE_PARITY,
     SOLVE_FAILURE_CORNER_CYCLE_ALGORITHMS_NEEDED,
     SOLVE_FAILURE_EDGE_CYCLE_ALGORITHMS_NEEDED
@@ -55,7 +56,12 @@ void FinderConstruct(
 );
 void FinderDestroy(Finder* finder);
 
-FinderSolveStatus FinderSolve(Finder* finder, const Formula* skeleton);
+FinderSolveStatus FinderSolve(
+    Finder* finder,
+    const Formula* skeleton,
+    bool* parity,
+    int* corner_cycles, int* edge_cycles
+);
 
 void FinderWorkerConstruct(
     FinderWorker* worker,

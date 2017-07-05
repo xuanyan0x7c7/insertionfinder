@@ -4,6 +4,7 @@
 typedef struct CliParser CliParser;
 struct CliParser {
     int command;
+    bool json;
     size_t algfile_count;
     const char** algfile_list;
     size_t casefile_count;
@@ -18,9 +19,10 @@ enum {
     COMMAND_GENERATE_ALGFILE,
     COMMAND_HELP,
     COMMAND_VERSION,
+    PARAMETER_JSON,
     PARAMETER_ALGFILE,
     PARAMETER_CASEFILE,
-    PARAMETER_FILE
+    PARAMETER_FILE,
 };
 
 enum {
