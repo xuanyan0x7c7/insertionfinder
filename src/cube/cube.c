@@ -6,14 +6,13 @@
 #include "common.h"
 
 
-extern Cube one_move_cube[24];
-extern int computed_corner_twist_table[24][8][24];
-extern int computed_edge_twist_table[24][12][24];
-extern int corner_cycle_transform_table[6 * 24 * 24][24];
-extern int edge_cycle_transform_table[10 * 24 * 24][24];
-
-
 void CubeInit() {
+    for (int i = 0; i < 8; ++i) {
+        identity_cube.corner[i] = i * 3;
+    }
+    for (int i = 0; i < 12; ++i) {
+        identity_cube.edge[i] = i << 1;
+    }
     GenerateOneMoveCube(one_move_cube);
     GenerateComputedCornerTwistTable(computed_corner_twist_table);
     GenerateComputedEdgeTwistTable(computed_edge_twist_table);
@@ -23,12 +22,7 @@ void CubeInit() {
 
 
 void CubeConstruct(Cube* cube) {
-    for (int i = 0; i < 8; ++i) {
-        cube->corner[i] = i * 3;
-    }
-    for (int i = 0; i < 12; ++i) {
-        cube->edge[i] = i << 1;
-    }
+    memcpy(cube, &identity_cube, sizeof(Cube));
 }
 
 
@@ -72,16 +66,10 @@ void CubeInverseState(const Cube* state, Cube* result) {
 unsigned CubeMask(const Cube* cube) {
     unsigned mask = 0;
     for (int i = 0; i < 8; ++i) {
-        mask <<= 1;
-        if (cube->corner[i] != i * 3) {
-            mask |= 1;
-        }
+        mask = (mask << 1) | (cube->corner[i] != i * 3);
     }
     for (int i = 0; i < 12; ++i) {
-        mask <<= 1;
-        if (cube->edge[i] != i << 1) {
-            mask |= 1;
-        }
+        mask = (mask << 1) | (cube->edge[i] != i << 1);
     }
     return mask;
 }

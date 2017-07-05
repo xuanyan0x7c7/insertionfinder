@@ -59,10 +59,6 @@ static const int edge_twist_table[][12] = {
     {23, 2, 4, 6, 17, 10, 12, 14, 1, 18, 20, 9}
 };
 
-extern Cube one_move_cube[24];
-extern int computed_corner_twist_table[24][8][24];
-extern int computed_edge_twist_table[24][12][24];
-
 
 void CubeTwist(Cube* cube, int move, bool twist_corners, bool twist_edges) {
     typedef int Array[24];
@@ -123,15 +119,17 @@ void CubeTwistCube(
     bool twist_corners, bool twist_edges
 ) {
     if (twist_corners) {
-        for (int i = 0; i < 8; ++i) {
-            int* item = &(cube->corner[i]);
+        int* begin = cube->corner;
+        int* end = begin + 8;
+        for (int* item = begin; item < end; ++item) {
             int transform = state->corner[*item / 3];
             *item = transform - transform % 3 + (*item + transform) % 3;
         }
     }
     if (twist_edges) {
-        for (int i = 0; i < 12; ++i) {
-            int* item = &(cube->edge[i]);
+        int* begin = cube->edge;
+        int* end = begin + 12;
+        for (int* item = begin; item < end; ++item) {
             *item = state->edge[*item >> 1] ^ (*item & 1);
         }
     }

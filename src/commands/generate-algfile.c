@@ -48,8 +48,7 @@ bool GenerateAlgfiles(const CliParser* parsed_args) {
                     fprintf(stderr, "Invalid formula: %s\n", string);
                     break;
                 }
-                Cube cube;
-                CubeConstruct(&cube);
+                Cube cube = identity_cube;
                 CubeTwistFormula(&cube, &formula, true, true, false);
                 if (CubeHasParity(&cube)) {
                     fprintf(stderr, "Formula has parity: %s\n", string);

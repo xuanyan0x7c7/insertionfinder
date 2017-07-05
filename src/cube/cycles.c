@@ -4,10 +4,6 @@
 #include "common.h"
 
 
-extern Cube one_move_cube[24];
-extern int corner_cycle_transform_table[6 * 24 * 24][24];
-extern int edge_cycle_transform_table[10 * 24 * 24][24];
-
 static Cube Corner3CycleCube(int index);
 static Cube Edge3CycleCube(int index);
 
@@ -108,10 +104,11 @@ int CubeEdgeCycles(const Cube* cube) {
 
 
 int CubeCorner3CycleIndex(const Cube* cube) {
+    const int* corner = cube->corner;
     for (int i = 0; i < 8; ++i) {
-        if (cube->corner[i] != i * 3) {
-            int j = cube->corner[i];
-            int k = cube->corner[j / 3];
+        if (corner[i] != i * 3) {
+            int j = corner[i];
+            int k = corner[j / 3];
             return k / 3 == i ? -1 : i * 24 * 24 + j * 24 + k;
         }
     }
@@ -119,10 +116,11 @@ int CubeCorner3CycleIndex(const Cube* cube) {
 }
 
 int CubeEdge3CycleIndex(const Cube* cube) {
+    const int* edge = cube->edge;
     for (int i = 0; i < 12; ++i) {
-        if (cube->edge[i] != i << 1) {
-            int j = cube->edge[i];
-            int k = cube->edge[j >> 1];
+        if (edge[i] != i << 1) {
+            int j = edge[i];
+            int k = edge[j >> 1];
             return k >> 1 == i ? -1 : i * 24 * 24 + j * 24 + k;
         }
     }
@@ -194,16 +192,10 @@ void GenerateEdgeCycleTable(int table[][24]) {
 
 
 Cube Corner3CycleCube(int index) {
-    Cube cube;
+    Cube cube = identity_cube;
     int x = index / 24 / 24;
     int y = (index / 24) % 24;
     int z = index % 24;
-    for (int i = 0; i < 8; ++i) {
-        cube.corner[i] = i * 3;
-    }
-    for (int i = 0; i < 12; ++i) {
-        cube.edge[i] = i << 1;
-    }
     if (x != y / 3 && x != z / 3 && y / 3 != z / 3) {
         cube.corner[x] = y;
         cube.corner[y / 3] = z;
@@ -213,16 +205,10 @@ Cube Corner3CycleCube(int index) {
 }
 
 Cube Edge3CycleCube(int index) {
-    Cube cube;
+    Cube cube = identity_cube;
     int x = index / 24 / 24;
     int y = (index / 24) % 24;
     int z = index % 24;
-    for (int i = 0; i < 8; ++i) {
-        cube.corner[i] = i * 3;
-    }
-    for (int i = 0; i < 12; ++i) {
-        cube.edge[i] = i << 1;
-    }
     if (x != y >> 1 && x != z >> 1 && y >> 1 != z >> 1) {
         cube.edge[x] = y;
         cube.edge[y >> 1] = z;

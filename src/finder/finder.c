@@ -65,8 +65,7 @@ void FinderDestroy(Finder* finder) {
 
 
 FinderSolveStatus FinderSolve(Finder* finder, const Formula* skeleton) {
-    Cube cube;
-    CubeConstruct(&cube);
+    Cube cube = identity_cube;
     CubeTwistFormula(&cube, &finder->scramble, true, true, false);
     CubeTwistFormula(&cube, skeleton, true, true, false);
     int corner_cycles = CubeCornerCycles(&cube);

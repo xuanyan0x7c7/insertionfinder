@@ -83,8 +83,7 @@ void FinderWorkerSearch(
     const Finder* finder = worker->finder;
     Insertion* insertion = &worker->solving_step[worker->depth];
     Formula* skeleton = &insertion->skeleton;
-    Cube state;
-    CubeConstruct(&state);
+    Cube state = identity_cube;
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
         if (insert_place == begin) {
             CubeRangeTwistFormula(
@@ -129,8 +128,7 @@ void FinderWorkerSearch(
                 skeleton->move[insert_place - 1],
                 skeleton->move[insert_place]
             };
-            Cube swapped_state;
-            CubeConstruct(&swapped_state);
+            Cube swapped_state = identity_cube;
             CubeTwist(
                 &swapped_state,
                 moves[1],
@@ -176,8 +174,7 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
         Formula* skeleton = &insertion->skeleton;
         int index;
         if (insert_place == begin) {
-            Cube state;
-            CubeConstruct(&state);
+            Cube state = identity_cube;
             CubeRangeTwistFormula(
                 &state,
                 skeleton,
@@ -233,8 +230,7 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
         Formula* skeleton = &insertion->skeleton;
         int index;
         if (insert_place == begin) {
-            Cube state;
-            CubeConstruct(&state);
+            Cube state = identity_cube;
             CubeRangeTwistFormula(
                 &state,
                 skeleton,

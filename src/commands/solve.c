@@ -132,8 +132,7 @@ bool Solve(const CliParser* parsed_args) {
             putchar('\n');
         }
 
-        Cube cube;
-        CubeConstruct(&cube);
+        Cube cube = identity_cube;
         CubeTwistFormula(&cube, &scramble, true, true, false);
         CubeTwistFormula(&cube, &skeleton, true, true, false);
         if (CubeHasParity(&cube)) {
