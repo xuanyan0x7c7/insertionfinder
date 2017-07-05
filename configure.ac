@@ -9,6 +9,14 @@ AC_PROG_RANLIB
 AC_CHECK_HEADERS([getopt.h regex.h])
 AC_CHECK_FUNCS([strdup])
 
+AH_TEMPLATE([PREFIX], ["Program file prefix"])
+AM_CONDITIONAL([PREFIX_DEFINED], [test $prefix = NONE])
+AM_COND_IF(
+    [PREFIX_DEFINED],
+    AC_DEFINE([PREFIX], ["/usr/local"]),
+    AC_DEFINE_UNQUOTED([PREFIX], ["$prefix"])
+)
+
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
     Makefile
