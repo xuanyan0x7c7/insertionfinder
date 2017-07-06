@@ -7,12 +7,14 @@
 #include "finder.h"
 
 
+typedef FinderWorker Worker;
+
 static int SolutionCompare(const void* p, const void* q);
 
 
 void FinderConstruct(
     Finder* finder,
-    size_t algorithm_count, Algorithm** algorithm_list,
+    size_t algorithm_count, const Algorithm** algorithm_list,
     const Formula* scramble
 ) {
     finder->algorithm_count = algorithm_count;
@@ -50,15 +52,17 @@ void FinderConstruct(
     finder->fewest_moves = ULONG_MAX;
     finder->solution_count = 0;
     finder->solution_capacity = 16;
-    finder->solution_list = (FinderWorker*)malloc(
-        finder->solution_capacity * sizeof(FinderWorker)
+    finder->solution_list = (Worker*)malloc(
+        finder->solution_capacity * sizeof(Worker)
     );
 }
 
 void FinderDestroy(Finder* finder) {
     FormulaDestroy(&finder->scramble);
-    for (size_t i = 0; i < finder->solution_count; ++i) {
-        FinderWorkerDestroy(&finder->solution_list[i]);
+    Worker* begin = finder->solution_list;
+    Worker* end = begin + finder->solution_count;
+    for (Worker* p = begin; p < end; ++p) {
+        FinderWorkerDestroy(p);
     }
     free(finder->solution_list);
 }
@@ -85,8 +89,9 @@ FinderSolveStatus FinderSolve(Finder* finder, const Formula* skeleton) {
         0, skeleton->length
     );
     FinderWorkerDestroy(&worker);
-    for (size_t i = 0; i < finder->solution_count; ++i) {
-        FinderWorker* solution = &finder->solution_list[i];
+    Worker* begin = finder->solution_list;
+    Worker* end = begin + finder->solution_count;
+    for (Worker* solution = begin; solution < end; ++solution) {
         solution->cancellation = solution->solving_step[0].skeleton.length;
         for (size_t j = 0; j < solution->depth; ++j) {
             solution->cancellation += solution->solving_step[j]
@@ -98,7 +103,7 @@ FinderSolveStatus FinderSolve(Finder* finder, const Formula* skeleton) {
     qsort(
         finder->solution_list,
         finder->solution_count,
-        sizeof(FinderWorker),
+        sizeof(Worker),
         SolutionCompare
     );
 

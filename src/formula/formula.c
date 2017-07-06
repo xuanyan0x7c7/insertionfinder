@@ -222,9 +222,11 @@ void FormulaPrint(const Formula* formula, FILE* stream) {
     if (formula->length == 0) {
         return;
     }
-    fprintf(stream, "%s", twist_str[formula->move[0]]);
-    for (size_t i = 1; i < formula->length; ++i) {
-        fprintf(stream, " %s", twist_str[formula->move[i]]);
+    const int* begin = formula->move;
+    const int* end = begin + formula->length;
+    fprintf(stream, "%s", twist_str[*begin]);
+    for (const int* p = begin; ++p < end;) {
+        fprintf(stream, " %s", twist_str[*p]);
     }
 }
 
@@ -236,9 +238,11 @@ void FormulaPrintRange(
     if (begin == end) {
         return;
     }
-    fprintf(stream, "%s", twist_str[formula->move[begin]]);
-    for (size_t i = begin; ++i < end;) {
-        fprintf(stream, " %s", twist_str[formula->move[i]]);
+    const int* p_begin = formula->move + begin;
+    const int* p_end = formula->move + end;
+    fprintf(stream, "%s", twist_str[*p_begin]);
+    for (const int* p = p_begin; ++p < p_end;) {
+        fprintf(stream, " %s", twist_str[*p]);
     }
 }
 
@@ -247,41 +251,40 @@ size_t FormulaCancelMoves(Formula* formula) {
     int* begin = formula->move;
     int* end = begin + formula->length;
     int* p = begin;
-    int* q = begin - 1;
-    int* needle = end + 1;
+    int* needle = end;
 
-    while (p < end) {
-        if (q < begin || *p >> 3 != *q >> 3) {
-            *++q = *p++;
+    for (int* q = begin; ++q < end;) {
+        if (*p >> 3 != *q >> 3) {
+            *++p = *q;
         } else if (*p >> 2 != *q >> 2) {
-            if (q > begin && *(q - 1) >> 3 == *q >> 3) {
-                int orientation = (*(q - 1) + *p++) & 3;
-                if (needle > q) {
-                    needle = q;
+            if (p > begin && *(p - 1) >> 3 == *p >> 3) {
+                int orientation = (*(p - 1) + *q) & 3;
+                if (needle > p) {
+                    needle = p;
                 }
                 if (orientation == 0) {
-                    *(q - 1) = *q;
-                    --q;
+                    *(p - 1) = *p;
+                    --p;
                 } else {
-                    *(q - 1) = (*(q - 1) & ~3) | orientation;
+                    *(p - 1) = (*(p - 1) & ~3) | orientation;
                 }
             } else {
-                *++q = *p++;
+                *++p = *q;
             }
         } else {
-            int orientation = (*q + *p++) & 3;
+            int orientation = (*p + *q) & 3;
             if (orientation == 0) {
-                --q;
+                --p;
             } else {
-                *q = (*q & ~3) | orientation;
+                *p = (*p & ~3) | orientation;
             }
-            if (needle > q + 1) {
-                needle = q + 1;
+            if (needle > p + 1) {
+                needle = p + 1;
             }
         }
     }
 
-    formula->length = q + 1 - begin;
+    formula->length = p + 1 - begin;
     return needle - begin;
 }
 

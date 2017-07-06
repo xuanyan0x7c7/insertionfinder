@@ -28,7 +28,7 @@ static void SolutionFound(
     size_t insert_place,
     const Algorithm* algorithm
 );
-static void UpdateFewestMoves(Worker* worker);
+static void TrySolution(Worker* worker);
 static void SetFewestMoves(Worker* worker, size_t moves);
 
 static bool BitCountLessThan2(unsigned n);
@@ -53,15 +53,14 @@ void FinderWorkerConstruct(
     worker->solving_step = (Insertion*)malloc(
         worker->solving_step_capacity * sizeof(Insertion)
     );
-    FormulaDuplicate(
-        &worker->solving_step[0].skeleton,
-        skeleton
-    );
+    FormulaDuplicate(&worker->solving_step[0].skeleton, skeleton);
 }
 
 void FinderWorkerDestroy(Worker* worker) {
-    for (size_t i = 0; i <= worker->depth; ++i) {
-        FormulaDestroy(&worker->solving_step[i].skeleton);
+    Insertion* begin = worker->solving_step;
+    Insertion* end = begin + worker->depth + 1;
+    for (Insertion* p = begin; p < end; ++p) {
+        FormulaDestroy(&p->skeleton);
     }
     free(worker->solving_step);
 }
@@ -169,9 +168,9 @@ void FinderWorkerSearch(
 
 void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
     const Finder* finder = worker->finder;
+    Insertion* insertion = &worker->solving_step[worker->depth];
+    Formula* skeleton = &insertion->skeleton;
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
-        Insertion* insertion = &worker->solving_step[worker->depth];
-        Formula* skeleton = &insertion->skeleton;
         int index;
         if (insert_place == begin) {
             Cube state = identity_cube;
@@ -225,9 +224,9 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
 
 void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
     const Finder* finder = worker->finder;
+    Insertion* insertion = &worker->solving_step[worker->depth];
+    Formula* skeleton = &insertion->skeleton;
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
-        Insertion* insertion = &worker->solving_step[worker->depth];
-        Formula* skeleton = &insertion->skeleton;
         int index;
         if (insert_place == begin) {
             Cube state = identity_cube;
@@ -379,7 +378,7 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
             }
         }
         PushInsertion(worker, NULL);
-        UpdateFewestMoves(worker);
+        TrySolution(worker);
         PopInsertion(worker);
     }
 }
@@ -423,12 +422,12 @@ void SolutionFound(
     for (size_t i = 0; i < algorithm->size; ++i) {
         insertion->insertion = &algorithm->formula_list[i];
         PushInsertion(worker, NULL);
-        UpdateFewestMoves(worker);
+        TrySolution(worker);
         PopInsertion(worker);
     }
 }
 
-void UpdateFewestMoves(Worker* worker) {
+void TrySolution(Worker* worker) {
     Finder* finder = worker->finder;
     size_t depth = worker->depth;
     const Insertion* worker_steps = worker->solving_step;
