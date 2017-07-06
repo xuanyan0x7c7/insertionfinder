@@ -14,7 +14,7 @@ static int SolutionCompare(const void* p, const void* q);
 
 void FinderConstruct(
     Finder* finder,
-    size_t algorithm_count, const Algorithm** algorithm_list,
+    size_t algorithm_count, Algorithm** algorithm_list,
     const Formula* scramble
 ) {
     finder->algorithm_count = algorithm_count;

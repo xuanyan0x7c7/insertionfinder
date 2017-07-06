@@ -25,13 +25,13 @@ bool Solve(const CliParser* parsed_args) {
         const char* path = parsed_args->algfile_list[i];
         FILE* algorithm_file = fopen(path, "r");
         if (!algorithm_file) {
-            const char* prefix = PREFIX "/share/"
+            static const char* prefix = PREFIX "/share/"
                 PACKAGE_NAME "/" PACKAGE_VERSION "/algorithms/";
             char shared_path[strlen(prefix) + strlen(path) + 6];
             strcpy(shared_path, prefix);
             strcat(shared_path, path);
             strcat(shared_path, ".algs");
-            algorithm_file = fopen(shared_path, "r");
+            algorithm_file = fopen(shared_path, "rb");
             if (!algorithm_file) {
                 fprintf(stderr, "Cannot open algorithm file: %s\n", path);
                 continue;
@@ -46,8 +46,7 @@ bool Solve(const CliParser* parsed_args) {
             if (!HashMapInsert(&map, &algorithm->state, algorithm, &node)) {
                 Algorithm* dest = (Algorithm*)node->value;
                 for (size_t k = 0; k < algorithm->size; ++k) {
-                    const Formula* formula = &algorithm->formula_list[k];
-                    AlgorithmAddFormula(dest, formula);
+                    AlgorithmAddFormula(dest, &algorithm->formula_list[k]);
                 }
                 AlgorithmDestroy(algorithm);
                 free(algorithm);
