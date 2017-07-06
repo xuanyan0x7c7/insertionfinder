@@ -44,6 +44,8 @@ void FormulaPrintRange(
     FILE* stream
 );
 
+char* Formula2String(const Formula* formula);
+
 size_t FormulaCancelMoves(Formula* formula);
 
 size_t FormulaInsert(

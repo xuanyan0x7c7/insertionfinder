@@ -247,6 +247,16 @@ void FormulaPrintRange(
 }
 
 
+char* Formula2String(const Formula* formula) {
+    char* buffer;
+    size_t size;
+    FILE* stream = open_memstream(&buffer, &size);
+    FormulaPrint(formula, stream);
+    fclose(stream);
+    return buffer;
+}
+
+
 size_t FormulaCancelMoves(Formula* formula) {
     int* begin = formula->move;
     int* end = begin + formula->length;
