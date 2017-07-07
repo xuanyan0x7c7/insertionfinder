@@ -3,11 +3,12 @@ AC_INIT([insertionfinder], [0.1], [xuanyan@xuanyan.ws])
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 AM_PROG_AR
 
-AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_RANLIB
 
 AC_CHECK_HEADERS([getopt.h regex.h])
 AC_CHECK_FUNCS([strdup])
+AC_CHECK_FUNCS([open_memstream])
 
 AH_TEMPLATE([PREFIX], ["Program file prefix"])
 AM_CONDITIONAL([PREFIX_DEFINED], [test $prefix = NONE])
