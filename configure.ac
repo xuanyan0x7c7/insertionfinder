@@ -6,10 +6,6 @@ AM_PROG_AR
 AC_PROG_CC_C99
 AC_PROG_RANLIB
 
-AC_CHECK_HEADERS([getopt.h regex.h])
-AC_CHECK_FUNCS([strdup])
-AC_CHECK_FUNCS([open_memstream])
-
 AH_TEMPLATE([PREFIX], ["Program file prefix"])
 AM_CONDITIONAL([PREFIX_DEFINED], [test $prefix = NONE])
 AM_COND_IF(
@@ -17,6 +13,9 @@ AM_COND_IF(
     AC_DEFINE([PREFIX], ["/usr/local"]),
     AC_DEFINE_UNQUOTED([PREFIX], ["$prefix"])
 )
+
+AC_CHECK_HEADERS([getopt.h regex.h pthread.h])
+AC_CHECK_FUNCS([strdup open_memstream])
 
 PKG_CHECK_MODULES([json], [json-glib-1.0])
 
