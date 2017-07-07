@@ -6,4 +6,5 @@ insertionfinder_LDADD = commands/libcommands.a \
 	algorithm/libalgorithm.a \
 	cube/libcube.a \
 	formula/libformula.a \
-	data-structure/libdatastructure.a
+	data-structure/libdatastructure.a \
+	$(json_LIBS)

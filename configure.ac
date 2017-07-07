@@ -18,6 +18,8 @@ AM_COND_IF(
     AC_DEFINE_UNQUOTED([PREFIX], ["$prefix"])
 )
 
+PKG_CHECK_MODULES([json], [json-glib-1.0])
+
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
     Makefile
