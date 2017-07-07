@@ -70,7 +70,7 @@ bool FormulaConstruct(Formula* formula, const char* string) {
         {{"z'", "[f']", "[b]"}, {"URDL", ""}}
     };
 
-    if (!string) {
+    if (!string || string[0] == '\0') {
         formula->length = 0;
         formula->capacity = 64;
         formula->move = (int*)malloc(formula->capacity * sizeof(int));
