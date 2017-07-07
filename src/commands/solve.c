@@ -14,27 +14,43 @@
 
 typedef FinderWorker Worker;
 
+typedef struct SolvingFunctionArgs SolvingFunctionArgs;
+struct SolvingFunctionArgs {
+    Finder* finder;
+    const Formula* skeleton;
+};
+
+typedef void SolvingFunction(
+    SolvingFunctionArgs* args,
+    FinderSolveStatus* return_value
+);
+
 typedef void OutputFunction(
     const Formula*, const Formula*,
     bool, int, int,
-    Finder*
+    Finder*,
+    SolvingFunction*, SolvingFunctionArgs*
 );
 
 
 static FILE* OpenAlgorithmFile(const char* path);
 
+static void Solving(SolvingFunctionArgs* args, FinderSolveStatus* return_value);
+
 static void StandardOutput(
     const Formula* scramble, const Formula* skeleton,
     bool parity,
     int corner_cycles, int edge_cycles,
-    Finder* finder
+    Finder* finder,
+    SolvingFunction* solve, SolvingFunctionArgs* args
 );
 
 static void JSONOutput(
     const Formula* scramble, const Formula* skeleton,
     bool parity,
     int corner_cycles, int edge_cycles,
-    Finder* finder
+    Finder* finder,
+    SolvingFunction* solve, SolvingFunctionArgs* args
 );
 
 static void Solution2JSON(
@@ -153,10 +169,12 @@ bool Solve(const CliParser* parsed_args) {
         Finder finder;
         FinderConstruct(&finder, map.size, algorithm_list, &scramble);
         print = parsed_args->json ? JSONOutput : StandardOutput;
+        SolvingFunctionArgs args = {&finder, &skeleton};
         print(
             &scramble, &skeleton,
             parity, corner_cycles, edge_cycles,
-            &finder
+            &finder,
+            Solving, &args
         );
 
         FormulaDestroy(&scramble);
@@ -191,11 +209,17 @@ FILE* OpenAlgorithmFile(const char* path) {
 }
 
 
+void Solving(SolvingFunctionArgs* args, FinderSolveStatus* return_value) {
+    *return_value = FinderSolve(args->finder, args->skeleton);
+}
+
+
 void StandardOutput(
     const Formula* scramble, const Formula* skeleton,
     bool parity,
     int corner_cycles, int edge_cycles,
-    Finder* finder
+    Finder* finder,
+    SolvingFunction* solve, SolvingFunctionArgs* args
 ) {
     printf("Scramble: ");
     FormulaPrint(scramble, stdout);
@@ -228,7 +252,9 @@ void StandardOutput(
     }
     printf(".\n");
 
-    switch (FinderSolve(finder, skeleton)) {
+    FinderSolveStatus status;
+    solve(args, &status);
+    switch (status) {
         case SOLVE_SUCCESS:
             if (finder->solution_count == 0) {
                 puts("No solution found.");
@@ -291,10 +317,12 @@ void JSONOutput(
     const Formula* scramble, const Formula* skeleton,
     bool parity,
     int corner_cycles, int edge_cycles,
-    Finder* finder
+    Finder* finder,
+    SolvingFunction* solve, SolvingFunctionArgs* args
 ) {
     if (!parity) {
-        FinderSolve(finder, skeleton);
+        FinderSolveStatus status;
+        solve(args, &status);
     }
 
     JsonObject* object = json_object_new();
