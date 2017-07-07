@@ -132,32 +132,26 @@ void JSONOutput(
     const Formula* scramble, const Formula* skeleton,
     bool parity, int corner_cycles, int edge_cycles
 ) {
-    JsonBuilder* builder = json_builder_new();
-    json_builder_begin_object(builder);
-    json_builder_set_member_name(builder, "scramble");
+    JsonObject* object = json_object_new();
+
     char* scramble_string = Formula2String(scramble);
-    json_builder_add_string_value(builder, scramble_string);
+    json_object_set_string_member(object, "scramble", scramble_string);
     free(scramble_string);
-    json_builder_set_member_name(builder, "skeleton");
+
     char* skeleton_string = Formula2String(skeleton);
-    json_builder_add_string_value(builder, skeleton_string);
+    json_object_set_string_member(object, "skeleton", skeleton_string);
     free(skeleton_string);
-    json_builder_set_member_name(builder, "parity");
-    json_builder_add_boolean_value(builder, parity);
+
+    json_object_set_boolean_member(object, "parity", parity);
     if (!parity) {
-        json_builder_set_member_name(builder, "corner_cycle_num");
-        json_builder_add_int_value(builder, corner_cycles);
-        json_builder_set_member_name(builder, "edge_cycle_num");
-        json_builder_add_int_value(builder, edge_cycles);
+        json_object_set_int_member(object, "corner_cycle_num", corner_cycles);
+        json_object_set_int_member(object, "edge_cycle_num", edge_cycles);
     }
-    json_builder_end_object(builder);
-    JsonGenerator* generator = json_generator_new();
-    JsonNode* root = json_builder_get_root(builder);
-    json_generator_set_root(generator, root);
-    gchar* string = json_generator_to_data(generator, NULL);
-    json_node_free(root);
-    g_object_unref(generator);
-    g_object_unref(builder);
-    printf("%s", string);
-    free(string);
+
+    JsonNode* json = json_node_alloc();
+    json_node_init_object(json, object);
+    json_object_unref(object);
+
+    PrintJson(json, stdout);
+    json_node_unref(json);
 }

@@ -12,6 +12,8 @@
 #include "commands.h"
 
 
+typedef FinderWorker Worker;
+
 typedef void OutputFunction(
     const Formula*, const Formula*,
     bool, int, int,
@@ -36,8 +38,8 @@ static void JSONOutput(
 );
 
 static void Solution2JSON(
-    const FinderWorker* solution,
-    JsonBuilder* solution_builder
+    const Worker* solution,
+    JsonArray* solution_array
 );
 
 
@@ -233,7 +235,7 @@ void StandardOutput(
             }
             for (size_t i = 0; i < finder->solution_count; ++i) {
                 printf("\nSolution #%lu:\n", i + 1);
-                const FinderWorker* solution = &finder->solution_list[i];
+                const Worker* solution = &finder->solution_list[i];
                 for (size_t j = 0; j < solution->depth; ++j) {
                     const Insertion* insertion = &solution->solving_step[j];
                     const Formula* skeleton = &insertion->skeleton;
@@ -294,80 +296,65 @@ void JSONOutput(
     if (!parity) {
         FinderSolve(finder, skeleton);
     }
-    JsonBuilder* builder = json_builder_new();
-    json_builder_begin_object(builder);
-    json_builder_set_member_name(builder, "scramble");
+
+    JsonObject* object = json_object_new();
+
     char* scramble_string = Formula2String(scramble);
-    json_builder_add_string_value(builder, scramble_string);
+    json_object_set_string_member(object, "scramble", scramble_string);
     free(scramble_string);
-    json_builder_set_member_name(builder, "scramble_moves");
-    json_builder_add_int_value(builder, scramble->length);
-    json_builder_set_member_name(builder, "skeleton");
+    json_object_set_int_member(object, "scramble_moves", scramble->length);
+
     char* skeleton_string = Formula2String(skeleton);
-    json_builder_add_string_value(builder, skeleton_string);
+    json_object_set_string_member(object, "skeleton", skeleton_string);
     free(skeleton_string);
-    json_builder_set_member_name(builder, "skeleton_moves");
-    json_builder_add_int_value(builder, skeleton->length);
-    json_builder_set_member_name(builder, "parity");
-    json_builder_add_boolean_value(builder, parity);
+    json_object_set_int_member(object, "skeleton_moves", skeleton->length);
+
+    json_object_set_boolean_member(object, "parity", parity);
     if (!parity) {
-        json_builder_set_member_name(builder, "corner_cycle_num");
-        json_builder_add_int_value(builder, corner_cycles);
-        json_builder_set_member_name(builder, "edge_cycle_num");
-        json_builder_add_int_value(builder, edge_cycles);
-        json_builder_set_member_name(builder, "minimum_moves");
+        json_object_set_int_member(object, "corner_cycle_num", corner_cycles);
+        json_object_set_int_member(object, "edge_cycle_num", edge_cycles);
         if (
             finder->solution_count
             || (corner_cycles == 0 && edge_cycles == 0)
         ) {
-            json_builder_add_int_value(builder, finder->fewest_moves);
+            json_object_set_int_member(
+                object,
+                "minimum_moves",
+                finder->fewest_moves
+            );
         } else {
-            json_builder_add_null_value(builder);
+            json_object_set_null_member(object, "minimum_moves");
         }
-        JsonBuilder* solution_builder = json_builder_new();
-        json_builder_begin_array(solution_builder);
+
+        JsonArray* solution_array = json_array_new();
         for (size_t i = 0; i < finder->solution_count; ++i) {
-            Solution2JSON(&finder->solution_list[i], solution_builder);
+            Solution2JSON(&finder->solution_list[i], solution_array);
         }
-        json_builder_end_array(solution_builder);
-        json_builder_set_member_name(builder, "solution");
-        json_builder_add_value(
-            builder,
-            json_builder_get_root(solution_builder)
-        );
-        g_object_unref(solution_builder);
+        json_object_set_array_member(object, "solution", solution_array);
     }
-    json_builder_end_object(builder);
-    JsonGenerator* generator = json_generator_new();
-    JsonNode* root = json_builder_get_root(builder);
-    json_generator_set_root(generator, root);
-    gchar* string = json_generator_to_data(generator, NULL);
-    json_node_free(root);
-    g_object_unref(generator);
-    g_object_unref(builder);
-    printf("%s", string);
-    free(string);
+
+    JsonNode* json = json_node_alloc();
+    json_node_init_object(json, object);
+    json_object_unref(object);
+
+    PrintJson(json, stdout);
+    json_node_unref(json);
 }
 
 
-void Solution2JSON(
-    const FinderWorker* solution,
-    JsonBuilder* solution_builder
-) {
-    JsonBuilder* builder = json_builder_new();
-    json_builder_begin_object(builder);
-    json_builder_set_member_name(builder, "cancellation");
-    json_builder_add_int_value(builder, solution->cancellation);
+void Solution2JSON(const Worker* solution, JsonArray* solution_array) {
+    JsonObject* object = json_object_new();
 
-    JsonBuilder* solving_step_list_builder = json_builder_new();
-    json_builder_begin_array(solving_step_list_builder);
+    json_object_set_int_member(object, "cancellation", solution->cancellation);
+
+    JsonArray* solving_step_array = json_array_new();
+
     for (size_t j = 0; j < solution->depth; ++j) {
         const Insertion* insertion = &solution->solving_step[j];
         const Formula* skeleton = &insertion->skeleton;
         size_t insert_place = insertion->insert_place;
 
-        JsonBuilder* solving_step_builder = json_builder_new();
-        json_builder_begin_object(solving_step_builder);
+        JsonObject* solving_step_object = json_object_new();
 
         char* skeleton_string;
         size_t temp_size;
@@ -386,35 +373,24 @@ void Solution2JSON(
             );
         }
         fclose(skeleton_stream);
-        json_builder_set_member_name(solving_step_builder, "skeleton");
-        json_builder_add_string_value(solving_step_builder, skeleton_string);
+        json_object_set_string_member(
+            solving_step_object,
+            "skeleton",
+            skeleton_string
+        );
         free(skeleton_string);
 
         char* insertion_string = Formula2String(insertion->insertion);
-        json_builder_set_member_name(solving_step_builder, "insertion");
-        json_builder_add_string_value(solving_step_builder, insertion_string);
+        json_object_set_string_member(
+            solving_step_object,
+            "insertion",
+            insertion_string
+        );
         free(insertion_string);
 
-        json_builder_end_object(solving_step_builder);
-        json_builder_add_value(
-            solving_step_list_builder,
-            json_builder_get_root(solving_step_builder)
-        );
-        g_object_unref(solving_step_builder);
+        json_array_add_object_element(solving_step_array, solving_step_object);
     }
 
-    json_builder_end_array(solving_step_list_builder);
-    json_builder_set_member_name(builder, "insertions");
-    json_builder_add_value(
-        builder,
-        json_builder_get_root(solving_step_list_builder)
-    );
-    json_builder_end_object(builder);
-    json_builder_add_value(
-        solution_builder,
-        json_builder_get_root(builder)
-    );
-
-    g_object_unref(solving_step_list_builder);
-    g_object_unref(builder);
+    json_object_set_array_member(object, "insertions", solving_step_array);
+    json_array_add_object_element(solution_array, object);
 }

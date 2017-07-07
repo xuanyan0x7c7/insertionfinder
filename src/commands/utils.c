@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <json-glib/json-glib.h>
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
 #include "utils.h"
@@ -77,4 +78,15 @@ void AlgorithmFreeGeneric(void* p) {
     Algorithm* algorithm = (Algorithm*)p;
     AlgorithmDestroy(algorithm);
     free(algorithm);
+}
+
+
+void PrintJson(JsonNode* json, FILE* stream) {
+    JsonGenerator* generator = json_generator_new();
+    json_generator_set_root(generator, json);
+
+    gchar* string = json_generator_to_data(generator, NULL);
+    g_object_unref(generator);
+    fputs(string, stream);
+    g_free(string);
 }
