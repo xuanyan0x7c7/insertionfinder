@@ -14,7 +14,7 @@ AM_COND_IF(
     AC_DEFINE_UNQUOTED([PREFIX], ["$prefix"])
 )
 
-AC_CHECK_HEADERS([getopt.h regex.h pthread.h])
+AC_CHECK_HEADERS([getopt.h pthread.h regex.h unistd.h])
 AC_CHECK_FUNCS([strdup open_memstream])
 
 PKG_CHECK_MODULES([json], [json-glib-1.0])

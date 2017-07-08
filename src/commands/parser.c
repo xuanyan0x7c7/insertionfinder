@@ -1,10 +1,11 @@
+#include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <getopt.h>
 #include "parser.h"
 
 
-static const char* short_options = "a:c:f:hsvV";
+static const char* short_options = "a:c:f:hst::vV";
 
 static const struct option long_options[] = {
     {"solve", no_argument, NULL, SHORT_COMMAND_SOLVE},
@@ -16,8 +17,11 @@ static const struct option long_options[] = {
     {"algfile", required_argument, NULL, SHORT_PARAMETER_ALGFILE},
     {"casefile", required_argument, NULL, SHORT_PARAMETER_CASEFILE},
     {"file", required_argument, NULL, SHORT_PARAMETER_FILE},
+    {"threads", optional_argument, NULL, SHORT_PARAMETER_THREADS},
     {NULL, 0, NULL, 0}
 };
+
+static void ParseThreadArgs(CliParser* parsed_args);
 
 
 CliParser Parse(int argc, char** argv) {
@@ -32,6 +36,8 @@ CliParser Parse(int argc, char** argv) {
     );
     parsed_args.file_count = 0;
     parsed_args.file_list = (const char**)malloc(argc * sizeof(const char*));
+    parsed_args.max_threads = 1;
+
     while (true) {
         int option_index;
         int c = getopt_long(
@@ -70,6 +76,9 @@ CliParser Parse(int argc, char** argv) {
                             parsed_args.file_count++
                         ] = optarg;
                     break;
+                    case PARAMETER_THREADS:
+                        ParseThreadArgs(&parsed_args);
+                        break;
                 }
                 break;
             case SHORT_COMMAND_SOLVE:
@@ -95,7 +104,23 @@ CliParser Parse(int argc, char** argv) {
             case SHORT_PARAMETER_FILE:
                 parsed_args.file_list[parsed_args.file_count++] = optarg;
                 break;
+            case SHORT_PARAMETER_THREADS:
+                ParseThreadArgs(&parsed_args);
+                break;
         }
     }
     return parsed_args;
+}
+
+
+void ParseThreadArgs(CliParser* parsed_args) {
+    if (optarg) {
+        char* end;
+        long threads = strtol(optarg, &end, 10);
+        if (threads > 0 && threads < LONG_MAX) {
+            parsed_args->max_threads = threads;
+        }
+    } else {
+        parsed_args->max_threads = ULONG_MAX;
+    }
 }

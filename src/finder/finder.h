@@ -1,5 +1,6 @@
 #pragma once
 #include <stddef.h>
+#include <pthread.h>
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
 #include "../formula/formula.h"
@@ -31,6 +32,7 @@ struct Finder {
     size_t solution_count;
     size_t solution_capacity;
     FinderWorker* solution_list;
+    pthread_mutex_t mutex;
 };
 
 struct FinderWorker {
@@ -55,7 +57,11 @@ void FinderConstruct(
 );
 void FinderDestroy(Finder* finder);
 
-FinderSolveStatus FinderSolve(Finder* finder, const Formula* skeleton);
+FinderSolveStatus FinderSolve(
+    Finder* finder,
+    const Formula* skeleton,
+    size_t max_threads
+);
 
 void FinderWorkerConstruct(
     FinderWorker* worker,

@@ -11,6 +11,7 @@ struct CliParser {
     const char** casefile_list;
     size_t file_count;
     const char** file_list;
+    size_t max_threads;
 };
 
 enum {
@@ -23,6 +24,7 @@ enum {
     PARAMETER_ALGFILE,
     PARAMETER_CASEFILE,
     PARAMETER_FILE,
+    PARAMETER_THREADS
 };
 
 enum {
@@ -32,7 +34,8 @@ enum {
     SHORT_COMMAND_VERSION = 'V',
     SHORT_PARAMETER_ALGFILE = 'a',
     SHORT_PARAMETER_CASEFILE = 'c',
-    SHORT_PARAMETER_FILE = 'f'
+    SHORT_PARAMETER_FILE = 'f',
+    SHORT_PARAMETER_THREADS = 't'
 };
 
 CliParser Parse(int argc, char** argv);

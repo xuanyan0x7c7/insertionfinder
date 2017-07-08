@@ -18,6 +18,7 @@ typedef struct SolvingFunctionArgs SolvingFunctionArgs;
 struct SolvingFunctionArgs {
     Finder* finder;
     const Formula* skeleton;
+    size_t max_threads;
 };
 
 typedef void SolvingFunction(
@@ -169,7 +170,11 @@ bool Solve(const CliParser* parsed_args) {
         Finder finder;
         FinderConstruct(&finder, map.size, algorithm_list, &scramble);
         print = parsed_args->json ? JSONOutput : StandardOutput;
-        SolvingFunctionArgs args = {&finder, &skeleton};
+        SolvingFunctionArgs args = {
+            .finder = &finder,
+            .skeleton = &skeleton,
+            .max_threads = parsed_args->max_threads
+        };
         print(
             &scramble, &skeleton,
             parity, corner_cycles, edge_cycles,
@@ -210,7 +215,11 @@ FILE* OpenAlgorithmFile(const char* path) {
 
 
 void Solving(SolvingFunctionArgs* args, FinderSolveStatus* return_value) {
-    *return_value = FinderSolve(args->finder, args->skeleton);
+    *return_value = FinderSolve(
+        args->finder,
+        args->skeleton,
+        args->max_threads
+    );
 }
 
 
