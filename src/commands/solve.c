@@ -204,8 +204,10 @@ FILE* OpenAlgorithmFile(const char* path) {
     if (file) {
         return file;
     }
-    char shared_path[strlen(ALGORITHMSDIR) + strlen(path) + 6];
-    strcpy(shared_path, ALGORITHMSDIR);
+    char shared_path[
+        strlen(ALGORITHMSDIR "/") + strlen(path) + strlen(".algs") + 1
+    ];
+    strcpy(shared_path, ALGORITHMSDIR "/");
     strcat(shared_path, path);
     strcat(shared_path, ".algs");
     return fopen(shared_path, "rb");
