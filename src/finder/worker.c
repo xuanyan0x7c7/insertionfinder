@@ -1,5 +1,6 @@
 #include <limits.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
@@ -21,7 +22,7 @@ static void TryInsertion(
 );
 static void TryLastInsertion(Worker* worker, size_t insert_place, int index);
 
-static void PushInsertion(Worker* worker, const Formula* inserted);
+static void PushInsertion(Worker* worker, const Formula* insert_result);
 static void PopInsertion(Worker* worker);
 
 static void SolutionFound(
@@ -327,9 +328,11 @@ void TryInsertion(
                     insertion->insertion,
                     &formula
                 );
-                if (!NotSearched(skeleton, insert_place, new_begin, swapped)) {
-                    continue;
-                } else if (!ContinueSearching(worker, &formula)) {
+                if (
+                    !NotSearched(skeleton, insert_place, new_begin, swapped)
+                    || !ContinueSearching(worker, &formula)
+                ) {
+                    FormulaDestroy(&formula);
                     continue;
                 }
                 insertion->insert_place = insert_place;
@@ -388,7 +391,7 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
 }
 
 
-void PushInsertion(Worker* worker, const Formula* inserted) {
+void PushInsertion(Worker* worker, const Formula* insert_result) {
     if (++worker->depth == worker->solving_step_capacity) {
         worker->solving_step = (Insertion*)realloc(
             worker->solving_step,
@@ -396,10 +399,8 @@ void PushInsertion(Worker* worker, const Formula* inserted) {
         );
     }
     Formula* formula = &worker->solving_step[worker->depth].skeleton;
-    if (inserted) {
-        formula->length = inserted->length;
-        formula->capacity = inserted->capacity;
-        formula->move = inserted->move;
+    if (insert_result) {
+        memcpy(formula, insert_result, sizeof(Formula));
     } else {
         const Insertion* previous = &worker->solving_step[worker->depth - 1];
         FormulaInsert(
