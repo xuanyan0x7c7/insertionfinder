@@ -204,10 +204,8 @@ FILE* OpenAlgorithmFile(const char* path) {
     if (file) {
         return file;
     }
-    static const char* prefix = PREFIX "/share/"
-        PACKAGE_NAME "/" PACKAGE_VERSION "/algorithms/";
-    char shared_path[strlen(prefix) + strlen(path) + 6];
-    strcpy(shared_path, prefix);
+    char shared_path[strlen(ALGORITHMSDIR) + strlen(path) + 6];
+    strcpy(shared_path, ALGORITHMSDIR);
     strcat(shared_path, path);
     strcat(shared_path, ".algs");
     return fopen(shared_path, "rb");

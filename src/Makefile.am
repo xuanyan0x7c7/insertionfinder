@@ -9,4 +9,4 @@ insertionfinder_LDADD = commands/libcommands.a \
 	data-structure/libdatastructure.a \
 	$(json_LIBS) \
 	-lm
-insertionfinder_LDFLAGS = -pthread
+AM_LDFLAGS = -pthread
