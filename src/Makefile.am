@@ -10,3 +10,11 @@ insertionfinder_LDADD = commands/libcommands.a \
 	$(json_LIBS) \
 	-lm
 AM_LDFLAGS = -pthread
+
+install-exec-hook:
+	cd $(DESTDIR)$(bindir) \
+		&& mv -f insertionfinder${EXEEXT} insertionfinder-${VERSION}${EXEEXT} \
+		&& $(LN_S) insertionfinder-${VERSION}${EXEEXT} insertionfinder${EXEEXT}
+
+uninstall-local:
+	cd $(DESTDIR)$(bindir) && rm -f insertionfinder-${VERSION}${EXEEXT}

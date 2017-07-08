@@ -9,7 +9,7 @@
 typedef bool Executor(const CliParser* parsed_args);
 
 bool Version(const CliParser* parsed_args) {
-    puts(PACKAGE_STRING);
+    puts("Insertion Finder " VERSION);
     return true;
 }
 

@@ -5,6 +5,7 @@ AM_PROG_AR
 
 AC_PROG_CC_C99
 AC_PROG_RANLIB
+AC_PROG_LN_S
 
 AC_CHECK_HEADERS([getopt.h pthread.h regex.h unistd.h])
 AC_CHECK_FUNCS([strdup open_memstream])

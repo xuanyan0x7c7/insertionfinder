@@ -8,7 +8,7 @@ algorithmsdir = $(datadir)/$(PACKAGE)/$(VERSION)/algorithms
 
 .txt.algs:
 	@echo Generating algorithm file $@
-	@../../src/insertionfinder --generate-algfile -f $^ -a $@
+	@../../src/insertionfinder${EXEEXT} --generate-algfile -f $^ -a $@
 
 clean-local:
 	rm -f *.algs
