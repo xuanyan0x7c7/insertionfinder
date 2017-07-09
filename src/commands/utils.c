@@ -86,7 +86,7 @@ void PrintJson(JsonNode* json, FILE* stream) {
     json_generator_set_root(generator, json);
 
     gchar* string = json_generator_to_data(generator, NULL);
-    g_free(generator);
     fputs(string, stream);
+    g_object_unref(generator);
     g_free(string);
 }

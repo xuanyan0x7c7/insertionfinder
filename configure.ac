@@ -10,7 +10,7 @@ AC_PROG_LN_S
 AC_CHECK_HEADERS([getopt.h pthread.h regex.h unistd.h])
 AC_CHECK_FUNCS([strdup open_memstream])
 
-PKG_CHECK_MODULES([json], [json-glib-1.0])
+PKG_CHECK_MODULES([json], [json-glib-1.0 >= 1.1.2])
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([

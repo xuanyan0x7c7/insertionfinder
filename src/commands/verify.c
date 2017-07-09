@@ -150,8 +150,8 @@ void JSONOutput(
 
     JsonNode* json = json_node_alloc();
     json_node_init_object(json, object);
-    g_free(object);
+    json_object_unref(object);
 
     PrintJson(json, stdout);
-    g_free(json);
+    json_node_unref(json);
 }
