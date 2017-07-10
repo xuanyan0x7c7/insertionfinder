@@ -207,11 +207,10 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
         if (FormulaSwappable(skeleton, insert_place)) {
             FormulaSwapAdjacent(skeleton, insert_place);
             int swapped_index = CubeCornerNext3CycleIndex(
-                index,
-                skeleton->move[insert_place - 1]
-            );
-            swapped_index = CubeCornerNext3CycleIndex(
-                swapped_index,
+                CubeCornerNext3CycleIndex(
+                    index,
+                    skeleton->move[insert_place - 1]
+                ),
                 inverse_move_table[skeleton->move[insert_place]]
             );
             TryLastInsertion(
@@ -259,11 +258,10 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
         if (FormulaSwappable(skeleton, insert_place)) {
             FormulaSwapAdjacent(skeleton, insert_place);
             int swapped_index = CubeEdgeNext3CycleIndex(
-                index,
-                skeleton->move[insert_place - 1]
-            );
-            swapped_index = CubeEdgeNext3CycleIndex(
-                swapped_index,
+                CubeEdgeNext3CycleIndex(
+                    index,
+                    skeleton->move[insert_place - 1]
+                ),
                 inverse_move_table[skeleton->move[insert_place]]
             );
             TryLastInsertion(
@@ -321,11 +319,17 @@ void TryInsertion(
         ) {
             for (size_t j = 0; j < algorithm->size; ++j) {
                 insertion->insertion = &algorithm->formula_list[j];
+                ptrdiff_t moves_to_cancel = skeleton->length
+                    + insertion->insertion->length - finder->fewest_moves;
+                if (finder->fewest_moves == ULONG_MAX || moves_to_cancel < 0) {
+                    moves_to_cancel = 0;
+                }
                 if (!FormulaInsertIsWorthy(
                     skeleton,
                     insert_place,
                     insertion->insertion,
-                    insert_place_mask
+                    insert_place_mask,
+                    moves_to_cancel
                 )) {
                     continue;
                 }
@@ -375,26 +379,18 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
         insertion->insertion = &algorithm->formula_list[i];
         size_t new_length = skeleton->length + insertion->insertion->length;
         ptrdiff_t moves_to_cancel = new_length - finder->fewest_moves;
-        if (finder->fewest_moves == ULONG_MAX || moves_to_cancel <= 0) {
+        if (finder->fewest_moves == ULONG_MAX || moves_to_cancel < 0) {
             UpdateFewestMoves(worker, new_length, false);
-            if (!FormulaInsertIsWorthy(
-                skeleton,
-                insert_place,
-                insertion->insertion,
-                insert_place_mask
-            )) {
-                continue;
-            }
-        } else {
-            if (!FormulaInsertFinalIsWorthy(
-                skeleton,
-                insert_place,
-                insertion->insertion,
-                insert_place_mask,
-                moves_to_cancel
-            )) {
-                continue;
-            }
+            moves_to_cancel = 0;
+        }
+        if (!FormulaInsertIsWorthy(
+            skeleton,
+            insert_place,
+            insertion->insertion,
+            insert_place_mask,
+            moves_to_cancel
+        )) {
+            continue;
         }
         PushInsertion(worker, NULL);
         UpdateFewestMoves(

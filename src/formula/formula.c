@@ -247,7 +247,7 @@ void FormulaPrint(const Formula* formula, FILE* stream) {
     }
     const int* begin = formula->move;
     const int* end = begin + formula->length;
-    fprintf(stream, "%s", twist_str[*begin]);
+    fputs(twist_str[*begin], stream);
     for (const int* p = begin; ++p < end;) {
         fprintf(stream, " %s", twist_str[*p]);
     }
@@ -263,7 +263,7 @@ void FormulaPrintRange(
     }
     const int* p_begin = formula->move + begin;
     const int* p_end = formula->move + end;
-    fprintf(stream, "%s", twist_str[*p_begin]);
+    fputs(twist_str[*p_begin], stream);
     for (const int* p = p_begin; ++p < p_end;) {
         fprintf(stream, " %s", twist_str[*p]);
     }
@@ -344,7 +344,7 @@ void FormulaGetInsertPlaceMask(
     } else {
         mask[1] = MoveMask(move[insert_place]);
         if (
-            formula->length > 1 && insert_place < formula->length - 1
+            insert_place + 1 < formula->length
             && move[insert_place] >> 3 == move[insert_place + 1] >> 3
         ) {
             mask[1] |= MoveMask(move[insert_place + 1]);
@@ -379,21 +379,6 @@ size_t FormulaInsert(
 }
 
 bool FormulaInsertIsWorthy(
-    const Formula* formula,
-    size_t insert_place,
-    const Formula* insertion,
-    const uint32_t* insert_place_mask
-) {
-    if (insert_place_mask[0] & insertion->begin_mask & 0xffffff) {
-        return false;
-    }
-    if (insert_place_mask[1] & insertion->set_up_mask) {
-        return false;
-    }
-    return true;
-}
-
-bool FormulaInsertFinalIsWorthy(
     const Formula* formula,
     size_t insert_place,
     const Formula* insertion,

@@ -68,12 +68,6 @@ bool FormulaInsertIsWorthy(
     const Formula* formula,
     size_t insert_place,
     const Formula* insertion,
-    const uint32_t* insert_place_mask
-);
-bool FormulaInsertFinalIsWorthy(
-    const Formula* formula,
-    size_t insert_place,
-    const Formula* insertion,
     const uint32_t* insert_place_mask,
     size_t moves_to_cancel
 );
