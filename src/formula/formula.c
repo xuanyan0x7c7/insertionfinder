@@ -260,11 +260,11 @@ char* Formula2String(const Formula* formula) {
 size_t FormulaCancelMoves(Formula* formula) {
     int* begin = formula->move;
     int* end = begin + formula->length;
-    int* p = begin;
+    int* p = begin - 1;
     int* needle = end;
 
-    for (int* q = begin; ++q < end;) {
-        if (*p >> 3 != *q >> 3) {
+    for (int* q = begin; q < end; ++q) {
+        if (p < begin || *p >> 3 != *q >> 3) {
             *++p = *q;
         } else if (*p >> 2 != *q >> 2) {
             if (p > begin && *(p - 1) >> 3 == *p >> 3) {
