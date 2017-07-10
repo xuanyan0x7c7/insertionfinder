@@ -26,6 +26,9 @@ struct Formula {
     size_t length;
     size_t capacity;
     int* move;
+    unsigned begin_mask;
+    unsigned end_mask;
+    unsigned set_up_mask;
 };
 
 void FormulaInit();
@@ -48,6 +51,12 @@ char* Formula2String(const Formula* formula);
 
 size_t FormulaCancelMoves(Formula* formula);
 
+void FormulaGetInsertPlaceMask(
+    const Formula* formula,
+    size_t insert_place,
+    unsigned* mask
+);
+
 size_t FormulaInsert(
     const Formula* formula,
     size_t insert_place,
@@ -57,12 +66,14 @@ size_t FormulaInsert(
 bool FormulaInsertIsWorthy(
     const Formula* formula,
     size_t insert_place,
-    const Formula* insertion
+    const Formula* insertion,
+    const unsigned* insert_place_mask
 );
 bool FormulaInsertFinalIsWorthy(
     const Formula* formula,
     size_t insert_place,
     const Formula* insertion,
+    const unsigned* insert_place_mask,
     size_t moves_to_cancel
 );
 

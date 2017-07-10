@@ -286,6 +286,12 @@ void TryInsertion(
     const Finder* finder = worker->finder;
     Insertion* insertion = &worker->solving_step[worker->depth];
     const Formula* skeleton = &insertion->skeleton;
+    unsigned insert_place_mask[2];
+    FormulaGetInsertPlaceMask(
+        &insertion->skeleton,
+        insert_place,
+        insert_place_mask
+    );
     unsigned mask = CubeMask(state);
     for (size_t i = 0; i < finder->algorithm_count; ++i) {
         const Algorithm* algorithm = finder->algorithm_list[i];
@@ -317,7 +323,8 @@ void TryInsertion(
                 if (!FormulaInsertIsWorthy(
                     skeleton,
                     insert_place,
-                    insertion->insertion
+                    insertion->insertion,
+                    insert_place_mask
                 )) {
                     continue;
                 }
@@ -357,6 +364,12 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
     Insertion* insertion = &worker->solving_step[worker->depth];
     const Formula* skeleton = &insertion->skeleton;
     insertion->insert_place = insert_place;
+    unsigned insert_place_mask[2];
+    FormulaGetInsertPlaceMask(
+        &insertion->skeleton,
+        insert_place,
+        insert_place_mask
+    );
     for (size_t i = 0; i < algorithm->size; ++i) {
         insertion->insertion = &algorithm->formula_list[i];
         size_t new_length = skeleton->length + insertion->insertion->length;
@@ -366,7 +379,8 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
             if (!FormulaInsertIsWorthy(
                 skeleton,
                 insert_place,
-                insertion->insertion
+                insertion->insertion,
+                insert_place_mask
             )) {
                 continue;
             }
@@ -375,6 +389,7 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
                 skeleton,
                 insert_place,
                 insertion->insertion,
+                insert_place_mask,
                 moves_to_cancel
             )) {
                 continue;

@@ -33,7 +33,12 @@ void AlgorithmAddFormula(Algorithm* algorithm, const Formula* formula) {
             (algorithm->capacity <<= 1) * sizeof(Formula)
         );
     }
-    FormulaDuplicate(&algorithm->formula_list[algorithm->size++], formula);
+    Formula* new_formula = &algorithm->formula_list[algorithm->size];
+    FormulaDuplicate(new_formula, formula);
+    new_formula->begin_mask = formula->begin_mask;
+    new_formula->end_mask = formula->end_mask;
+    new_formula->set_up_mask = formula->set_up_mask;
+    ++algorithm->size;
 }
 
 void AlgorithmSortFormula(Algorithm* algorithm) {
