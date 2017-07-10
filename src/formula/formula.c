@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,7 +26,7 @@ static regex_t moves_regex;
 static void CycleReplace(char* c, const char* pattern);
 static int FormulaCompareGeneric(const void* p, const void* q);
 
-static unsigned MoveMask(int move);
+static uint32_t MoveMask(int move);
 
 
 void FormulaInit() {
@@ -217,7 +218,7 @@ void FormulaLoad(Formula* formula, FILE* stream) {
         formula->end_mask |= MoveMask(inverse_move_table[move[length - 2]]);
     }
     if (length > 2) {
-        unsigned set_up_mask = (formula->begin_mask & formula->end_mask) >> 24;
+        uint32_t set_up_mask = (formula->begin_mask & formula->end_mask) >> 24;
         formula->set_up_mask = 0;
         for (int i = 0; i < 6; ++i) {
             if (set_up_mask & (1 << i)) {
@@ -324,7 +325,7 @@ size_t FormulaCancelMoves(Formula* formula) {
 void FormulaGetInsertPlaceMask(
     const Formula* formula,
     size_t insert_place,
-    unsigned* mask
+    uint32_t* mask
 ) {
     const int* move = formula->move;
     if (insert_place == 0) {
@@ -381,7 +382,7 @@ bool FormulaInsertIsWorthy(
     const Formula* formula,
     size_t insert_place,
     const Formula* insertion,
-    const unsigned* insert_place_mask
+    const uint32_t* insert_place_mask
 ) {
     if (insert_place_mask[0] & insertion->begin_mask & 0xffffff) {
         return false;
@@ -396,25 +397,25 @@ bool FormulaInsertFinalIsWorthy(
     const Formula* formula,
     size_t insert_place,
     const Formula* insertion,
-    const unsigned* insert_place_mask,
+    const uint32_t* insert_place_mask,
     size_t moves_to_cancel
 ) {
     size_t sum = 0;
-    unsigned begin_mask = insert_place_mask[0] & insertion->begin_mask;
+    uint32_t begin_mask = insert_place_mask[0] & insertion->begin_mask;
     if (begin_mask) {
         if (begin_mask & 0xffffff) {
             return false;
         }
-        unsigned high_mask = begin_mask >>= 24;
+        uint32_t high_mask = begin_mask >>= 24;
         sum += (high_mask & (high_mask - 1)) ? 2 : 1;
     }
-    unsigned end_mask = insert_place_mask[1] & insertion->end_mask;
+    uint32_t end_mask = insert_place_mask[1] & insertion->end_mask;
     if (end_mask) {
         if (end_mask & insertion->set_up_mask) {
             return false;
         }
-        unsigned low_mask = end_mask & 0xffffff;
-        unsigned high_mask = end_mask >> 24;
+        uint32_t low_mask = end_mask & 0xffffff;
+        uint32_t high_mask = end_mask >> 24;
         if (high_mask & (high_mask - 1)) {
             if (low_mask == 0) {
                 sum += 2;
@@ -536,6 +537,6 @@ int FormulaCompareGeneric(const void* p, const void* q) {
     return FormulaCompare((const Formula*)p, (const Formula*)q);
 }
 
-unsigned MoveMask(int move) {
+uint32_t MoveMask(int move) {
     return (1 << move) | (1 << (24 + (move >> 2)));
 }

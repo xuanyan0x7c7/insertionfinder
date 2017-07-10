@@ -1,6 +1,7 @@
 #pragma once
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include "../cube/cube.h"
 #include "../formula/formula.h"
@@ -8,7 +9,7 @@
 typedef struct Algorithm Algorithm;
 struct Algorithm {
     Cube state;
-    unsigned mask;
+    uint32_t mask;
     int corner_cycles;
     int edge_cycles;
     size_t size;

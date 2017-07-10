@@ -1,4 +1,5 @@
 #include <limits.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
@@ -32,7 +33,7 @@ static void SolutionFound(
 );
 static void UpdateFewestMoves(Worker* worker, size_t moves, bool is_solution);
 
-static bool BitCountLessThan2(unsigned n);
+static bool BitCountLessThan2(uint32_t n);
 
 static bool NotSearched(
     const Formula* formula,
@@ -286,13 +287,13 @@ void TryInsertion(
     const Finder* finder = worker->finder;
     Insertion* insertion = &worker->solving_step[worker->depth];
     const Formula* skeleton = &insertion->skeleton;
-    unsigned insert_place_mask[2];
+    uint32_t insert_place_mask[2];
     FormulaGetInsertPlaceMask(
         &insertion->skeleton,
         insert_place,
         insert_place_mask
     );
-    unsigned mask = CubeMask(state);
+    uint32_t mask = CubeMask(state);
     for (size_t i = 0; i < finder->algorithm_count; ++i) {
         const Algorithm* algorithm = finder->algorithm_list[i];
         if (BitCountLessThan2(mask & algorithm->mask)) {
@@ -364,7 +365,7 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
     Insertion* insertion = &worker->solving_step[worker->depth];
     const Formula* skeleton = &insertion->skeleton;
     insertion->insert_place = insert_place;
-    unsigned insert_place_mask[2];
+    uint32_t insert_place_mask[2];
     FormulaGetInsertPlaceMask(
         &insertion->skeleton,
         insert_place,
@@ -504,7 +505,7 @@ void UpdateFewestMoves(Worker* worker, size_t moves, bool is_solution) {
 }
 
 
-bool BitCountLessThan2(unsigned n) {
+bool BitCountLessThan2(uint32_t n) {
     return (n & (n - 1)) == 0;
 }
 
