@@ -1,6 +1,7 @@
 #pragma once
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include "../formula/formula.h"
 
@@ -58,7 +59,7 @@ bool CubeTwistPositive(
 
 void CubeInverseState(const Cube* state, Cube* result);
 
-unsigned CubeMask(const Cube* cube);
+uint32_t CubeMask(const Cube* cube);
 
 bool CubeHasParity(const Cube* cube);
 int CubeCornerCycles(const Cube* cube);

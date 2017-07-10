@@ -1,4 +1,6 @@
+#include <limits.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,6 +26,8 @@ static regex_t moves_regex;
 
 static void CycleReplace(char* c, const char* pattern);
 static int FormulaCompareGeneric(const void* p, const void* q);
+
+static uint32_t MoveMask(int move);
 
 
 void FormulaInit() {
@@ -187,11 +191,11 @@ void FormulaDestroy(Formula* formula) {
 
 void FormulaSave(const Formula* formula, FILE* stream) {
     fwrite(&formula->length, sizeof(size_t), 1, stream);
-    int8_t compressed[formula->length];
+    int8_t move[formula->length];
     for (size_t i = 0; i < formula->length; ++i) {
-        compressed[i] = formula->move[i];
+        move[i] = formula->move[i];
     }
-    fwrite(compressed, sizeof(int8_t), formula->length, stream);
+    fwrite(move, sizeof(int8_t), formula->length, stream);
 }
 
 void FormulaLoad(Formula* formula, FILE* stream) {
@@ -201,10 +205,30 @@ void FormulaLoad(Formula* formula, FILE* stream) {
     formula->capacity = 32;
     while ((formula->capacity <<= 1) < length);
     formula->move = (int*)malloc(formula->capacity * sizeof(int));
-    int8_t compressed[length];
-    fread(compressed, sizeof(int8_t), length, stream);
+    int8_t move[length];
+    fread(move, sizeof(int8_t), length, stream);
     for (size_t i = 0; i < length; ++i) {
-        formula->move[i] = compressed[i];
+        formula->move[i] = move[i];
+    }
+    formula->begin_mask = MoveMask(inverse_move_table[move[0]]);
+    if (length > 1 && move[0] >> 3 == move[1] >> 3) {
+        formula->begin_mask |= MoveMask(inverse_move_table[move[1]]);
+    }
+    formula->end_mask = MoveMask(inverse_move_table[move[length - 1]]);
+    if (length > 1 && move[length - 1] >> 3 == move[length - 2] >> 3) {
+        formula->end_mask |= MoveMask(inverse_move_table[move[length - 2]]);
+    }
+    if (length > 2) {
+        uint32_t set_up_mask = (formula->begin_mask & formula->end_mask) >> 24;
+        formula->set_up_mask = 0;
+        for (int i = 0; i < 6; ++i) {
+            if (set_up_mask & (1 << i)) {
+                formula->set_up_mask |= 0xe << (i << 2);
+            }
+        }
+        formula->set_up_mask &= formula->end_mask;
+    } else {
+        formula->set_up_mask = 0;
     }
 }
 
@@ -224,7 +248,7 @@ void FormulaPrint(const Formula* formula, FILE* stream) {
     }
     const int* begin = formula->move;
     const int* end = begin + formula->length;
-    fprintf(stream, "%s", twist_str[*begin]);
+    fputs(twist_str[*begin], stream);
     for (const int* p = begin; ++p < end;) {
         fprintf(stream, " %s", twist_str[*p]);
     }
@@ -240,7 +264,7 @@ void FormulaPrintRange(
     }
     const int* p_begin = formula->move + begin;
     const int* p_end = formula->move + end;
-    fprintf(stream, "%s", twist_str[*p_begin]);
+    fputs(twist_str[*p_begin], stream);
     for (const int* p = p_begin; ++p < p_end;) {
         fprintf(stream, " %s", twist_str[*p]);
     }
@@ -299,6 +323,37 @@ size_t FormulaCancelMoves(Formula* formula) {
 }
 
 
+void FormulaGetInsertPlaceMask(
+    const Formula* formula,
+    size_t insert_place,
+    uint32_t* mask
+) {
+    const int* move = formula->move;
+    if (insert_place == 0) {
+        mask[0] = 0;
+    } else {
+        mask[0] = MoveMask(move[insert_place - 1]);
+        if (
+            insert_place > 1
+            && move[insert_place - 1] >> 3 == move[insert_place - 2] >> 3
+        ) {
+            mask[0] |= MoveMask(move[insert_place - 2]);
+        }
+    }
+    if (insert_place == formula->length) {
+        mask[1] = 0;
+    } else {
+        mask[1] = MoveMask(move[insert_place]);
+        if (
+            insert_place + 1 < formula->length
+            && move[insert_place] >> 3 == move[insert_place + 1] >> 3
+        ) {
+            mask[1] |= MoveMask(move[insert_place + 1]);
+        }
+    }
+}
+
+
 size_t FormulaInsert(
     const Formula* formula,
     size_t insert_place,
@@ -327,109 +382,42 @@ size_t FormulaInsert(
 bool FormulaInsertIsWorthy(
     const Formula* formula,
     size_t insert_place,
-    const Formula* insertion
-) {
-    if (insert_place == 0) {
-        return true;
-    }
-    size_t l1 = formula->length;
-    size_t l2 = insertion->length;
-    const int* f1 = formula->move;
-    const int* f2 = insertion->move;
-    const int* x = &f1[insert_place - 1];
-    const int* y = f2;
-    if (inverse_move_table[*x] == *y) {
-        return false;
-    }
-    if (*x >> 3 == *y >> 3) {
-        if (l1 > 1 && inverse_move_table[*(x - 1)] == *y) {
-            return false;
-        }
-        if (l2 > 1 && inverse_move_table[*x] == *(y + 1)) {
-            return false;
-        }
-    }
-    if (l2 > 1) {
-        const int* z = &f2[l2 - 1];
-        if (*y >> 2 == *z >> 2 && inverse_move_table[*z] == f1[insert_place]) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool FormulaInsertFinalIsWorthy(
-    const Formula* formula,
-    size_t insert_place,
     const Formula* insertion,
-    size_t moves_to_cancel
+    const uint32_t* insert_place_mask,
+    size_t fewest_moves
 ) {
-    size_t l1 = formula->length;
-    size_t l2 = insertion->length;
-    const int* f1 = formula->move;
-    const int* f2 = insertion->move;
-    size_t sum = 0;
-    if (insert_place > 0) {
-        const int* x = &f1[insert_place - 1];
-        const int* y = f2;
-        if (*x >> 2 == *y >> 2) {
-            if ((*x + *y) & 3) {
-                ++sum;
-                if (insert_place > 1 && *(x - 1) >> 3 == *x >> 3) {
-                    if (l2 == 1) {
-                        sum += 2;
-                    } else if (*(y + 1) >> 3 == *y >> 3) {
-                        if ((*(x - 1) + *(y + 1)) & 3) {
-                            ++sum;
-                        } else {
-                            return false;
-                        }
-                    }
-                }
+    size_t cancellation = 0;
+    uint32_t begin_mask = insert_place_mask[0] & insertion->begin_mask;
+    if (begin_mask) {
+        if (begin_mask & 0xffffff) {
+            return false;
+        }
+        uint32_t high_mask = begin_mask >>= 24;
+        cancellation += (high_mask & (high_mask - 1)) ? 2 : 1;
+    }
+    uint32_t end_mask = insert_place_mask[1] & insertion->end_mask;
+    if (end_mask) {
+        if (end_mask & insertion->set_up_mask) {
+            return false;
+        }
+        uint32_t low_mask = end_mask & 0xffffff;
+        uint32_t high_mask = end_mask >> 24;
+        if (high_mask & (high_mask - 1)) {
+            if (low_mask == 0) {
+                cancellation += 2;
+            } else if (low_mask & (low_mask - 1)) {
+                cancellation += (formula->length - insert_place) << 1;
             } else {
-                return false;
+                cancellation += 3;
             }
-        } else if (*x >> 3 == *y >> 3) {
-            sum += insert_place << 1;
-            if (l1 > 1 && inverse_move_table[*(x - 1)] == *y) {
-                return false;
-            }
-            if (l2 > 1 && inverse_move_table[*x] == *(y + 1)) {
-                return false;
-            }
+        } else if (low_mask) {
+            cancellation += (formula->length - insert_place) << 1;
+        } else {
+            ++cancellation;
         }
     }
-    if (insert_place < l1) {
-        const int* x = &f1[insert_place];
-        const int* y = &f2[l2 - 1];
-        if (*x >> 2 == *y >> 2) {
-            if ((*x + *y) & 3) {
-                ++sum;
-                if (insert_place < l1 - 1 && *(x + 1) >> 3 == *x >> 3) {
-                    if (l2 == 1) {
-                        sum += 2;
-                    } else if (*(y - 1) >> 3 == *y >> 3) {
-                        if ((*(x + 1) + *(y - 1)) & 3) {
-                            ++sum;
-                        } else {
-                            sum += 2;
-                        }
-                    }
-                }
-            } else {
-                const int* z = f2;
-                if (l2 > 1 && *x >> 3 == *z >> 3) {
-                    if (*x >> 2 == *z >> 2 || *x >> 2 == *(z + 1) >> 2) {
-                        return false;
-                    }
-                }
-                sum += (l1 - insert_place) << 1;
-            }
-        } else if (*x >> 3 == *y >> 3) {
-            sum += (l1 - insert_place) << 1;
-        }
-    }
-    return sum >= moves_to_cancel;
+    return fewest_moves == ULONG_MAX
+        || formula->length + insertion->length <= fewest_moves + cancellation;
 }
 
 
@@ -536,4 +524,8 @@ void CycleReplace(char* c, const char* pattern) {
 
 int FormulaCompareGeneric(const void* p, const void* q) {
     return FormulaCompare((const Formula*)p, (const Formula*)q);
+}
+
+uint32_t MoveMask(int move) {
+    return (1 << move) | (1 << (24 + (move >> 2)));
 }

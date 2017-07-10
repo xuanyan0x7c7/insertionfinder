@@ -1,6 +1,7 @@
 #pragma once
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 
 enum {
@@ -26,6 +27,9 @@ struct Formula {
     size_t length;
     size_t capacity;
     int* move;
+    uint32_t begin_mask;
+    uint32_t end_mask;
+    uint32_t set_up_mask;
 };
 
 void FormulaInit();
@@ -48,6 +52,12 @@ char* Formula2String(const Formula* formula);
 
 size_t FormulaCancelMoves(Formula* formula);
 
+void FormulaGetInsertPlaceMask(
+    const Formula* formula,
+    size_t insert_place,
+    uint32_t* mask
+);
+
 size_t FormulaInsert(
     const Formula* formula,
     size_t insert_place,
@@ -57,13 +67,9 @@ size_t FormulaInsert(
 bool FormulaInsertIsWorthy(
     const Formula* formula,
     size_t insert_place,
-    const Formula* insertion
-);
-bool FormulaInsertFinalIsWorthy(
-    const Formula* formula,
-    size_t insert_place,
     const Formula* insertion,
-    size_t moves_to_cancel
+    const uint32_t* insert_place_mask,
+    size_t fewest_moves
 );
 
 bool FormulaSwappable(const Formula* formula, size_t index);

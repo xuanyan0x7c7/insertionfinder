@@ -63,8 +63,8 @@ void CubeInverseState(const Cube* state, Cube* result) {
 }
 
 
-unsigned CubeMask(const Cube* cube) {
-    unsigned mask = 0;
+uint32_t CubeMask(const Cube* cube) {
+    uint32_t mask = 0;
     for (int i = 0; i < 8; ++i) {
         mask = (mask << 1) | (cube->corner[i] != i * 3);
     }

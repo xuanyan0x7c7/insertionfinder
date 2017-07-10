@@ -1,4 +1,5 @@
 #include <limits.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
@@ -30,9 +31,9 @@ static void SolutionFound(
     size_t insert_place,
     const Algorithm* algorithm
 );
-static void UpdateFewestMoves(Worker* worker, size_t moves, bool is_solution);
+static void UpdateFewestMoves(Worker* worker, size_t moves);
 
-static bool BitCountLessThan2(unsigned n);
+static bool BitCountLessThan2(uint32_t n);
 
 static bool NotSearched(
     const Formula* formula,
@@ -206,11 +207,10 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
         if (FormulaSwappable(skeleton, insert_place)) {
             FormulaSwapAdjacent(skeleton, insert_place);
             int swapped_index = CubeCornerNext3CycleIndex(
-                index,
-                skeleton->move[insert_place - 1]
-            );
-            swapped_index = CubeCornerNext3CycleIndex(
-                swapped_index,
+                CubeCornerNext3CycleIndex(
+                    index,
+                    skeleton->move[insert_place - 1]
+                ),
                 inverse_move_table[skeleton->move[insert_place]]
             );
             TryLastInsertion(
@@ -258,11 +258,10 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
         if (FormulaSwappable(skeleton, insert_place)) {
             FormulaSwapAdjacent(skeleton, insert_place);
             int swapped_index = CubeEdgeNext3CycleIndex(
-                index,
-                skeleton->move[insert_place - 1]
-            );
-            swapped_index = CubeEdgeNext3CycleIndex(
-                swapped_index,
+                CubeEdgeNext3CycleIndex(
+                    index,
+                    skeleton->move[insert_place - 1]
+                ),
                 inverse_move_table[skeleton->move[insert_place]]
             );
             TryLastInsertion(
@@ -286,7 +285,13 @@ void TryInsertion(
     const Finder* finder = worker->finder;
     Insertion* insertion = &worker->solving_step[worker->depth];
     const Formula* skeleton = &insertion->skeleton;
-    unsigned mask = CubeMask(state);
+    uint32_t insert_place_mask[2];
+    FormulaGetInsertPlaceMask(
+        &insertion->skeleton,
+        insert_place,
+        insert_place_mask
+    );
+    uint32_t mask = CubeMask(state);
     for (size_t i = 0; i < finder->algorithm_count; ++i) {
         const Algorithm* algorithm = finder->algorithm_list[i];
         if (BitCountLessThan2(mask & algorithm->mask)) {
@@ -317,7 +322,9 @@ void TryInsertion(
                 if (!FormulaInsertIsWorthy(
                     skeleton,
                     insert_place,
-                    insertion->insertion
+                    insertion->insertion,
+                    insert_place_mask,
+                    finder->fewest_moves
                 )) {
                     continue;
                 }
@@ -357,34 +364,27 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
     Insertion* insertion = &worker->solving_step[worker->depth];
     const Formula* skeleton = &insertion->skeleton;
     insertion->insert_place = insert_place;
+    uint32_t insert_place_mask[2];
+    FormulaGetInsertPlaceMask(
+        &insertion->skeleton,
+        insert_place,
+        insert_place_mask
+    );
     for (size_t i = 0; i < algorithm->size; ++i) {
         insertion->insertion = &algorithm->formula_list[i];
-        size_t new_length = skeleton->length + insertion->insertion->length;
-        ptrdiff_t moves_to_cancel = new_length - finder->fewest_moves;
-        if (finder->fewest_moves == ULONG_MAX || moves_to_cancel <= 0) {
-            UpdateFewestMoves(worker, new_length, false);
-            if (!FormulaInsertIsWorthy(
-                skeleton,
-                insert_place,
-                insertion->insertion
-            )) {
-                continue;
-            }
-        } else {
-            if (!FormulaInsertFinalIsWorthy(
-                skeleton,
-                insert_place,
-                insertion->insertion,
-                moves_to_cancel
-            )) {
-                continue;
-            }
+        if (!FormulaInsertIsWorthy(
+            skeleton,
+            insert_place,
+            insertion->insertion,
+            insert_place_mask,
+            finder->fewest_moves
+        )) {
+            continue;
         }
         PushInsertion(worker, NULL);
         UpdateFewestMoves(
             worker,
-            worker->solving_step[worker->depth].skeleton.length,
-            true
+            worker->solving_step[worker->depth].skeleton.length
         );
         PopInsertion(worker);
     }
@@ -429,18 +429,15 @@ void SolutionFound(
         PushInsertion(worker, NULL);
         UpdateFewestMoves(
             worker,
-            worker->solving_step[worker->depth].skeleton.length,
-            true
+            worker->solving_step[worker->depth].skeleton.length
         );
         PopInsertion(worker);
     }
 }
 
-void UpdateFewestMoves(Worker* worker, size_t moves, bool is_solution) {
+void UpdateFewestMoves(Worker* worker, size_t moves) {
     Finder* finder = worker->finder;
     if (moves > finder->fewest_moves) {
-        return;
-    } else if (moves == finder->fewest_moves && !is_solution) {
         return;
     }
     size_t depth = worker->depth;
@@ -456,40 +453,38 @@ void UpdateFewestMoves(Worker* worker, size_t moves, bool is_solution) {
             finder->solution_count = 0;
         }
 
-        if (is_solution) {
-            if (finder->solution_count == finder->solution_capacity) {
-                finder->solution_list = (Worker*)realloc(
-                    finder->solution_list,
-                    (finder->solution_capacity <<= 1) * sizeof(Worker)
-                );
-            }
-            Worker* answer = &finder->solution_list[finder->solution_count++];
-            answer->depth = depth;
-            answer->solving_step_capacity = depth + 1;
-            answer->solving_step = (Insertion*)malloc(
-                worker->solving_step_capacity * sizeof(Insertion)
-            );
-            Insertion* answer_steps = answer->solving_step;
-            for (size_t i = 0; i < depth; ++i) {
-                FormulaDuplicate(
-                    &answer_steps[i].skeleton,
-                    &worker_steps[i].skeleton
-                );
-                answer_steps[i].insert_place = worker_steps[i].insert_place;
-                answer_steps[i].insertion = worker_steps[i].insertion;
-            }
-            FormulaDuplicate(
-                &answer_steps[depth].skeleton,
-                &worker_steps[depth].skeleton
+        if (finder->solution_count == finder->solution_capacity) {
+            finder->solution_list = (Worker*)realloc(
+                finder->solution_list,
+                (finder->solution_capacity <<= 1) * sizeof(Worker)
             );
         }
+        Worker* answer = &finder->solution_list[finder->solution_count++];
+        answer->depth = depth;
+        answer->solving_step_capacity = depth + 1;
+        answer->solving_step = (Insertion*)malloc(
+            worker->solving_step_capacity * sizeof(Insertion)
+        );
+        Insertion* answer_steps = answer->solving_step;
+        for (size_t i = 0; i < depth; ++i) {
+            FormulaDuplicate(
+                &answer_steps[i].skeleton,
+                &worker_steps[i].skeleton
+            );
+            answer_steps[i].insert_place = worker_steps[i].insert_place;
+            answer_steps[i].insertion = worker_steps[i].insertion;
+        }
+        FormulaDuplicate(
+            &answer_steps[depth].skeleton,
+            &worker_steps[depth].skeleton
+        );
     }
 
     pthread_mutex_unlock(&finder->mutex);
 }
 
 
-bool BitCountLessThan2(unsigned n) {
+bool BitCountLessThan2(uint32_t n) {
     return (n & (n - 1)) == 0;
 }
 
