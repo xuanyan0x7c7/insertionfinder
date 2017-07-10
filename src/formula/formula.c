@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -383,16 +384,16 @@ bool FormulaInsertIsWorthy(
     size_t insert_place,
     const Formula* insertion,
     const uint32_t* insert_place_mask,
-    size_t moves_to_cancel
+    size_t fewest_moves
 ) {
-    size_t sum = 0;
+    size_t cancellation = 0;
     uint32_t begin_mask = insert_place_mask[0] & insertion->begin_mask;
     if (begin_mask) {
         if (begin_mask & 0xffffff) {
             return false;
         }
         uint32_t high_mask = begin_mask >>= 24;
-        sum += (high_mask & (high_mask - 1)) ? 2 : 1;
+        cancellation += (high_mask & (high_mask - 1)) ? 2 : 1;
     }
     uint32_t end_mask = insert_place_mask[1] & insertion->end_mask;
     if (end_mask) {
@@ -403,17 +404,20 @@ bool FormulaInsertIsWorthy(
         uint32_t high_mask = end_mask >> 24;
         if (high_mask & (high_mask - 1)) {
             if (low_mask == 0) {
-                sum += 2;
+                cancellation += 2;
             } else if (low_mask & (low_mask - 1)) {
-                sum += (formula->length - insert_place) << 1;
+                cancellation += (formula->length - insert_place) << 1;
             } else {
-                sum += 3;
+                cancellation += 3;
             }
+        } else if (low_mask) {
+            cancellation += (formula->length - insert_place) << 1;
         } else {
-            sum += low_mask ? (formula->length - insert_place) << 1 : 1;
+            ++cancellation;
         }
     }
-    return sum >= moves_to_cancel;
+    return fewest_moves == ULONG_MAX
+        || formula->length + insertion->length <= fewest_moves + cancellation;
 }
 
 

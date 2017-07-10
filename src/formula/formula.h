@@ -69,7 +69,7 @@ bool FormulaInsertIsWorthy(
     size_t insert_place,
     const Formula* insertion,
     const uint32_t* insert_place_mask,
-    size_t moves_to_cancel
+    size_t fewest_moves
 );
 
 bool FormulaSwappable(const Formula* formula, size_t index);

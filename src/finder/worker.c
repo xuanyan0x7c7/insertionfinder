@@ -319,17 +319,12 @@ void TryInsertion(
         ) {
             for (size_t j = 0; j < algorithm->size; ++j) {
                 insertion->insertion = &algorithm->formula_list[j];
-                ptrdiff_t moves_to_cancel = skeleton->length
-                    + insertion->insertion->length - finder->fewest_moves;
-                if (finder->fewest_moves == ULONG_MAX || moves_to_cancel < 0) {
-                    moves_to_cancel = 0;
-                }
                 if (!FormulaInsertIsWorthy(
                     skeleton,
                     insert_place,
                     insertion->insertion,
                     insert_place_mask,
-                    moves_to_cancel
+                    finder->fewest_moves
                 )) {
                     continue;
                 }
@@ -377,17 +372,12 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
     );
     for (size_t i = 0; i < algorithm->size; ++i) {
         insertion->insertion = &algorithm->formula_list[i];
-        ptrdiff_t moves_to_cancel = skeleton->length
-            + insertion->insertion->length - finder->fewest_moves;
-        if (finder->fewest_moves == ULONG_MAX || moves_to_cancel < 0) {
-            moves_to_cancel = 0;
-        }
         if (!FormulaInsertIsWorthy(
             skeleton,
             insert_place,
             insertion->insertion,
             insert_place_mask,
-            moves_to_cancel
+            finder->fewest_moves
         )) {
             continue;
         }
