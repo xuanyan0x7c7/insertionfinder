@@ -31,7 +31,7 @@ static void SolutionFound(
     size_t insert_place,
     const Algorithm* algorithm
 );
-static void UpdateFewestMoves(Worker* worker, size_t moves, bool is_solution);
+static void UpdateFewestMoves(Worker* worker, size_t moves);
 
 static bool BitCountLessThan2(uint32_t n);
 
@@ -377,10 +377,9 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
     );
     for (size_t i = 0; i < algorithm->size; ++i) {
         insertion->insertion = &algorithm->formula_list[i];
-        size_t new_length = skeleton->length + insertion->insertion->length;
-        ptrdiff_t moves_to_cancel = new_length - finder->fewest_moves;
+        ptrdiff_t moves_to_cancel = skeleton->length
+            + insertion->insertion->length - finder->fewest_moves;
         if (finder->fewest_moves == ULONG_MAX || moves_to_cancel < 0) {
-            UpdateFewestMoves(worker, new_length, false);
             moves_to_cancel = 0;
         }
         if (!FormulaInsertIsWorthy(
@@ -395,8 +394,7 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
         PushInsertion(worker, NULL);
         UpdateFewestMoves(
             worker,
-            worker->solving_step[worker->depth].skeleton.length,
-            true
+            worker->solving_step[worker->depth].skeleton.length
         );
         PopInsertion(worker);
     }
@@ -441,18 +439,15 @@ void SolutionFound(
         PushInsertion(worker, NULL);
         UpdateFewestMoves(
             worker,
-            worker->solving_step[worker->depth].skeleton.length,
-            true
+            worker->solving_step[worker->depth].skeleton.length
         );
         PopInsertion(worker);
     }
 }
 
-void UpdateFewestMoves(Worker* worker, size_t moves, bool is_solution) {
+void UpdateFewestMoves(Worker* worker, size_t moves) {
     Finder* finder = worker->finder;
     if (moves > finder->fewest_moves) {
-        return;
-    } else if (moves == finder->fewest_moves && !is_solution) {
         return;
     }
     size_t depth = worker->depth;
@@ -468,33 +463,31 @@ void UpdateFewestMoves(Worker* worker, size_t moves, bool is_solution) {
             finder->solution_count = 0;
         }
 
-        if (is_solution) {
-            if (finder->solution_count == finder->solution_capacity) {
-                finder->solution_list = (Worker*)realloc(
-                    finder->solution_list,
-                    (finder->solution_capacity <<= 1) * sizeof(Worker)
-                );
-            }
-            Worker* answer = &finder->solution_list[finder->solution_count++];
-            answer->depth = depth;
-            answer->solving_step_capacity = depth + 1;
-            answer->solving_step = (Insertion*)malloc(
-                worker->solving_step_capacity * sizeof(Insertion)
-            );
-            Insertion* answer_steps = answer->solving_step;
-            for (size_t i = 0; i < depth; ++i) {
-                FormulaDuplicate(
-                    &answer_steps[i].skeleton,
-                    &worker_steps[i].skeleton
-                );
-                answer_steps[i].insert_place = worker_steps[i].insert_place;
-                answer_steps[i].insertion = worker_steps[i].insertion;
-            }
-            FormulaDuplicate(
-                &answer_steps[depth].skeleton,
-                &worker_steps[depth].skeleton
+        if (finder->solution_count == finder->solution_capacity) {
+            finder->solution_list = (Worker*)realloc(
+                finder->solution_list,
+                (finder->solution_capacity <<= 1) * sizeof(Worker)
             );
         }
+        Worker* answer = &finder->solution_list[finder->solution_count++];
+        answer->depth = depth;
+        answer->solving_step_capacity = depth + 1;
+        answer->solving_step = (Insertion*)malloc(
+            worker->solving_step_capacity * sizeof(Insertion)
+        );
+        Insertion* answer_steps = answer->solving_step;
+        for (size_t i = 0; i < depth; ++i) {
+            FormulaDuplicate(
+                &answer_steps[i].skeleton,
+                &worker_steps[i].skeleton
+            );
+            answer_steps[i].insert_place = worker_steps[i].insert_place;
+            answer_steps[i].insertion = worker_steps[i].insertion;
+        }
+        FormulaDuplicate(
+            &answer_steps[depth].skeleton,
+            &worker_steps[depth].skeleton
+        );
     }
 
     pthread_mutex_unlock(&finder->mutex);
