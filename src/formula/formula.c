@@ -287,15 +287,15 @@ size_t FormulaCancelMoves(Formula* formula) {
     int* p = begin - 1;
     int* needle = end;
 
-    for (int* q = begin; q < end; ++q) {
+    for (const int* q = begin; q < end; ++q) {
         if (p < begin || *p >> 3 != *q >> 3) {
             *++p = *q;
         } else if (*p >> 2 != *q >> 2) {
             if (p > begin && *(p - 1) >> 3 == *p >> 3) {
-                int orientation = (*(p - 1) + *q) & 3;
                 if (needle > p) {
                     needle = p;
                 }
+                int orientation = (*(p - 1) + *q) & 3;
                 if (orientation == 0) {
                     *(p - 1) = *p;
                     --p;
