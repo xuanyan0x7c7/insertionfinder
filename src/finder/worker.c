@@ -440,10 +440,10 @@ void UpdateFewestMoves(Worker* worker, size_t moves) {
     if (moves > finder->fewest_moves) {
         return;
     }
-    size_t depth = worker->depth;
-    const Insertion* worker_steps = worker->solving_step;
     pthread_mutex_lock(&finder->mutex);
 
+    size_t depth = worker->depth;
+    const Insertion* worker_steps = worker->solving_step;
     if (moves <= finder->fewest_moves) {
         if (moves < finder->fewest_moves) {
             finder->fewest_moves = moves;
