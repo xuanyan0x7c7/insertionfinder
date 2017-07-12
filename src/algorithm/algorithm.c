@@ -2,6 +2,7 @@
 #include <string.h>
 #include "../cube/cube.h"
 #include "../formula/formula.h"
+#include "../utils/memory.h"
 #include "algorithm.h"
 
 
@@ -15,9 +16,7 @@ void AlgorithmConstruct(Algorithm* algorithm, const Cube* state) {
     algorithm->edge_cycles = CubeEdgeCycles(state);
     algorithm->size = 0;
     algorithm->capacity = 8;
-    algorithm->formula_list = (Formula*)malloc(
-        algorithm->capacity * sizeof(Formula)
-    );
+    algorithm->formula_list = MALLOC(Formula, algorithm->capacity);
 }
 
 void AlgorithmDestroy(Algorithm* algorithm) {
@@ -50,7 +49,7 @@ void AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
     fread(&size, sizeof(size_t), 1, stream);
     algorithm->size = size;
     algorithm->capacity = size;
-    algorithm->formula_list = (Formula*)malloc(size * sizeof(Formula));
+    algorithm->formula_list = MALLOC(Formula, size);
     Formula* begin = algorithm->formula_list;
     Formula* end = begin + algorithm->size;
     for (Formula* p = begin; p < end; ++p) {

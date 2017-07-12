@@ -6,6 +6,7 @@
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
 #include "../formula/formula.h"
+#include "../utils/memory.h"
 #include "finder.h"
 
 
@@ -52,9 +53,7 @@ void FinderWorkerConstruct(
     worker->finder = finder;
     worker->depth = 0;
     worker->solving_step_capacity = 8;
-    worker->solving_step = (Insertion*)malloc(
-        worker->solving_step_capacity * sizeof(Insertion)
-    );
+    worker->solving_step = MALLOC(Insertion, worker->solving_step_capacity);
     FormulaDuplicate(&worker->solving_step[0].skeleton, skeleton);
 }
 
@@ -393,9 +392,10 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
 
 void PushInsertion(Worker* worker, const Formula* insert_result) {
     if (++worker->depth == worker->solving_step_capacity) {
-        worker->solving_step = (Insertion*)realloc(
+        REALLOC(
             worker->solving_step,
-            (worker->solving_step_capacity <<= 1) * sizeof(Insertion)
+            Insertion,
+            worker->solving_step_capacity <<= 1
         );
     }
     Formula* formula = &worker->solving_step[worker->depth].skeleton;
@@ -454,17 +454,16 @@ void UpdateFewestMoves(Worker* worker, size_t moves) {
         }
 
         if (finder->solution_count == finder->solution_capacity) {
-            finder->solution_list = (Worker*)realloc(
+            REALLOC(
                 finder->solution_list,
-                (finder->solution_capacity <<= 1) * sizeof(Worker)
+                Worker,
+                finder->solution_capacity <<= 1
             );
         }
         Worker* answer = &finder->solution_list[finder->solution_count++];
         answer->depth = depth;
         answer->solving_step_capacity = depth + 1;
-        answer->solving_step = (Insertion*)malloc(
-            worker->solving_step_capacity * sizeof(Insertion)
-        );
+        answer->solving_step = MALLOC(Insertion, worker->solving_step_capacity);
         Insertion* answer_steps = answer->solving_step;
         for (size_t i = 0; i < depth; ++i) {
             FormulaDuplicate(

@@ -5,6 +5,7 @@
 #include <json-glib/json-glib.h>
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
+#include "../utils/memory.h"
 #include "utils.h"
 
 
@@ -20,7 +21,7 @@ char* Trim(const char* string) {
     while (begin != end && isspace(*(end - 1))) {
         --end;
     }
-    char* result = (char*)malloc((end - begin + 1) * sizeof(char));
+    char* result = MALLOC(char, end - begin + 1);
     strncpy(result, begin, end - begin);
     *(result + (end - begin)) = '\0';
     return result;

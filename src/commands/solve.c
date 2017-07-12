@@ -8,6 +8,7 @@
 #include "../data-structure/hash-map.h"
 #include "../finder/finder.h"
 #include "../formula/formula.h"
+#include "../utils/memory.h"
 #include "utils.h"
 #include "commands.h"
 
@@ -80,7 +81,7 @@ bool Solve(const CliParser* parsed_args) {
         size_t size;
         fread(&size, sizeof(size_t), 1, algorithm_file);
         for (size_t j = 0; j < size; ++j) {
-            Algorithm* algorithm = (Algorithm*)malloc(sizeof(Algorithm));
+            Algorithm* algorithm = MALLOC(Algorithm);
             AlgorithmLoad(algorithm, algorithm_file);
             HashMapNode* node;
             if (!HashMapInsert(&map, &algorithm->state, algorithm, &node)) {
@@ -95,9 +96,7 @@ bool Solve(const CliParser* parsed_args) {
         fclose(algorithm_file);
     }
 
-    Algorithm** algorithm_list = (Algorithm**)malloc(
-        map.size * sizeof(Algorithm*)
-    );
+    Algorithm** algorithm_list = MALLOC(Algorithm*, map.size);
     size_t index = 0;
     for (
         HashMapNode* node = HashMapIterStart(&map);

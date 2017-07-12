@@ -6,6 +6,7 @@
 #include <string.h>
 #include <regex.h>
 #include "../data-structure/linked-list.h"
+#include "../utils/memory.h"
 #include "formula.h"
 
 
@@ -77,7 +78,7 @@ bool FormulaConstruct(Formula* formula, const char* string) {
     if (!string || string[0] == '\0') {
         formula->length = 0;
         formula->capacity = 64;
-        formula->move = (int*)malloc(formula->capacity * sizeof(int));
+        formula->move = MALLOC(int, formula->capacity);
         return true;
     }
 
@@ -87,14 +88,14 @@ bool FormulaConstruct(Formula* formula, const char* string) {
     const char* buffer = string;
     regmatch_t pmatch[2];
     while (buffer && regexec(&moves_regex, buffer, 2, pmatch, 0) == 0) {
-        regmatch_t* full_match = &pmatch[0];
+        const regmatch_t* full_match = &pmatch[0];
         if (full_match->rm_so) {
             FormulaDestroy(formula);
             return false;
         }
-        regmatch_t* match = &pmatch[1];
+        const regmatch_t* match = &pmatch[1];
         size_t length = match->rm_eo - match->rm_so;
-        char* move_string = (char*)malloc((length + 1) * sizeof(char));
+        char* move_string = MALLOC(char, length + 1);
         strncpy(move_string, buffer + match->rm_so, length);
         move_string[length] = '\0';
         char* position = strstr(move_string, "2'");
@@ -161,7 +162,7 @@ bool FormulaConstruct(Formula* formula, const char* string) {
 
     formula->length = 0;
     formula->capacity = 64;
-    formula->move = (int*)malloc(formula->capacity * sizeof(int));
+    formula->move = MALLOC(int, formula->capacity);
     for (
         const LinkedListNode* node = procedure.head;
         (node = node->next) != procedure.tail;
@@ -169,10 +170,7 @@ bool FormulaConstruct(Formula* formula, const char* string) {
         for (size_t i = 0; i < ArrayLength(twist_str); ++i) {
             if (strcmp((char*)node->data, twist_str[i]) == 0) {
                 if (formula->length == formula->capacity) {
-                    formula->move = (int*)realloc(
-                        formula->move,
-                        (formula->capacity <<= 1) * sizeof(int)
-                    );
+                    REALLOC(formula->move, int, formula->capacity <<= 1);
                 }
                 formula->move[formula->length++] = i;
                 break;
@@ -204,7 +202,7 @@ void FormulaLoad(Formula* formula, FILE* stream) {
     formula->length = length;
     formula->capacity = 32;
     while ((formula->capacity <<= 1) < length);
-    formula->move = (int*)malloc(formula->capacity * sizeof(int));
+    formula->move = MALLOC(int, formula->capacity);
     int8_t move[length];
     fread(move, sizeof(int8_t), length, stream);
     for (size_t i = 0; i < length; ++i) {
@@ -237,7 +235,7 @@ void FormulaDuplicate(Formula* formula, const Formula* source) {
     formula->length = length;
     formula->capacity = 32;
     while ((formula->capacity <<= 1) < length);
-    formula->move = (int*)malloc(formula->capacity * sizeof(int));
+    formula->move = MALLOC(int, formula->capacity);
     memcpy(formula->move, source->move, length * sizeof(int));
 }
 
@@ -363,7 +361,7 @@ size_t FormulaInsert(
     result->length = formula->length + insertion->length;
     result->capacity = 32;
     while ((result->capacity <<= 1) < result->length);
-    result->move = (int*)malloc(result->capacity * sizeof(int));
+    result->move = MALLOC(int, result->capacity);
     memcpy(result->move, formula->move, insert_place * sizeof(int));
     memcpy(
         result->move + insert_place,
@@ -470,7 +468,7 @@ size_t FormulaGenerateIsomorphisms(const Formula* formula, Formula* result) {
         result[i].length = length;
         result[i].capacity = 32;
         while ((result[i].capacity <<= 1) < length);
-        result[i].move = (int*)malloc(result[i].capacity * sizeof(int));
+        result[i].move = MALLOC(int, result[i].capacity);
     }
     for (size_t i = 0; i < 24; ++i) {
         int* move_list = result[i].move;

@@ -7,6 +7,7 @@
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
 #include "../formula/formula.h"
+#include "../utils/memory.h"
 #include "finder.h"
 
 
@@ -69,9 +70,7 @@ void FinderConstruct(
     finder->fewest_moves = ULONG_MAX;
     finder->solution_count = 0;
     finder->solution_capacity = 16;
-    finder->solution_list = (Worker*)malloc(
-        finder->solution_capacity * sizeof(Worker)
-    );
+    finder->solution_list = MALLOC(Worker, finder->solution_capacity);
 
     pthread_mutex_init(&finder->mutex, NULL);
 }
