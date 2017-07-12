@@ -60,7 +60,7 @@ static const int edge_twist_table[][12] = {
 };
 
 
-void CubeTwist(Cube* cube, int move, bool twist_corners, bool twist_edges) {
+void CubeTwistMove(Cube* cube, int move, bool twist_corners, bool twist_edges) {
     typedef int Array[24];
     if (twist_corners) {
         Array* table = computed_corner_twist_table[move];
@@ -100,7 +100,7 @@ void CubeRangeTwistFormula(
 ) {
     if (reversed) {
         for (size_t i = end; i > begin; --i) {
-            CubeTwist(
+            CubeTwistMove(
                 cube,
                 inverse_move_table[formula->move[i - 1]],
                 twist_corners, twist_edges
@@ -108,7 +108,7 @@ void CubeRangeTwistFormula(
         }
     } else {
         for (size_t i = begin; i < end; ++i) {
-            CubeTwist(cube, formula->move[i], twist_corners, twist_edges);
+            CubeTwistMove(cube, formula->move[i], twist_corners, twist_edges);
         }
     }
 }
@@ -136,7 +136,7 @@ void CubeTwistCube(
 }
 
 
-void CubeTwistBefore(
+void CubeTwistMoveBefore(
     Cube* cube,
     int move,
     bool twist_corners, bool twist_edges

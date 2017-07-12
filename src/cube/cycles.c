@@ -153,7 +153,7 @@ void GenerateCornerCycleTable(int table[][24]) {
                         8 * sizeof(int)
                     );
                     CubeTwistCube(&new_cube, &cube, true, false);
-                    CubeTwist(&new_cube, j, true, false);
+                    CubeTwistMove(&new_cube, j, true, false);
                     table[i][j] = CubeCorner3CycleIndex(&new_cube);
                 } else {
                     table[i][j] = i;
@@ -180,7 +180,7 @@ void GenerateEdgeCycleTable(int table[][24]) {
                         12 * sizeof(int)
                     );
                     CubeTwistCube(&new_cube, &cube, false, true);
-                    CubeTwist(&new_cube, j, false, true);
+                    CubeTwistMove(&new_cube, j, false, true);
                     table[i][j] = CubeEdge3CycleIndex(&new_cube);
                 } else {
                     table[i][j] = i;

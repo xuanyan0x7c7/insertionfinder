@@ -107,12 +107,16 @@ void FinderWorkerSearch(
             );
         } else {
             int move = skeleton->move[insert_place - 1];
-            CubeTwistBefore(
+            CubeTwistMoveBefore(
                 &state,
                 inverse_move_table[move],
                 finder->change_corner, finder->change_edge
             );
-            CubeTwist(&state, move, finder->change_corner, finder->change_edge);
+            CubeTwistMove(
+                &state,
+                move,
+                finder->change_corner, finder->change_edge
+            );
         }
         TryInsertion(
             worker,
@@ -129,12 +133,12 @@ void FinderWorkerSearch(
                 skeleton->move[insert_place]
             };
             Cube swapped_state = identity_cube;
-            CubeTwist(
+            CubeTwistMove(
                 &swapped_state,
                 moves[1],
                 finder->change_corner, finder->change_edge
             );
-            CubeTwist(
+            CubeTwistMove(
                 &swapped_state,
                 inverse_move_table[moves[0]],
                 finder->change_corner, finder->change_edge
@@ -144,12 +148,12 @@ void FinderWorkerSearch(
                 &state,
                 finder->change_corner, finder->change_edge
             );
-            CubeTwist(
+            CubeTwistMove(
                 &swapped_state,
                 moves[0],
                 finder->change_corner, finder->change_edge
             );
-            CubeTwist(
+            CubeTwistMove(
                 &swapped_state,
                 inverse_move_table[moves[1]],
                 finder->change_corner, finder->change_edge
