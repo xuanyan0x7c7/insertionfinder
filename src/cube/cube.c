@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../formula/formula.h"
+#include "../utils/io.h"
 #include "cube.h"
 #include "common.h"
 
@@ -38,16 +39,21 @@ void CubeSave(const Cube* cube, FILE* stream) {
     fwrite(edge, sizeof(int8_t), 12, stream);
 }
 
-void CubeLoad(Cube* cube, FILE* stream) {
+bool CubeLoad(Cube* cube, FILE* stream) {
     int8_t corner[8], edge[12];
-    fread(corner, sizeof(int8_t), 8, stream);
-    fread(edge, sizeof(int8_t), 12, stream);
+    if (!SafeRead(corner, sizeof(int8_t), 8, stream)) {
+        return false;
+    }
+    if (!SafeRead(edge, sizeof(int8_t), 12, stream)) {
+        return false;
+    }
     for (int i = 0; i < 8; ++i) {
         cube->corner[i] = corner[i];
     }
     for (int i = 0; i < 12; ++i) {
         cube->edge[i] = edge[i];
     }
+    return true;
 }
 
 

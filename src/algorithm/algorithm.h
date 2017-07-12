@@ -21,7 +21,7 @@ void AlgorithmConstruct(Algorithm* algorithm, const Cube* state);
 void AlgorithmDestroy(Algorithm* algorithm);
 
 void AlgorithmSave(const Algorithm* algorithm, FILE* stream);
-void AlgorithmLoad(Algorithm* algorithm, FILE* stream);
+bool AlgorithmLoad(Algorithm* algorithm, FILE* stream);
 
 bool AlgorithmContainsFormula(
     const Algorithm* algorithm,

@@ -3,6 +3,7 @@
 #include "../cube/cube.h"
 #include "../formula/formula.h"
 #include "../utils/memory.h"
+#include "../utils/io.h"
 #include "algorithm.h"
 
 
@@ -39,22 +40,29 @@ void AlgorithmSave(const Algorithm* algorithm, FILE* stream) {
     }
 }
 
-void AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
+bool AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
     Cube* state = &algorithm->state;
-    CubeLoad(state, stream);
+    if (!CubeLoad(state, stream)) {
+        return false;
+    }
     algorithm->mask = CubeMask(state);
     algorithm->corner_cycles = CubeCornerCycles(state);
     algorithm->edge_cycles = CubeEdgeCycles(state);
     size_t size;
-    fread(&size, sizeof(size_t), 1, stream);
+    if (!SafeRead(&size, sizeof(size_t), 1, stream)) {
+        return false;
+    }
     algorithm->size = size;
     algorithm->capacity = size;
     algorithm->formula_list = MALLOC(Formula, size);
     Formula* begin = algorithm->formula_list;
     Formula* end = begin + algorithm->size;
     for (Formula* p = begin; p < end; ++p) {
-        FormulaLoad(p, stream);
+        if (!FormulaLoad(p, stream)) {
+            return false;
+        }
     }
+    return true;
 }
 
 

@@ -9,6 +9,7 @@
 #include "../finder/finder.h"
 #include "../formula/formula.h"
 #include "../utils/memory.h"
+#include "../utils/io.h"
 #include "utils.h"
 #include "commands.h"
 
@@ -79,10 +80,17 @@ bool Solve(const CliParser* parsed_args) {
             continue;
         }
         size_t size;
-        fread(&size, sizeof(size_t), 1, algorithm_file);
+        if (!SafeRead(&size, sizeof(size_t), 1, algorithm_file)) {
+            fprintf(stderr, "Invalid algorithm file: %s\n", path);
+            continue;
+        }
         for (size_t j = 0; j < size; ++j) {
             Algorithm* algorithm = MALLOC(Algorithm);
-            AlgorithmLoad(algorithm, algorithm_file);
+            if (!AlgorithmLoad(algorithm, algorithm_file)) {
+                fprintf(stderr, "Invalid algorithm file: %s\n", path);
+                free(algorithm);
+                break;
+            }
             HashMapNode* node;
             if (!HashMapInsert(&map, &algorithm->state, algorithm, &node)) {
                 Algorithm* dest = (Algorithm*)node->value;

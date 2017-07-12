@@ -18,7 +18,7 @@ void CubeInit();
 void CubeConstruct(Cube* cube);
 
 void CubeSave(const Cube* cube, FILE* stream);
-void CubeLoad(Cube* cube, FILE* stream);
+bool CubeLoad(Cube* cube, FILE* stream);
 
 void CubeTwist(Cube* cube, int move, bool twist_corners, bool twist_edges);
 void CubeTwistFormula(

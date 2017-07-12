@@ -7,6 +7,7 @@
 #include <regex.h>
 #include "../data-structure/linked-list.h"
 #include "../utils/memory.h"
+#include "../utils/io.h"
 #include "formula.h"
 
 
@@ -196,15 +197,19 @@ void FormulaSave(const Formula* formula, FILE* stream) {
     fwrite(move, sizeof(int8_t), formula->length, stream);
 }
 
-void FormulaLoad(Formula* formula, FILE* stream) {
+bool FormulaLoad(Formula* formula, FILE* stream) {
     size_t length;
-    fread(&length, sizeof(size_t), 1, stream);
+    if (!SafeRead(&length, sizeof(size_t), 1, stream)) {
+        return false;
+    }
     formula->length = length;
     formula->capacity = 32;
     while ((formula->capacity <<= 1) < length);
     formula->move = MALLOC(int, formula->capacity);
     int8_t move[length];
-    fread(move, sizeof(int8_t), length, stream);
+    if (!SafeRead(move, sizeof(int8_t), length, stream)) {
+        return false;
+    }
     for (size_t i = 0; i < length; ++i) {
         formula->move[i] = move[i];
     }
@@ -228,6 +233,7 @@ void FormulaLoad(Formula* formula, FILE* stream) {
     } else {
         formula->set_up_mask = 0;
     }
+    return true;
 }
 
 void FormulaDuplicate(Formula* formula, const Formula* source) {
