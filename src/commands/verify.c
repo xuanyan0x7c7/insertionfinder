@@ -62,19 +62,14 @@ bool Verify(const CliParser* parsed_args) {
             break;
         }
 
-        OutputFunction* print;
-        bool parity;
-        int corner_cycles;
-        int edge_cycles;
-
         Cube cube = identity_cube;
         CubeTwistFormula(&cube, &scramble, true, true, false);
         CubeTwistFormula(&cube, &skeleton, true, true, false);
-        parity = CubeHasParity(&cube);
-        corner_cycles = CubeCornerCycles(&cube);
-        edge_cycles = CubeEdgeCycles(&cube);
+        bool parity = CubeHasParity(&cube);
+        int corner_cycles = CubeCornerCycles(&cube);
+        int edge_cycles = CubeEdgeCycles(&cube);
 
-        print = parsed_args->json ? JSONOutput : StandardOutput;
+        OutputFunction* print = parsed_args->json ? JSONOutput : StandardOutput;
         print(&scramble, &skeleton, parity, corner_cycles, edge_cycles);
 
         if (input != stdin) {

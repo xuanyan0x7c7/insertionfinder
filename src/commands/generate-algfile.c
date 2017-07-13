@@ -51,10 +51,7 @@ bool GenerateAlgfiles(const CliParser* parsed_args) {
                 }
                 Cube cube = identity_cube;
                 CubeTwistFormula(&cube, &formula, true, true, false);
-                if (CubeHasParity(&cube)) {
-                    fprintf(stderr, "Formula has parity: %s\n", string);
-                    break;
-                } else if (CubeMask(&cube) == 0) {
+                if (CubeMask(&cube) == 0) {
                     fprintf(
                         stderr,
                         "Formula does not change the state: %s\n",
