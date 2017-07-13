@@ -291,7 +291,7 @@ Cube ParityCube(int index) {
     int x = (index / 11 / 24) % 24;
     int y = (index / 24) % 11;
     int z = index % 24;
-    if (w != x / 3 && y != z >> 1) {
+    if (w < x / 3 && y < z >> 1) {
         cube.corner[w] = x;
         cube.corner[x / 3] = w * 3 + (24 - x) % 3;
         cube.edge[y] = z;
@@ -305,7 +305,7 @@ Cube Corner3CycleCube(int index) {
     int x = index / 24 / 24;
     int y = (index / 24) % 24;
     int z = index % 24;
-    if (x != y / 3 && x != z / 3 && y / 3 != z / 3) {
+    if (x < y / 3 && x < z / 3 && y / 3 != z / 3) {
         cube.corner[x] = y;
         cube.corner[y / 3] = z;
         cube.corner[z / 3] = x * 3 + (48 - y - z) % 3;
@@ -318,7 +318,7 @@ Cube Edge3CycleCube(int index) {
     int x = index / 24 / 24;
     int y = (index / 24) % 24;
     int z = index % 24;
-    if (x != y >> 1 && x != z >> 1 && y >> 1 != z >> 1) {
+    if (x < y >> 1 && x < z >> 1 && y >> 1 != z >> 1) {
         cube.edge[x] = y;
         cube.edge[y >> 1] = z;
         cube.edge[z >> 1] = (x << 1) | ((y + z) & 1);
