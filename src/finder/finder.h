@@ -1,5 +1,6 @@
 #pragma once
 #include <stddef.h>
+#include <stdint.h>
 #include <pthread.h>
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
@@ -14,6 +15,12 @@ enum FinderSolveStatus {
     SOLVE_FAILURE_EDGE_CYCLE_ALGORITHMS_NEEDED
 };
 typedef enum FinderSolveStatus FinderSolveStatus;
+
+typedef struct FinderSolveResult FinderSolveResult;
+struct FinderSolveResult {
+    FinderSolveStatus status;
+    int64_t duration;
+};
 
 typedef struct Finder Finder;
 typedef struct FinderWorker FinderWorker;
@@ -60,7 +67,7 @@ void FinderConstruct(
 );
 void FinderDestroy(Finder* finder);
 
-FinderSolveStatus FinderSolve(
+FinderSolveResult FinderSolve(
     Finder* finder,
     const Formula* skeleton,
     size_t max_threads

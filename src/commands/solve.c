@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,7 +26,7 @@ struct SolvingFunctionArgs {
 
 typedef void SolvingFunction(
     SolvingFunctionArgs* args,
-    FinderSolveStatus* return_value
+    FinderSolveResult* return_value
 );
 
 typedef void OutputFunction(
@@ -38,7 +39,7 @@ typedef void OutputFunction(
 
 static FILE* OpenAlgorithmFile(const char* path);
 
-static void Solving(SolvingFunctionArgs* args, FinderSolveStatus* return_value);
+static void Solving(SolvingFunctionArgs* args, FinderSolveResult* return_value);
 
 static void StandardOutput(
     const Formula* scramble, const Formula* skeleton,
@@ -213,7 +214,7 @@ FILE* OpenAlgorithmFile(const char* path) {
 }
 
 
-void Solving(SolvingFunctionArgs* args, FinderSolveStatus* return_value) {
+void Solving(SolvingFunctionArgs* args, FinderSolveResult* return_value) {
     *return_value = FinderSolve(
         args->finder,
         args->skeleton,
@@ -264,9 +265,9 @@ void StandardOutput(
         printf(".\n");
     }
 
-    FinderSolveStatus status;
-    solve(args, &status);
-    switch (status) {
+    FinderSolveResult result;
+    solve(args, &result);
+    switch (result.status) {
         case SOLVE_SUCCESS:
             if (finder->solution_count == 0) {
                 puts("No solution found.");
@@ -325,6 +326,7 @@ void StandardOutput(
         default:
             break;
     }
+    printf("Uses %" PRId64 " nanoseconds.\n", result.duration);
 }
 
 
@@ -335,8 +337,8 @@ void JSONOutput(
     Finder* finder,
     SolvingFunction* solve, SolvingFunctionArgs* args
 ) {
-    FinderSolveStatus status;
-    solve(args, &status);
+    FinderSolveResult result;
+    solve(args, &result);
 
     JsonObject* object = json_object_new();
 
@@ -371,6 +373,7 @@ void JSONOutput(
         Solution2JSON(&finder->solution_list[i], solution_array);
     }
     json_object_set_array_member(object, "solution", solution_array);
+    json_object_set_int_member(object, "duration", result.duration);
 
     JsonNode* json = json_node_alloc();
     json_node_init_object(json, object);

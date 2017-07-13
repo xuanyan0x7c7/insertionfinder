@@ -1,7 +1,9 @@
 #include <limits.h>
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <pthread.h>
 #include <unistd.h>
 #include "../algorithm/algorithm.h"
@@ -25,6 +27,12 @@ struct WorkerThread {
     size_t begin;
     size_t end;
 };
+
+static FinderSolveStatus FinderSolveMain(
+    Finder* finder,
+    const Formula* skeleton,
+    size_t max_threads
+);
 
 static void* WorkerThreadStart(void* arg);
 
@@ -99,7 +107,25 @@ void FinderDestroy(Finder* finder) {
 }
 
 
-FinderSolveStatus FinderSolve(
+FinderSolveResult FinderSolve(
+    Finder* finder,
+    const Formula* skeleton,
+    size_t max_threads
+) {
+    FinderSolveResult result;
+    struct timespec time_begin;
+    struct timespec time_end;
+    clock_gettime(CLOCK_MONOTONIC, &time_begin);
+    result.status = FinderSolveMain(finder, skeleton, max_threads);
+    clock_gettime(CLOCK_MONOTONIC, &time_end);
+    result.duration =
+        (time_end.tv_sec - time_begin.tv_sec) * 1000000000ull
+        + (time_end.tv_nsec - time_begin.tv_nsec);
+    return result;
+}
+
+
+FinderSolveStatus FinderSolveMain(
     Finder* finder,
     const Formula* skeleton,
     size_t max_threads
