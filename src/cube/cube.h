@@ -18,9 +18,9 @@ void CubeInit();
 void CubeConstruct(Cube* cube);
 
 void CubeSave(const Cube* cube, FILE* stream);
-void CubeLoad(Cube* cube, FILE* stream);
+bool CubeLoad(Cube* cube, FILE* stream);
 
-void CubeTwist(Cube* cube, int move, bool twist_corners, bool twist_edges);
+void CubeTwistMove(Cube* cube, int move, bool twist_corners, bool twist_edges);
 void CubeTwistFormula(
     Cube* cube,
     const Formula* formula,
@@ -40,7 +40,7 @@ void CubeTwistCube(
     bool twist_corners, bool twist_edges
 );
 
-void CubeTwistBefore(
+void CubeTwistMoveBefore(
     Cube* cube,
     int move,
     bool twist_corners, bool twist_edges
@@ -65,7 +65,9 @@ bool CubeHasParity(const Cube* cube);
 int CubeCornerCycles(const Cube* cube);
 int CubeEdgeCycles(const Cube* cube);
 
+int CubeParityIndex(const Cube* cube);
 int CubeCorner3CycleIndex(const Cube* cube);
 int CubeEdge3CycleIndex(const Cube* cube);
+int CubeParityNextIndex(int index, int move);
 int CubeCornerNext3CycleIndex(int index, int move);
 int CubeEdgeNext3CycleIndex(int index, int move);

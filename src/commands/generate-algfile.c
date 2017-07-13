@@ -3,6 +3,7 @@
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
 #include "../data-structure/hash-map.h"
+#include "../utils/memory.h"
 #include "utils.h"
 #include "commands.h"
 
@@ -50,10 +51,7 @@ bool GenerateAlgfiles(const CliParser* parsed_args) {
                 }
                 Cube cube = identity_cube;
                 CubeTwistFormula(&cube, &formula, true, true, false);
-                if (CubeHasParity(&cube)) {
-                    fprintf(stderr, "Formula has parity: %s\n", string);
-                    break;
-                } else if (CubeMask(&cube) == 0) {
+                if (CubeMask(&cube) == 0) {
                     fprintf(
                         stderr,
                         "Formula does not change the state: %s\n",
@@ -77,7 +75,7 @@ bool GenerateAlgfiles(const CliParser* parsed_args) {
                 );
                 for (size_t i = 0; i < isomorphism_count; ++i) {
                     Formula* formula = &isomorphism_list[i];
-                    Cube* cube = (Cube*)malloc(sizeof(Cube));
+                    Cube* cube = MALLOC(Cube);
                     CubeConstruct(cube);
                     CubeTwistFormula(cube, formula, true, true, false);
                     HashMapNode* node = HashMapFind(&map, cube);
@@ -86,9 +84,7 @@ bool GenerateAlgfiles(const CliParser* parsed_args) {
                         AlgorithmAddFormula(algorithm, formula);
                         free(cube);
                     } else {
-                        Algorithm* algorithm = (Algorithm*)malloc(
-                            sizeof(Algorithm)
-                        );
+                        Algorithm* algorithm = MALLOC(Algorithm);
                         AlgorithmConstruct(algorithm, cube);
                         AlgorithmAddFormula(algorithm, formula);
                         HashMapInsert(&map, cube, algorithm, NULL);
@@ -103,7 +99,7 @@ bool GenerateAlgfiles(const CliParser* parsed_args) {
         fclose(input);
     }
 
-    Algorithm** list = (Algorithm**)malloc(map.size * sizeof(Algorithm*));
+    Algorithm** list = MALLOC(Algorithm*, map.size);
     size_t index = 0;
     for (
         HashMapNode* node = HashMapIterStart(&map);

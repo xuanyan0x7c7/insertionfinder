@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include "../utils/memory.h"
 #include "parser.h"
 
 
@@ -29,13 +30,11 @@ CliParser Parse(int argc, char** argv) {
     parsed_args.command = -1;
     parsed_args.json = false;
     parsed_args.algfile_count = 0;
-    parsed_args.algfile_list = (const char**)malloc(argc * sizeof(const char*));
+    parsed_args.algfile_list = MALLOC(const char*, argc);
     parsed_args.casefile_count = 0;
-    parsed_args.casefile_list = (const char**)malloc(
-        argc * sizeof(const char*)
-    );
+    parsed_args.casefile_list = MALLOC(const char*, argc);
     parsed_args.file_count = 0;
-    parsed_args.file_list = (const char**)malloc(argc * sizeof(const char*));
+    parsed_args.file_list = MALLOC(const char*, argc);
     parsed_args.max_threads = 1;
 
     while (true) {

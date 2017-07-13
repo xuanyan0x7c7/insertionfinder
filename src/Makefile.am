@@ -1,4 +1,4 @@
-SUBDIRS = algorithm commands cube data-structure finder formula
+SUBDIRS = algorithm commands cube data-structure finder formula utils
 bin_PROGRAMS = insertionfinder
 insertionfinder_SOURCES = init.h init.c main.c
 insertionfinder_LDADD = commands/libcommands.a \
@@ -7,6 +7,7 @@ insertionfinder_LDADD = commands/libcommands.a \
 	cube/libcube.a \
 	formula/libformula.a \
 	data-structure/libdatastructure.a \
+	utils/libutils.a \
 	$(json_LIBS) \
 	-lm
 AM_LDFLAGS = -pthread

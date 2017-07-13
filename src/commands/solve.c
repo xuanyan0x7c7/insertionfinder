@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +9,8 @@
 #include "../data-structure/hash-map.h"
 #include "../finder/finder.h"
 #include "../formula/formula.h"
+#include "../utils/memory.h"
+#include "../utils/io.h"
 #include "utils.h"
 #include "commands.h"
 
@@ -23,7 +26,7 @@ struct SolvingFunctionArgs {
 
 typedef void SolvingFunction(
     SolvingFunctionArgs* args,
-    FinderSolveStatus* return_value
+    FinderSolveResult* return_value
 );
 
 typedef void OutputFunction(
@@ -36,7 +39,7 @@ typedef void OutputFunction(
 
 static FILE* OpenAlgorithmFile(const char* path);
 
-static void Solving(SolvingFunctionArgs* args, FinderSolveStatus* return_value);
+static void Solving(SolvingFunctionArgs* args, FinderSolveResult* return_value);
 
 static void StandardOutput(
     const Formula* scramble, const Formula* skeleton,
@@ -54,10 +57,7 @@ static void JSONOutput(
     SolvingFunction* solve, SolvingFunctionArgs* args
 );
 
-static void Solution2JSON(
-    const Worker* solution,
-    JsonArray* solution_array
-);
+static void Solution2JSON(const Worker* solution, JsonArray* solution_array);
 
 
 bool Solve(const CliParser* parsed_args) {
@@ -78,10 +78,17 @@ bool Solve(const CliParser* parsed_args) {
             continue;
         }
         size_t size;
-        fread(&size, sizeof(size_t), 1, algorithm_file);
+        if (!SafeRead(&size, sizeof(size_t), 1, algorithm_file)) {
+            fprintf(stderr, "Invalid algorithm file: %s\n", path);
+            continue;
+        }
         for (size_t j = 0; j < size; ++j) {
-            Algorithm* algorithm = (Algorithm*)malloc(sizeof(Algorithm));
-            AlgorithmLoad(algorithm, algorithm_file);
+            Algorithm* algorithm = MALLOC(Algorithm);
+            if (!AlgorithmLoad(algorithm, algorithm_file)) {
+                fprintf(stderr, "Invalid algorithm file: %s\n", path);
+                free(algorithm);
+                break;
+            }
             HashMapNode* node;
             if (!HashMapInsert(&map, &algorithm->state, algorithm, &node)) {
                 Algorithm* dest = (Algorithm*)node->value;
@@ -95,9 +102,7 @@ bool Solve(const CliParser* parsed_args) {
         fclose(algorithm_file);
     }
 
-    Algorithm** algorithm_list = (Algorithm**)malloc(
-        map.size * sizeof(Algorithm*)
-    );
+    Algorithm** algorithm_list = MALLOC(Algorithm*, map.size);
     size_t index = 0;
     for (
         HashMapNode* node = HashMapIterStart(&map);
@@ -158,23 +163,18 @@ bool Solve(const CliParser* parsed_args) {
         Cube cube = identity_cube;
         CubeTwistFormula(&cube, &scramble, true, true, false);
         CubeTwistFormula(&cube, &skeleton, true, true, false);
-        OutputFunction* print;
         bool parity = CubeHasParity(&cube);
-        int corner_cycles;
-        int edge_cycles;
-        if (!parity) {
-            corner_cycles = CubeCornerCycles(&cube);
-            edge_cycles = CubeEdgeCycles(&cube);
-        }
+        int corner_cycles = CubeCornerCycles(&cube);
+        int edge_cycles = CubeEdgeCycles(&cube);
 
         Finder finder;
         FinderConstruct(&finder, map.size, algorithm_list, &scramble);
-        print = parsed_args->json ? JSONOutput : StandardOutput;
         SolvingFunctionArgs args = {
             .finder = &finder,
             .skeleton = &skeleton,
             .max_threads = parsed_args->max_threads
         };
+        OutputFunction* print = parsed_args->json ? JSONOutput : StandardOutput;
         print(
             &scramble, &skeleton,
             parity, corner_cycles, edge_cycles,
@@ -214,7 +214,7 @@ FILE* OpenAlgorithmFile(const char* path) {
 }
 
 
-void Solving(SolvingFunctionArgs* args, FinderSolveStatus* return_value) {
+void Solving(SolvingFunctionArgs* args, FinderSolveResult* return_value) {
     *return_value = FinderSolve(
         args->finder,
         args->skeleton,
@@ -237,33 +237,37 @@ void StandardOutput(
     FormulaPrint(skeleton, stdout);
     putchar('\n');
 
-    if (parity) {
-        puts("The cube has parity.");
-        return;
-    }
     if (corner_cycles == 0 && edge_cycles == 0) {
-        puts("The cube is solved.");
-        return;
+        if (parity) {
+            puts("The cube has parity with no additional cycles.");
+        } else {
+            puts("The cube is solved.");
+        }
+    } else {
+        if (parity) {
+            printf("The cube has parity, with additional ");
+        } else {
+            printf("The cube has ");
+        }
+        if (corner_cycles == 1) {
+            printf("1 corner-3-cycle");
+        } else if (corner_cycles) {
+            printf("%d corner-3-cycles", corner_cycles);
+        }
+        if (corner_cycles && edge_cycles) {
+            printf(" and ");
+        }
+        if (edge_cycles == 1) {
+            printf("1 edge-3-cycle");
+        } else if (edge_cycles) {
+            printf("%d edge-3-cycles", edge_cycles);
+        }
+        printf(".\n");
     }
-    printf("The cube has ");
-    if (corner_cycles == 1) {
-        printf("1 corner-3-cycle");
-    } else if (corner_cycles) {
-        printf("%d corner-3-cycles", corner_cycles);
-    }
-    if (corner_cycles && edge_cycles) {
-        printf(" and ");
-    }
-    if (edge_cycles == 1) {
-        printf("1 edge-3-cycle");
-    } else if (edge_cycles) {
-        printf("%d edge-3-cycles", edge_cycles);
-    }
-    printf(".\n");
 
-    FinderSolveStatus status;
-    solve(args, &status);
-    switch (status) {
+    FinderSolveResult result;
+    solve(args, &result);
+    switch (result.status) {
         case SOLVE_SUCCESS:
             if (finder->solution_count == 0) {
                 puts("No solution found.");
@@ -310,6 +314,9 @@ void StandardOutput(
                 printf("\n");
             }
             break;
+        case SOLVE_FAILURE_PARITY_ALGORITHMS_NEEDED:
+            puts("Parity algorithms needed.");
+            break;
         case SOLVE_FAILURE_CORNER_CYCLE_ALGORITHMS_NEEDED:
             puts("Corner 3-cycle algorithms needed.");
             break;
@@ -318,6 +325,31 @@ void StandardOutput(
             break;
         default:
             break;
+    }
+    if (result.duration < 1000) {
+        printf("Time usage: %" PRId64 " nanoseconds.\n", result.duration);
+    } else if (result.duration < 1000000) {
+        printf("Time usage: %.3f microseconds.\n", result.duration / 1e3);
+    } else if (result.duration < 1000000000) {
+        printf("Time usage: %.3f milliseconds.\n", result.duration / 1e6);
+    } else if (result.duration < 60 * (int64_t)1000000000) {
+        printf("Time usage: %.3f seconds.\n", result.duration / 1e9);
+    } else if (result.duration < 60 * 60 * (int64_t)1000000000) {
+        printf(
+            "Time usage: %" PRId64 ":%02" PRId64 ".%3" PRId64 ".\n",
+            result.duration / (60 * (int64_t)1000000000),
+            (result.duration / 1000000000) % 60,
+            (result.duration % 1000000000 + 500000) / 1000000
+        );
+    } else {
+        printf(
+            "Time usage: %" PRId64 ":%02" PRId64
+            ":%02" PRId64 ".%3" PRId64 ".\n",
+            result.duration / (60 * 60 * (int64_t)1000000000),
+            (result.duration / (60 * (int64_t)1000000000)) % 60,
+            (result.duration / 1000000000) % 60,
+            (result.duration % 1000000000 + 500000) / 1000000
+        );
     }
 }
 
@@ -329,10 +361,8 @@ void JSONOutput(
     Finder* finder,
     SolvingFunction* solve, SolvingFunctionArgs* args
 ) {
-    if (!parity) {
-        FinderSolveStatus status;
-        solve(args, &status);
-    }
+    FinderSolveResult result;
+    solve(args, &result);
 
     JsonObject* object = json_object_new();
 
@@ -347,28 +377,27 @@ void JSONOutput(
     json_object_set_int_member(object, "skeleton_moves", skeleton->length);
 
     json_object_set_boolean_member(object, "parity", parity);
-    if (!parity) {
-        json_object_set_int_member(object, "corner_cycle_num", corner_cycles);
-        json_object_set_int_member(object, "edge_cycle_num", edge_cycles);
-        if (
-            finder->solution_count
-            || (corner_cycles == 0 && edge_cycles == 0)
-        ) {
-            json_object_set_int_member(
-                object,
-                "minimum_moves",
-                finder->fewest_moves
-            );
-        } else {
-            json_object_set_null_member(object, "minimum_moves");
-        }
-
-        JsonArray* solution_array = json_array_new();
-        for (size_t i = 0; i < finder->solution_count; ++i) {
-            Solution2JSON(&finder->solution_list[i], solution_array);
-        }
-        json_object_set_array_member(object, "solution", solution_array);
+    json_object_set_int_member(object, "corner_cycle_num", corner_cycles);
+    json_object_set_int_member(object, "edge_cycle_num", edge_cycles);
+    if (
+        finder->solution_count
+        || (!parity && corner_cycles == 0 && edge_cycles == 0)
+    ) {
+        json_object_set_int_member(
+            object,
+            "minimum_moves",
+            finder->fewest_moves
+        );
+    } else {
+        json_object_set_null_member(object, "minimum_moves");
     }
+
+    JsonArray* solution_array = json_array_new();
+    for (size_t i = 0; i < finder->solution_count; ++i) {
+        Solution2JSON(&finder->solution_list[i], solution_array);
+    }
+    json_object_set_array_member(object, "solution", solution_array);
+    json_object_set_int_member(object, "duration", result.duration);
 
     JsonNode* json = json_node_alloc();
     json_node_init_object(json, object);

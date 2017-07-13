@@ -38,7 +38,7 @@ bool FormulaConstruct(Formula* formula, const char* string);
 void FormulaDestroy(Formula* formula);
 
 void FormulaSave(const Formula* formula, FILE* stream);
-void FormulaLoad(Formula* formula, FILE* stream);
+bool FormulaLoad(Formula* formula, FILE* stream);
 void FormulaDuplicate(Formula* formula, const Formula* source);
 
 void FormulaPrint(const Formula* formula, FILE* stream);

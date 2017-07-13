@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "../utils/memory.h"
 #include "linked-list.h"
 
 
@@ -9,8 +10,8 @@ static void Noop(void* data) {}
 
 
 void LinkedListConstruct(List* list, Destructor* destroy) {
-    list->head = (Node*)malloc(sizeof(Node));
-    list->tail = (Node*)malloc(sizeof(Node));
+    list->head = MALLOC(Node);
+    list->tail = MALLOC(Node);
     list->head->data = NULL;
     list->head->prev = NULL;
     list->head->next = list->tail;
@@ -34,7 +35,7 @@ void LinkedListDestroy(List* list) {
 
 
 void LinkedListInsertBefore(Node* node, void* data) {
-    Node* new_node = (Node*)malloc(sizeof(Node));
+    Node* new_node = MALLOC(Node);
     new_node->data = data;
     new_node->prev = node->prev;
     new_node->next = node;
@@ -43,7 +44,7 @@ void LinkedListInsertBefore(Node* node, void* data) {
 }
 
 void LinkedListInsertAfter(Node* node, void* data) {
-    Node* new_node = (Node*)malloc(sizeof(Node));
+    Node* new_node = MALLOC(Node);
     new_node->data = data;
     new_node->prev = node;
     new_node->next = node->next;

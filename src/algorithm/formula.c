@@ -3,6 +3,7 @@
 #include <string.h>
 #include "../cube/cube.h"
 #include "../formula/formula.h"
+#include "../utils/memory.h"
 #include "algorithm.h"
 
 
@@ -28,10 +29,7 @@ void AlgorithmAddFormula(Algorithm* algorithm, const Formula* formula) {
         return;
     }
     if (algorithm->size == algorithm->capacity) {
-        algorithm->formula_list = (Formula*)realloc(
-            algorithm->formula_list,
-            (algorithm->capacity <<= 1) * sizeof(Formula)
-        );
+        REALLOC(algorithm->formula_list, Formula, algorithm->capacity <<= 1);
     }
     Formula* new_formula = &algorithm->formula_list[algorithm->size];
     FormulaDuplicate(new_formula, formula);

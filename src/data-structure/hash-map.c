@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include "../utils/memory.h"
 #include "utils.h"
 #include "hash-map.h"
 
@@ -16,7 +17,7 @@ void HashMapConstruct(
 ) {
     map->size = 0;
     map->buckets = 256;
-    map->buffer = (HashMapNode*)malloc(map->buckets * sizeof(HashMapNode));
+    map->buffer = MALLOC(HashMapNode, map->buckets);
     for (size_t i = 0; i < map->buckets; ++i) {
         map->buffer[i].status = NODE_EMPTY;
     }
@@ -69,9 +70,7 @@ bool HashMapInsert(HashMap* map, void* key, void* value, HashMapNode** node) {
     if (map->size == (map->buckets >> 2) * 3) {
         size_t new_buckets = map->buckets << 1;
         size_t buckets_mask = new_buckets - 1;
-        HashMapNode* new_buffer = (HashMapNode*)malloc(
-            new_buckets * sizeof(HashMapNode)
-        );
+        HashMapNode* new_buffer = MALLOC(HashMapNode, new_buckets);
         for (size_t i = 0; i < new_buckets; ++i) {
             new_buffer[i].status = NODE_EMPTY;
         }
@@ -113,9 +112,7 @@ void HashMapRemove(HashMap* map, HashMapNode* node) {
     if (map->size == (map->buckets >> 3) * 3 && map->buckets > 256) {
         size_t new_buckets = map->buckets >> 1;
         size_t buckets_mask = new_buckets - 1;
-        HashMapNode* new_buffer = (HashMapNode*)malloc(
-            new_buckets * sizeof(HashMapNode)
-        );
+        HashMapNode* new_buffer = MALLOC(HashMapNode, new_buckets);
         for (size_t i = 0; i < new_buckets; ++i) {
             new_buffer[i].status = NODE_EMPTY;
         }

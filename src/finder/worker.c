@@ -6,11 +6,13 @@
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
 #include "../formula/formula.h"
+#include "../utils/memory.h"
 #include "finder.h"
 
 
 typedef FinderWorker Worker;
 
+static void SearchLastParity(Worker* worker, size_t begin, size_t end);
 static void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end);
 static void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end);
 
@@ -19,7 +21,7 @@ static void TryInsertion(
     size_t insert_place,
     const Cube* state,
     bool swapped,
-    int corner_cycles, int edge_cycles
+    bool parity, int corner_cycles, int edge_cycles
 );
 static void TryLastInsertion(Worker* worker, size_t insert_place, int index);
 
@@ -52,9 +54,7 @@ void FinderWorkerConstruct(
     worker->finder = finder;
     worker->depth = 0;
     worker->solving_step_capacity = 8;
-    worker->solving_step = (Insertion*)malloc(
-        worker->solving_step_capacity * sizeof(Insertion)
-    );
+    worker->solving_step = MALLOC(Insertion, worker->solving_step_capacity);
     FormulaDuplicate(&worker->solving_step[0].skeleton, skeleton);
 }
 
@@ -70,22 +70,24 @@ void FinderWorkerDestroy(Worker* worker) {
 
 void FinderWorkerSearch(
     Worker* worker,
-    int corner_cycles, int edge_cycles,
+    bool parity, int corner_cycles, int edge_cycles,
     size_t begin, size_t end
 ) {
-    if (corner_cycles == 1 && edge_cycles == 0) {
+    if (parity && corner_cycles == 0 && edge_cycles == 0) {
+        SearchLastParity(worker, begin, end);
+        return;
+    } else if (!parity && corner_cycles == 1 && edge_cycles == 0) {
         SearchLastCornerCycle(worker, begin, end);
         return;
-    } else if (corner_cycles == 0 && edge_cycles == 1) {
+    } else if (!parity && corner_cycles == 0 && edge_cycles == 1) {
         SearchLastEdgeCycle(worker, begin, end);
         return;
     }
 
     const Finder* finder = worker->finder;
-    Insertion* insertion = &worker->solving_step[worker->depth];
-    Formula* skeleton = &insertion->skeleton;
     Cube state = identity_cube;
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
+        Formula* skeleton = &worker->solving_step[worker->depth].skeleton;
         if (insert_place == begin) {
             CubeRangeTwistFormula(
                 &state,
@@ -108,21 +110,26 @@ void FinderWorkerSearch(
             );
         } else {
             int move = skeleton->move[insert_place - 1];
-            CubeTwistBefore(
+            CubeTwistMoveBefore(
                 &state,
                 inverse_move_table[move],
                 finder->change_corner, finder->change_edge
             );
-            CubeTwist(&state, move, finder->change_corner, finder->change_edge);
+            CubeTwistMove(
+                &state,
+                move,
+                finder->change_corner, finder->change_edge
+            );
         }
         TryInsertion(
             worker,
             insert_place,
             &state,
             false,
-            corner_cycles, edge_cycles
+            parity, corner_cycles, edge_cycles
         );
 
+        skeleton = &worker->solving_step[worker->depth].skeleton;
         if (FormulaSwappable(skeleton, insert_place)) {
             FormulaSwapAdjacent(skeleton, insert_place);
             const int moves[2] = {
@@ -130,12 +137,12 @@ void FinderWorkerSearch(
                 skeleton->move[insert_place]
             };
             Cube swapped_state = identity_cube;
-            CubeTwist(
+            CubeTwistMove(
                 &swapped_state,
                 moves[1],
                 finder->change_corner, finder->change_edge
             );
-            CubeTwist(
+            CubeTwistMove(
                 &swapped_state,
                 inverse_move_table[moves[0]],
                 finder->change_corner, finder->change_edge
@@ -145,12 +152,12 @@ void FinderWorkerSearch(
                 &state,
                 finder->change_corner, finder->change_edge
             );
-            CubeTwist(
+            CubeTwistMove(
                 &swapped_state,
                 moves[0],
                 finder->change_corner, finder->change_edge
             );
-            CubeTwist(
+            CubeTwistMove(
                 &swapped_state,
                 inverse_move_table[moves[1]],
                 finder->change_corner, finder->change_edge
@@ -160,19 +167,79 @@ void FinderWorkerSearch(
                 insert_place,
                 &swapped_state,
                 true,
-                corner_cycles, edge_cycles
+                parity, corner_cycles, edge_cycles
             );
-            FormulaSwapAdjacent(skeleton, insert_place);
+            FormulaSwapAdjacent(
+                &worker->solving_step[worker->depth].skeleton,
+                insert_place
+            );
         }
     }
 }
 
 
+void SearchLastParity(Worker* worker, size_t begin, size_t end) {
+    const Finder* finder = worker->finder;
+    for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
+        Formula* skeleton = &worker->solving_step[worker->depth].skeleton;
+        int index;
+        if (insert_place == begin) {
+            Cube state = identity_cube;
+            CubeRangeTwistFormula(
+                &state,
+                skeleton,
+                0, insert_place,
+                true, true,
+                true
+            );
+            CubeTwistCube(&state, &finder->inverse_scramble_cube, true, true);
+            CubeRangeTwistFormula(
+                &state,
+                skeleton,
+                insert_place, skeleton->length,
+                true, true,
+                true
+            );
+            index = CubeParityIndex(&state);
+        } else {
+            index = CubeParityNextIndex(
+                index,
+                skeleton->move[insert_place - 1]
+            );
+        }
+        TryLastInsertion(
+            worker,
+            insert_place,
+            finder->parity_index[index]
+        );
+
+        skeleton = &worker->solving_step[worker->depth].skeleton;
+        if (FormulaSwappable(skeleton, insert_place)) {
+            FormulaSwapAdjacent(skeleton, insert_place);
+            int swapped_index = CubeParityNextIndex(
+                CubeParityNextIndex(
+                    index,
+                    skeleton->move[insert_place - 1]
+                ),
+                inverse_move_table[skeleton->move[insert_place]]
+            );
+            TryLastInsertion(
+                worker,
+                insert_place,
+                finder->parity_index[swapped_index]
+            );
+            FormulaSwapAdjacent(
+                &worker->solving_step[worker->depth].skeleton,
+                insert_place
+            );
+        }
+    }
+}
+
 void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
     const Finder* finder = worker->finder;
-    Insertion* insertion = &worker->solving_step[worker->depth];
-    Formula* skeleton = &insertion->skeleton;
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
+        Formula* skeleton = &worker->solving_step[worker->depth].skeleton;
         int index;
         if (insert_place == begin) {
             Cube state = identity_cube;
@@ -204,6 +271,7 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
             finder->corner_cycle_index[index]
         );
 
+        skeleton = &worker->solving_step[worker->depth].skeleton;
         if (FormulaSwappable(skeleton, insert_place)) {
             FormulaSwapAdjacent(skeleton, insert_place);
             int swapped_index = CubeCornerNext3CycleIndex(
@@ -218,16 +286,18 @@ void SearchLastCornerCycle(Worker* worker, size_t begin, size_t end) {
                 insert_place,
                 finder->corner_cycle_index[swapped_index]
             );
-            FormulaSwapAdjacent(skeleton, insert_place);
+            FormulaSwapAdjacent(
+                &worker->solving_step[worker->depth].skeleton,
+                insert_place
+            );
         }
     }
 }
 
 void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
     const Finder* finder = worker->finder;
-    Insertion* insertion = &worker->solving_step[worker->depth];
-    Formula* skeleton = &insertion->skeleton;
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
+        Formula* skeleton = &worker->solving_step[worker->depth].skeleton;
         int index;
         if (insert_place == begin) {
             Cube state = identity_cube;
@@ -255,6 +325,7 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
         }
         TryLastInsertion(worker, insert_place, finder->edge_cycle_index[index]);
 
+        skeleton = &worker->solving_step[worker->depth].skeleton;
         if (FormulaSwappable(skeleton, insert_place)) {
             FormulaSwapAdjacent(skeleton, insert_place);
             int swapped_index = CubeEdgeNext3CycleIndex(
@@ -269,7 +340,10 @@ void SearchLastEdgeCycle(Worker* worker, size_t begin, size_t end) {
                 insert_place,
                 finder->edge_cycle_index[swapped_index]
             );
-            FormulaSwapAdjacent(skeleton, insert_place);
+            FormulaSwapAdjacent(
+                &worker->solving_step[worker->depth].skeleton,
+                insert_place
+            );
         }
     }
 }
@@ -280,14 +354,13 @@ void TryInsertion(
     size_t insert_place,
     const Cube* state,
     bool swapped,
-    int corner_cycles, int edge_cycles
+    bool parity, int corner_cycles, int edge_cycles
 ) {
     const Finder* finder = worker->finder;
-    Insertion* insertion = &worker->solving_step[worker->depth];
-    const Formula* skeleton = &insertion->skeleton;
+    worker->solving_step[worker->depth].insert_place = insert_place;
     uint32_t insert_place_mask[2];
     FormulaGetInsertPlaceMask(
-        &insertion->skeleton,
+        &worker->solving_step[worker->depth].skeleton,
         insert_place,
         insert_place_mask
     );
@@ -307,17 +380,20 @@ void TryInsertion(
         )) {
             continue;
         }
+        bool parity_new = parity ^ algorithm->parity;
         int corner_cycles_new =
             corner_changed ? CubeCornerCycles(&cube) : corner_cycles;
         int edge_cycles_new =
             edge_changed ? CubeEdgeCycles(&cube) : edge_cycles;
-        if (corner_cycles_new == 0 && edge_cycles_new == 0) {
+        if (!parity_new && corner_cycles_new == 0 && edge_cycles_new == 0) {
             SolutionFound(worker, insert_place, algorithm);
         } else if (
-            corner_cycles_new + edge_cycles_new
-            < corner_cycles + edge_cycles
+            corner_cycles_new + edge_cycles_new + parity_new
+            < corner_cycles + edge_cycles + parity
         ) {
             for (size_t j = 0; j < algorithm->size; ++j) {
+                Insertion* insertion = &worker->solving_step[worker->depth];
+                const Formula* skeleton = &insertion->skeleton;
                 insertion->insertion = &algorithm->formula_list[j];
                 if (!FormulaInsertIsWorthy(
                     skeleton,
@@ -342,11 +418,10 @@ void TryInsertion(
                     FormulaDestroy(&formula);
                     continue;
                 }
-                insertion->insert_place = insert_place;
                 PushInsertion(worker, &formula);
                 FinderWorkerSearch(
                     worker,
-                    corner_cycles_new, edge_cycles_new,
+                    parity_new, corner_cycles_new, edge_cycles_new,
                     new_begin, formula.length
                 );
                 PopInsertion(worker);
@@ -361,16 +436,16 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
     }
     const Finder* finder = worker->finder;
     const Algorithm* algorithm = finder->algorithm_list[index];
-    Insertion* insertion = &worker->solving_step[worker->depth];
-    const Formula* skeleton = &insertion->skeleton;
-    insertion->insert_place = insert_place;
+    worker->solving_step[worker->depth].insert_place = insert_place;
     uint32_t insert_place_mask[2];
     FormulaGetInsertPlaceMask(
-        &insertion->skeleton,
+        &worker->solving_step[worker->depth].skeleton,
         insert_place,
         insert_place_mask
     );
     for (size_t i = 0; i < algorithm->size; ++i) {
+        Insertion* insertion = &worker->solving_step[worker->depth];
+        const Formula* skeleton = &insertion->skeleton;
         insertion->insertion = &algorithm->formula_list[i];
         if (!FormulaInsertIsWorthy(
             skeleton,
@@ -393,9 +468,10 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
 
 void PushInsertion(Worker* worker, const Formula* insert_result) {
     if (++worker->depth == worker->solving_step_capacity) {
-        worker->solving_step = (Insertion*)realloc(
+        REALLOC(
             worker->solving_step,
-            (worker->solving_step_capacity <<= 1) * sizeof(Insertion)
+            Insertion,
+            worker->solving_step_capacity <<= 1
         );
     }
     Formula* formula = &worker->solving_step[worker->depth].skeleton;
@@ -422,10 +498,10 @@ void SolutionFound(
     size_t insert_place,
     const Algorithm* algorithm
 ) {
-    Insertion* insertion = &worker->solving_step[worker->depth];
-    insertion->insert_place = insert_place;
+    worker->solving_step[worker->depth].insert_place = insert_place;
     for (size_t i = 0; i < algorithm->size; ++i) {
-        insertion->insertion = &algorithm->formula_list[i];
+        worker->solving_step[worker->depth].insertion =
+            &algorithm->formula_list[i];
         PushInsertion(worker, NULL);
         UpdateFewestMoves(
             worker,
@@ -440,10 +516,10 @@ void UpdateFewestMoves(Worker* worker, size_t moves) {
     if (moves > finder->fewest_moves) {
         return;
     }
-    size_t depth = worker->depth;
-    const Insertion* worker_steps = worker->solving_step;
     pthread_mutex_lock(&finder->mutex);
 
+    size_t depth = worker->depth;
+    const Insertion* worker_steps = worker->solving_step;
     if (moves <= finder->fewest_moves) {
         if (moves < finder->fewest_moves) {
             finder->fewest_moves = moves;
@@ -454,17 +530,16 @@ void UpdateFewestMoves(Worker* worker, size_t moves) {
         }
 
         if (finder->solution_count == finder->solution_capacity) {
-            finder->solution_list = (Worker*)realloc(
+            REALLOC(
                 finder->solution_list,
-                (finder->solution_capacity <<= 1) * sizeof(Worker)
+                Worker,
+                finder->solution_capacity <<= 1
             );
         }
         Worker* answer = &finder->solution_list[finder->solution_count++];
         answer->depth = depth;
         answer->solving_step_capacity = depth + 1;
-        answer->solving_step = (Insertion*)malloc(
-            worker->solving_step_capacity * sizeof(Insertion)
-        );
+        answer->solving_step = MALLOC(Insertion, worker->solving_step_capacity);
         Insertion* answer_steps = answer->solving_step;
         for (size_t i = 0; i < depth; ++i) {
             FormulaDuplicate(

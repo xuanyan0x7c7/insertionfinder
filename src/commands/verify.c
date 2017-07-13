@@ -62,23 +62,14 @@ bool Verify(const CliParser* parsed_args) {
             break;
         }
 
-        OutputFunction* print;
-        bool parity;
-        int corner_cycles;
-        int edge_cycles;
-
         Cube cube = identity_cube;
         CubeTwistFormula(&cube, &scramble, true, true, false);
         CubeTwistFormula(&cube, &skeleton, true, true, false);
-        if (CubeHasParity(&cube)) {
-            parity = true;
-        } else {
-            parity = false;
-            corner_cycles = CubeCornerCycles(&cube);
-            edge_cycles = CubeEdgeCycles(&cube);
-        }
+        bool parity = CubeHasParity(&cube);
+        int corner_cycles = CubeCornerCycles(&cube);
+        int edge_cycles = CubeEdgeCycles(&cube);
 
-        print = parsed_args->json ? JSONOutput : StandardOutput;
+        OutputFunction* print = parsed_args->json ? JSONOutput : StandardOutput;
         print(&scramble, &skeleton, parity, corner_cycles, edge_cycles);
 
         if (input != stdin) {
@@ -102,14 +93,18 @@ void StandardOutput(
     printf("Skeleton: ");
     FormulaPrint(skeleton, stdout);
     putchar('\n');
-    if (parity) {
-        puts("The cube has parity.");
-        return;
-    }
     if (corner_cycles == 0 && edge_cycles == 0) {
-        puts("The cube is solved.");
+        if (parity) {
+            puts("The cube has parity with no additional cycles.");
+        } else {
+            puts("The cube is solved.");
+        }
     } else {
-        printf("The cube has ");
+        if (parity) {
+            printf("The cube has parity, with additional ");
+        } else {
+            printf("The cube has ");
+        }
         if (corner_cycles == 1) {
             printf("1 corner-3-cycle");
         } else if (corner_cycles) {
@@ -143,10 +138,8 @@ void JSONOutput(
     free(skeleton_string);
 
     json_object_set_boolean_member(object, "parity", parity);
-    if (!parity) {
-        json_object_set_int_member(object, "corner_cycle_num", corner_cycles);
-        json_object_set_int_member(object, "edge_cycle_num", edge_cycles);
-    }
+    json_object_set_int_member(object, "corner_cycle_num", corner_cycles);
+    json_object_set_int_member(object, "edge_cycle_num", edge_cycles);
 
     JsonNode* json = json_node_alloc();
     json_node_init_object(json, object);

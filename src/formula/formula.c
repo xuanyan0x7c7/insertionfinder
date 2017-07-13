@@ -1,4 +1,3 @@
-#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -6,7 +5,10 @@
 #include <string.h>
 #include <regex.h>
 #include "../data-structure/linked-list.h"
+#include "../utils/memory.h"
+#include "../utils/io.h"
 #include "formula.h"
+#include "utils.h"
 
 
 #define ArrayLength(x) sizeof(x) / sizeof(x[0])
@@ -26,8 +28,6 @@ static regex_t moves_regex;
 
 static void CycleReplace(char* c, const char* pattern);
 static int FormulaCompareGeneric(const void* p, const void* q);
-
-static uint32_t MoveMask(int move);
 
 
 void FormulaInit() {
@@ -77,7 +77,7 @@ bool FormulaConstruct(Formula* formula, const char* string) {
     if (!string || string[0] == '\0') {
         formula->length = 0;
         formula->capacity = 64;
-        formula->move = (int*)malloc(formula->capacity * sizeof(int));
+        formula->move = MALLOC(int, formula->capacity);
         return true;
     }
 
@@ -87,14 +87,14 @@ bool FormulaConstruct(Formula* formula, const char* string) {
     const char* buffer = string;
     regmatch_t pmatch[2];
     while (buffer && regexec(&moves_regex, buffer, 2, pmatch, 0) == 0) {
-        regmatch_t* full_match = &pmatch[0];
+        const regmatch_t* full_match = &pmatch[0];
         if (full_match->rm_so) {
             FormulaDestroy(formula);
             return false;
         }
-        regmatch_t* match = &pmatch[1];
+        const regmatch_t* match = &pmatch[1];
         size_t length = match->rm_eo - match->rm_so;
-        char* move_string = (char*)malloc((length + 1) * sizeof(char));
+        char* move_string = MALLOC(char, length + 1);
         strncpy(move_string, buffer + match->rm_so, length);
         move_string[length] = '\0';
         char* position = strstr(move_string, "2'");
@@ -161,7 +161,7 @@ bool FormulaConstruct(Formula* formula, const char* string) {
 
     formula->length = 0;
     formula->capacity = 64;
-    formula->move = (int*)malloc(formula->capacity * sizeof(int));
+    formula->move = MALLOC(int, formula->capacity);
     for (
         const LinkedListNode* node = procedure.head;
         (node = node->next) != procedure.tail;
@@ -169,10 +169,7 @@ bool FormulaConstruct(Formula* formula, const char* string) {
         for (size_t i = 0; i < ArrayLength(twist_str); ++i) {
             if (strcmp((char*)node->data, twist_str[i]) == 0) {
                 if (formula->length == formula->capacity) {
-                    formula->move = (int*)realloc(
-                        formula->move,
-                        (formula->capacity <<= 1) * sizeof(int)
-                    );
+                    REALLOC(formula->move, int, formula->capacity <<= 1);
                 }
                 formula->move[formula->length++] = i;
                 break;
@@ -198,15 +195,19 @@ void FormulaSave(const Formula* formula, FILE* stream) {
     fwrite(move, sizeof(int8_t), formula->length, stream);
 }
 
-void FormulaLoad(Formula* formula, FILE* stream) {
+bool FormulaLoad(Formula* formula, FILE* stream) {
     size_t length;
-    fread(&length, sizeof(size_t), 1, stream);
+    if (!SafeRead(&length, sizeof(size_t), 1, stream)) {
+        return false;
+    }
     formula->length = length;
     formula->capacity = 32;
     while ((formula->capacity <<= 1) < length);
-    formula->move = (int*)malloc(formula->capacity * sizeof(int));
+    formula->move = MALLOC(int, formula->capacity);
     int8_t move[length];
-    fread(move, sizeof(int8_t), length, stream);
+    if (!SafeRead(move, sizeof(int8_t), length, stream)) {
+        return false;
+    }
     for (size_t i = 0; i < length; ++i) {
         formula->move[i] = move[i];
     }
@@ -230,6 +231,7 @@ void FormulaLoad(Formula* formula, FILE* stream) {
     } else {
         formula->set_up_mask = 0;
     }
+    return true;
 }
 
 void FormulaDuplicate(Formula* formula, const Formula* source) {
@@ -237,7 +239,7 @@ void FormulaDuplicate(Formula* formula, const Formula* source) {
     formula->length = length;
     formula->capacity = 32;
     while ((formula->capacity <<= 1) < length);
-    formula->move = (int*)malloc(formula->capacity * sizeof(int));
+    formula->move = MALLOC(int, formula->capacity);
     memcpy(formula->move, source->move, length * sizeof(int));
 }
 
@@ -278,146 +280,6 @@ char* Formula2String(const Formula* formula) {
     FormulaPrint(formula, stream);
     fclose(stream);
     return buffer;
-}
-
-
-size_t FormulaCancelMoves(Formula* formula) {
-    int* begin = formula->move;
-    int* end = begin + formula->length;
-    int* p = begin - 1;
-    int* needle = end;
-
-    for (int* q = begin; q < end; ++q) {
-        if (p < begin || *p >> 3 != *q >> 3) {
-            *++p = *q;
-        } else if (*p >> 2 != *q >> 2) {
-            if (p > begin && *(p - 1) >> 3 == *p >> 3) {
-                int orientation = (*(p - 1) + *q) & 3;
-                if (needle > p) {
-                    needle = p;
-                }
-                if (orientation == 0) {
-                    *(p - 1) = *p;
-                    --p;
-                } else {
-                    *(p - 1) = (*(p - 1) & ~3) | orientation;
-                }
-            } else {
-                *++p = *q;
-            }
-        } else {
-            int orientation = (*p + *q) & 3;
-            if (orientation == 0) {
-                --p;
-            } else {
-                *p = (*p & ~3) | orientation;
-            }
-            if (needle > p + 1) {
-                needle = p + 1;
-            }
-        }
-    }
-
-    formula->length = p + 1 - begin;
-    return needle - begin;
-}
-
-
-void FormulaGetInsertPlaceMask(
-    const Formula* formula,
-    size_t insert_place,
-    uint32_t* mask
-) {
-    const int* move = formula->move;
-    if (insert_place == 0) {
-        mask[0] = 0;
-    } else {
-        mask[0] = MoveMask(move[insert_place - 1]);
-        if (
-            insert_place > 1
-            && move[insert_place - 1] >> 3 == move[insert_place - 2] >> 3
-        ) {
-            mask[0] |= MoveMask(move[insert_place - 2]);
-        }
-    }
-    if (insert_place == formula->length) {
-        mask[1] = 0;
-    } else {
-        mask[1] = MoveMask(move[insert_place]);
-        if (
-            insert_place + 1 < formula->length
-            && move[insert_place] >> 3 == move[insert_place + 1] >> 3
-        ) {
-            mask[1] |= MoveMask(move[insert_place + 1]);
-        }
-    }
-}
-
-
-size_t FormulaInsert(
-    const Formula* formula,
-    size_t insert_place,
-    const Formula* insertion,
-    Formula* result
-) {
-    result->length = formula->length + insertion->length;
-    result->capacity = 32;
-    while ((result->capacity <<= 1) < result->length);
-    result->move = (int*)malloc(result->capacity * sizeof(int));
-    memcpy(result->move, formula->move, insert_place * sizeof(int));
-    memcpy(
-        result->move + insert_place,
-        insertion->move,
-        insertion->length * sizeof(int)
-    );
-    memcpy(
-        result->move + insert_place + insertion->length,
-        formula->move + insert_place,
-        (formula->length - insert_place) * sizeof(int)
-    );
-    size_t place = FormulaCancelMoves(result);
-    return place <= insert_place ? place : insert_place + 1;
-}
-
-bool FormulaInsertIsWorthy(
-    const Formula* formula,
-    size_t insert_place,
-    const Formula* insertion,
-    const uint32_t* insert_place_mask,
-    size_t fewest_moves
-) {
-    size_t cancellation = 0;
-    uint32_t begin_mask = insert_place_mask[0] & insertion->begin_mask;
-    if (begin_mask) {
-        if (begin_mask & 0xffffff) {
-            return false;
-        }
-        uint32_t high_mask = begin_mask >>= 24;
-        cancellation += (high_mask & (high_mask - 1)) ? 2 : 1;
-    }
-    uint32_t end_mask = insert_place_mask[1] & insertion->end_mask;
-    if (end_mask) {
-        if (end_mask & insertion->set_up_mask) {
-            return false;
-        }
-        uint32_t low_mask = end_mask & 0xffffff;
-        uint32_t high_mask = end_mask >> 24;
-        if (high_mask & (high_mask - 1)) {
-            if (low_mask == 0) {
-                cancellation += 2;
-            } else if (low_mask & (low_mask - 1)) {
-                cancellation += (formula->length - insert_place) << 1;
-            } else {
-                cancellation += 3;
-            }
-        } else if (low_mask) {
-            cancellation += (formula->length - insert_place) << 1;
-        } else {
-            ++cancellation;
-        }
-    }
-    return fewest_moves == ULONG_MAX
-        || formula->length + insertion->length <= fewest_moves + cancellation;
 }
 
 
@@ -470,7 +332,7 @@ size_t FormulaGenerateIsomorphisms(const Formula* formula, Formula* result) {
         result[i].length = length;
         result[i].capacity = 32;
         while ((result[i].capacity <<= 1) < length);
-        result[i].move = (int*)malloc(result[i].capacity * sizeof(int));
+        result[i].move = MALLOC(int, result[i].capacity);
     }
     for (size_t i = 0; i < 24; ++i) {
         int* move_list = result[i].move;
@@ -524,8 +386,4 @@ void CycleReplace(char* c, const char* pattern) {
 
 int FormulaCompareGeneric(const void* p, const void* q) {
     return FormulaCompare((const Formula*)p, (const Formula*)q);
-}
-
-uint32_t MoveMask(int move) {
-    return (1 << move) | (1 << (24 + (move >> 2)));
 }

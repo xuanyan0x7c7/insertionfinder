@@ -10,6 +10,7 @@ typedef struct Algorithm Algorithm;
 struct Algorithm {
     Cube state;
     uint32_t mask;
+    bool parity;
     int corner_cycles;
     int edge_cycles;
     size_t size;
@@ -21,7 +22,7 @@ void AlgorithmConstruct(Algorithm* algorithm, const Cube* state);
 void AlgorithmDestroy(Algorithm* algorithm);
 
 void AlgorithmSave(const Algorithm* algorithm, FILE* stream);
-void AlgorithmLoad(Algorithm* algorithm, FILE* stream);
+bool AlgorithmLoad(Algorithm* algorithm, FILE* stream);
 
 bool AlgorithmContainsFormula(
     const Algorithm* algorithm,

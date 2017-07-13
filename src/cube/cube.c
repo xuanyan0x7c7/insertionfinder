@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../formula/formula.h"
+#include "../utils/io.h"
 #include "cube.h"
 #include "common.h"
 
@@ -16,6 +17,7 @@ void CubeInit() {
     GenerateOneMoveCube(one_move_cube);
     GenerateComputedCornerTwistTable(computed_corner_twist_table);
     GenerateComputedEdgeTwistTable(computed_edge_twist_table);
+    GenerateParityTable(parity_transform_table);
     GenerateCornerCycleTable(corner_cycle_transform_table);
     GenerateEdgeCycleTable(edge_cycle_transform_table);
 }
@@ -38,16 +40,21 @@ void CubeSave(const Cube* cube, FILE* stream) {
     fwrite(edge, sizeof(int8_t), 12, stream);
 }
 
-void CubeLoad(Cube* cube, FILE* stream) {
+bool CubeLoad(Cube* cube, FILE* stream) {
     int8_t corner[8], edge[12];
-    fread(corner, sizeof(int8_t), 8, stream);
-    fread(edge, sizeof(int8_t), 12, stream);
+    if (!SafeRead(corner, sizeof(int8_t), 8, stream)) {
+        return false;
+    }
+    if (!SafeRead(edge, sizeof(int8_t), 12, stream)) {
+        return false;
+    }
     for (int i = 0; i < 8; ++i) {
         cube->corner[i] = corner[i];
     }
     for (int i = 0; i < 12; ++i) {
         cube->edge[i] = edge[i];
     }
+    return true;
 }
 
 
@@ -72,22 +79,4 @@ uint32_t CubeMask(const Cube* cube) {
         mask = (mask << 1) | (cube->edge[i] != i << 1);
     }
     return mask;
-}
-
-
-bool CubeHasParity(const Cube* cube) {
-    bool visited[] = {false, false, false, false, false, false, false, false};
-    const int* corner = cube->corner;
-    bool parity = false;
-    for (int x = 0; x < 8; ++x) {
-        if (!visited[x]) {
-            parity = !parity;
-            int y = x;
-            do {
-                visited[y] = true;
-                y = corner[y] / 3;
-            } while (y != x);
-        }
-    }
-    return parity;
 }
