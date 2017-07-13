@@ -4,6 +4,7 @@
 #include "common.h"
 
 
+static Cube ParityCube(int index);
 static Cube Corner3CycleCube(int index);
 static Cube Edge3CycleCube(int index);
 
@@ -139,11 +140,37 @@ int CubeEdgeCycles(const Cube* cube) {
 }
 
 
+int CubeParityIndex(const Cube* cube) {
+    const int* corner = cube->corner;
+    const int* edge = cube->edge;
+    int temp = 0;
+    for (int i = 0; i < 8; ++i) {
+        int j = corner[i];
+        if (j != i * 3) {
+            if (j / 3 == i) {
+                return -1;
+            }
+            temp = i * 24 + j;
+            break;
+        }
+    }
+    if (!temp) {
+        return -1;
+    }
+    for (int i = 0; i < 12; ++i) {
+        int j = edge[i];
+        if (j != i << 1) {
+            return j >> 1 == i ? -1 : temp * 11 * 24 + i * 24 + j;
+        }
+    }
+    return -1;
+}
+
 int CubeCorner3CycleIndex(const Cube* cube) {
     const int* corner = cube->corner;
     for (int i = 0; i < 8; ++i) {
-        if (corner[i] != i * 3) {
-            int j = corner[i];
+        int j = corner[i];
+        if (j != i * 3) {
             int k = corner[j / 3];
             return k / 3 == i ? -1 : i * 24 * 24 + j * 24 + k;
         }
@@ -154,13 +181,17 @@ int CubeCorner3CycleIndex(const Cube* cube) {
 int CubeEdge3CycleIndex(const Cube* cube) {
     const int* edge = cube->edge;
     for (int i = 0; i < 12; ++i) {
-        if (edge[i] != i << 1) {
-            int j = edge[i];
+        int j = edge[i];
+        if (j != i << 1) {
             int k = edge[j >> 1];
             return k >> 1 == i ? -1 : i * 24 * 24 + j * 24 + k;
         }
     }
     return -1;
+}
+
+int CubeParityNextIndex(int index, int move) {
+    return parity_transform_table[index][move];
 }
 
 int CubeCornerNext3CycleIndex(int index, int move) {
@@ -171,6 +202,33 @@ int CubeEdgeNext3CycleIndex(int index, int move) {
     return edge_cycle_transform_table[index][move];
 }
 
+
+void GenerateParityTable(int table[][24]) {
+    for (int i = 0; i < 7 * 24 * 11 * 24; ++i) {
+        Cube cube = ParityCube(i);
+        if (CubeMask(&cube) == 0) {
+            for (int j = 0; j < 24; ++j) {
+                table[i][j] = i;
+            }
+        } else {
+            for (int j = 0; j < 24; ++j) {
+                if (j & 3) {
+                    Cube new_cube;
+                    memcpy(
+                        &new_cube,
+                        &one_move_cube[inverse_move_table[j]],
+                        sizeof(Cube)
+                    );
+                    CubeTwistCube(&new_cube, &cube, true, true);
+                    CubeTwistMove(&new_cube, j, true, true);
+                    table[i][j] = CubeParityIndex(&new_cube);
+                } else {
+                    table[i][j] = i;
+                }
+            }
+        }
+    }
+}
 
 void GenerateCornerCycleTable(int table[][24]) {
     for (int i = 0; i < 6 * 24 * 24; ++i) {
@@ -226,6 +284,21 @@ void GenerateEdgeCycleTable(int table[][24]) {
     }
 }
 
+
+Cube ParityCube(int index) {
+    Cube cube = identity_cube;
+    int w = index / 24 / 11 / 24;
+    int x = (index / 11 / 24) % 24;
+    int y = (index / 24) % 11;
+    int z = index % 24;
+    if (w != x / 3 && y != z >> 1) {
+        cube.corner[w] = x;
+        cube.corner[x / 3] = w * 3 + (24 - x) % 3;
+        cube.edge[y] = z;
+        cube.edge[z >> 1] = (y << 1) | (z & 1);
+    }
+    return cube;
+}
 
 Cube Corner3CycleCube(int index) {
     Cube cube = identity_cube;

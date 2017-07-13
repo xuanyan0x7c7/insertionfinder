@@ -17,6 +17,7 @@ void CubeInit() {
     GenerateOneMoveCube(one_move_cube);
     GenerateComputedCornerTwistTable(computed_corner_twist_table);
     GenerateComputedEdgeTwistTable(computed_edge_twist_table);
+    GenerateParityTable(parity_transform_table);
     GenerateCornerCycleTable(corner_cycle_transform_table);
     GenerateEdgeCycleTable(edge_cycle_transform_table);
 }
