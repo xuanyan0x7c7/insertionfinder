@@ -31,6 +31,7 @@ int CubeCornerCycles(const Cube* cube) {
     const int* corner = cube->corner;
     int small_cycles[] = {0, 0, 0, 0, 0, 0, 0};
     int cycles = 0;
+    bool parity = false;
 
     for (int x = 0; x < 8; ++x) {
         if (!visited[x]) {
@@ -50,9 +51,23 @@ int CubeCornerCycles(const Cube* cube) {
             } else if ((length & 1) == 0 && orientation) {
                 ++small_cycles[orientation + 1];
             } else if (length & 1) {
+                parity = !parity;
                 ++cycles;
                 ++small_cycles[orientation + 4];
             }
+        }
+    }
+
+    if (parity) {
+        --cycles;
+        if (small_cycles[4]) {
+            --small_cycles[4];
+        } else if (small_cycles[5] < small_cycles[6]) {
+            --small_cycles[6];
+            ++small_cycles[3];
+        } else {
+            --small_cycles[5];
+            ++small_cycles[2];
         }
     }
 
@@ -71,6 +86,7 @@ int CubeCornerCycles(const Cube* cube) {
     return cycles + twists + (small_cycles[2] + small_cycles[3] < twists);
 }
 
+
 int CubeEdgeCycles(const Cube* cube) {
     bool visited[] = {
         false, false, false, false, false, false,
@@ -79,6 +95,7 @@ int CubeEdgeCycles(const Cube* cube) {
     const int* edge = cube->edge;
     int small_cycles[] = {0, 0, 0};
     int cycles = 0;
+    bool parity = false;
 
     for (int x = 0; x < 12; ++x) {
         if (!visited[x]) {
@@ -93,6 +110,7 @@ int CubeEdgeCycles(const Cube* cube) {
             } while (y != x);
             cycles += length >> 1;
             if (length & 1) {
+                parity = !parity;
                 ++cycles;
             }
             if (flip) {
@@ -117,7 +135,7 @@ int CubeEdgeCycles(const Cube* cube) {
         ];
     }
 
-    return cycles;
+    return cycles - parity;
 }
 
 
