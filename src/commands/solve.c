@@ -326,7 +326,31 @@ void StandardOutput(
         default:
             break;
     }
-    printf("Uses %" PRId64 " nanoseconds.\n", result.duration);
+    if (result.duration < 1000) {
+        printf("Time usage: %" PRId64 " nanoseconds.\n", result.duration);
+    } else if (result.duration < 1000000) {
+        printf("Time usage: %.3f microseconds.\n", result.duration / 1e3);
+    } else if (result.duration < 1000000000) {
+        printf("Time usage: %.3f milliseconds.\n", result.duration / 1e6);
+    } else if (result.duration < 60 * (int64_t)1000000000) {
+        printf("Time usage: %.3f seconds.\n", result.duration / 1e9);
+    } else if (result.duration < 60 * 60 * (int64_t)1000000000) {
+        printf(
+            "Time usage: %" PRId64 ":%02" PRId64 ".%3" PRId64 ".\n",
+            result.duration / (60 * (int64_t)1000000000),
+            (result.duration / 1000000000) % 60,
+            (result.duration % 1000000000 + 500000) / 1000000
+        );
+    } else {
+        printf(
+            "Time usage: %" PRId64 ":%02" PRId64
+            ":%02" PRId64 ".%3" PRId64 ".\n",
+            result.duration / (60 * 60 * (int64_t)1000000000),
+            (result.duration / (60 * (int64_t)1000000000)) % 60,
+            (result.duration / 1000000000) % 60,
+            (result.duration % 1000000000 + 500000) / 1000000
+        );
+    }
 }
 
 
