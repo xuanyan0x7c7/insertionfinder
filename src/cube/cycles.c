@@ -8,6 +8,24 @@ static Cube Corner3CycleCube(int index);
 static Cube Edge3CycleCube(int index);
 
 
+bool CubeHasParity(const Cube* cube) {
+    bool visited[] = {false, false, false, false, false, false, false, false};
+    const int* corner = cube->corner;
+    bool parity = false;
+    for (int x = 0; x < 8; ++x) {
+        if (!visited[x]) {
+            parity = !parity;
+            int y = x;
+            do {
+                visited[y] = true;
+                y = corner[y] / 3;
+            } while (y != x);
+        }
+    }
+    return parity;
+}
+
+
 int CubeCornerCycles(const Cube* cube) {
     bool visited[] = {false, false, false, false, false, false, false, false};
     const int* corner = cube->corner;

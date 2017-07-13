@@ -79,21 +79,3 @@ uint32_t CubeMask(const Cube* cube) {
     }
     return mask;
 }
-
-
-bool CubeHasParity(const Cube* cube) {
-    bool visited[] = {false, false, false, false, false, false, false, false};
-    const int* corner = cube->corner;
-    bool parity = false;
-    for (int x = 0; x < 8; ++x) {
-        if (!visited[x]) {
-            parity = !parity;
-            int y = x;
-            do {
-                visited[y] = true;
-                y = corner[y] / 3;
-            } while (y != x);
-        }
-    }
-    return parity;
-}
