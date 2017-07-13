@@ -10,6 +10,7 @@ typedef struct Algorithm Algorithm;
 struct Algorithm {
     Cube state;
     uint32_t mask;
+    bool parity;
     int corner_cycles;
     int edge_cycles;
     size_t size;

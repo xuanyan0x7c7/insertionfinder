@@ -13,6 +13,7 @@ static int CubeCompare(const Cube* x, const Cube* y);
 void AlgorithmConstruct(Algorithm* algorithm, const Cube* state) {
     memcpy(&algorithm->state, state, sizeof(Cube));
     algorithm->mask = CubeMask(state);
+    algorithm->parity = CubeHasParity(state);
     algorithm->corner_cycles = CubeCornerCycles(state);
     algorithm->edge_cycles = CubeEdgeCycles(state);
     algorithm->size = 0;
@@ -46,6 +47,7 @@ bool AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
         return false;
     }
     algorithm->mask = CubeMask(state);
+    algorithm->parity = CubeHasParity(state);
     algorithm->corner_cycles = CubeCornerCycles(state);
     algorithm->edge_cycles = CubeEdgeCycles(state);
     size_t size;
@@ -67,11 +69,14 @@ bool AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
 
 
 int AlgorithmCompare(const Algorithm* x, const Algorithm* y) {
-    int cycles_diff = (x->corner_cycles + x->edge_cycles) - (
-        y->corner_cycles + y->edge_cycles
+    int cycles_diff = (x->corner_cycles + x->edge_cycles + x->parity) - (
+        y->corner_cycles + y->edge_cycles + y->parity
     );
     if (cycles_diff) {
         return cycles_diff;
+    }
+    if (x->parity != y->parity) {
+        return x->parity - y->parity;
     }
     if (x->corner_cycles != y->corner_cycles) {
         return x->corner_cycles - y->corner_cycles;
