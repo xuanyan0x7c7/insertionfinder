@@ -1,4 +1,4 @@
-AC_INIT([insertionfinder], [0.3], [xuanyan@xuanyan.ws])
+AC_INIT([insertionfinder], [0.3.1], [xuanyan@xuanyan.ws])
 
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 AM_PROG_AR
@@ -8,7 +8,7 @@ AC_PROG_RANLIB
 AC_PROG_LN_S
 
 AC_CHECK_HEADERS([getopt.h pthread.h regex.h unistd.h])
-AC_CHECK_FUNCS([strdup open_memstream])
+AC_CHECK_FUNCS([open_memstream clock_gettime])
 
 PKG_CHECK_MODULES([json], [json-glib-1.0 >= 1.1.2])
 
