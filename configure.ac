@@ -1,4 +1,4 @@
-AC_INIT([insertionfinder], [0.3], [xuanyan@xuanyan.ws])
+AC_INIT([insertionfinder], [0.3.1], [xuanyan@xuanyan.ws])
 
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 AM_PROG_AR
