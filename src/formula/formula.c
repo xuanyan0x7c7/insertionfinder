@@ -14,7 +14,7 @@
 #define ArrayLength(x) sizeof(x) / sizeof(x[0])
 
 
-static const char twist_str[][3] = {
+static const char* twist_str[] = {
     "", "U", "U2", "U'",
     "", "D", "D2", "D'",
     "", "R", "R2", "R'",
@@ -26,7 +26,6 @@ static const char twist_str[][3] = {
 static regex_t moves_regex;
 
 
-static void CycleReplace(char* c, const char* pattern);
 static int FormulaCompareGeneric(const void* p, const void* q);
 
 
@@ -46,43 +45,51 @@ void FormulaInit() {
 
 
 bool FormulaConstruct(Formula* formula, const char* string) {
-    typedef struct BlockMovePattern BlockMovePattern;
-    struct BlockMovePattern {
-        const char* pattern;
-        const char* rotation;
-        const char* twist;
-    };
-    static const BlockMovePattern block_move_table[] = {
-        {"Uw", "y", "D"}, {"Uw2", "y2", "D2"}, {"Uw'", "y'", "D'"},
-        {"Dw", "y'", "U"}, {"Dw2", "y2", "U2"}, {"Dw'", "y", "U'"},
-        {"Rw", "x", "L"}, {"Rw2", "x2", "L2"}, {"Rw'", "x'", "L'"},
-        {"Lw", "x'", "R"}, {"Lw2", "x2", "R2"}, {"Lw'", "x", "R'"},
-        {"Fw", "z", "B"}, {"Fw2", "z2", "B2"}, {"Fw'", "z'", "B'"},
-        {"Bw", "z'", "F"}, {"Bw2", "z2", "F2"}, {"Bw'", "z", "F'"}
+    typedef struct Pattern Pattern;
+    struct Pattern {
+        const char* twist_string[7];
+        int transform[3];
+        const int additional_move;
     };
 
-    typedef char Patterns[3][5];
-    static const Patterns rotation_replacement[][2] = {
-        {{"x", "[r]", "[l']"}, {"UFDB", ""}},
-        {{"x2", "[r2]", "[l2]"}, {"UD", "FB", ""}},
-        {{"x'", "[r']", "[l]"}, {"UBDF", ""}},
-        {{"y", "[u]", "[d']"}, {"RBLF", ""}},
-        {{"y2", "[u2]", "[d2]"}, {"RL", "FB", ""}},
-        {{"y'", "[u']", "[d]"}, {"RFLB", ""}},
-        {{"z", "[f]", "[b']"}, {"ULDR", ""}},
-        {{"z2", "[f2]", "[b2]"}, {"UD", "RL", ""}},
-        {{"z'", "[f']", "[b]"}, {"URDL", ""}}
+    const Pattern pattern_table[] = {
+        {{"x", "[r]", "[l']", NULL}, {4, 2, 1}, -1},
+        {{"x2", "x2'", "[r2]", "[r2']", "[l2]", "[l2']", NULL}, {1, 2, 5}, -1},
+        {{"x'", "[r']", "[l]", NULL}, {5, 2, 0}, -1},
+        {{"y", "[u]", "[d']", NULL}, {0, 5, 2}, -1},
+        {{"y2", "y2'", "[u2]", "[u2']", "[d2]", "[d2']", NULL}, {0, 3, 5}, -1},
+        {{"y'", "[u']", "[d]", NULL}, {0, 4, 3}, -1},
+        {{"z", "[f]", "[b']", NULL}, {3, 0, 4}, -1},
+        {{"z2", "z2'", "[f2]", "[f2']", "[b2]", "[d2']", NULL}, {1, 3, 4}, -1},
+        {{"z'", "[f']", "[b]", NULL}, {2, 1, 4}, -1},
+        {{"Uw", NULL}, {0, 5, 2}, TWIST_D},
+        {{"Uw2", "Uw2'", NULL}, {0, 3, 5}, TWIST_D2},
+        {{"Uw'", NULL}, {0, 4, 3}, TWIST_D3},
+        {{"Dw", NULL}, {0, 4, 3}, TWIST_U},
+        {{"Dw2", "Dw2'", NULL}, {0, 3, 5}, TWIST_U2},
+        {{"Dw'", NULL}, {0, 5, 2}, TWIST_U3},
+        {{"Rw", NULL}, {4, 2, 1}, TWIST_L},
+        {{"Rw2", "Rw2'", NULL}, {1, 2, 5}, TWIST_L2},
+        {{"Rw'", NULL}, {5, 2, 0}, TWIST_L3},
+        {{"Lw", NULL}, {5, 2, 0}, TWIST_R},
+        {{"Lw2", "Lw2'", NULL}, {1, 2, 5}, TWIST_R2},
+        {{"Lw'", NULL}, {4, 2, 1}, TWIST_R3},
+        {{"Fw", NULL}, {3, 0, 4}, TWIST_B},
+        {{"Fw2", "Fw2'", NULL}, {1, 3, 4}, TWIST_B2},
+        {{"Fw'", NULL}, {2, 1, 4}, TWIST_B3},
+        {{"Bw", NULL}, {2, 1, 4}, TWIST_F},
+        {{"Bw2", "Bw2'", NULL}, {1, 3, 4}, TWIST_F2},
+        {{"Bw'", NULL}, {3, 0, 4}, TWIST_F3}
     };
 
+    formula->length = 0;
+    formula->capacity = 64;
+    formula->move = MALLOC(int, formula->capacity);
     if (!string || string[0] == '\0') {
-        formula->length = 0;
-        formula->capacity = 64;
-        formula->move = MALLOC(int, formula->capacity);
         return true;
     }
 
-    LinkedList procedure;
-    LinkedListConstruct(&procedure, free);
+    int transform[3] = {0, 2, 4};
 
     const char* buffer = string;
     regmatch_t pmatch[2];
@@ -103,82 +110,53 @@ bool FormulaConstruct(Formula* formula, const char* string) {
                 *position = *(position + 1);
             }
         }
-        LinkedListInsertBefore(procedure.tail, move_string);
-        buffer += match->rm_eo;
-    }
-
-    LinkedListNode* node = procedure.head;
-    while ((node = node->next) != procedure.tail) {
-        const char* move_string = (char*)node->data;
-        for (size_t i = 0; i < ArrayLength(block_move_table); ++i) {
-            const BlockMovePattern* table = &block_move_table[i];
-            if (strcmp(move_string, table->pattern) == 0) {
-                LinkedListSetItem(
-                    &procedure,
-                    node,
-                    strdup(table->rotation)
-                );
-                LinkedListInsertBefore(node, strdup(table->twist));
-                break;
-            }
-        }
-    }
-
-    for (
-        const LinkedListNode* pointer = procedure.tail;
-        (pointer = pointer->prev) != procedure.head;
-    ) {
-        for (size_t i = 0; i < ArrayLength(rotation_replacement); ++i) {
-            const Patterns* matches = &rotation_replacement[i][0];
-            const Patterns* patterns = &rotation_replacement[i][1];
-            bool found = false;
-            for (size_t j = 0; j < 3; ++j) {
-                if (strcmp((char*)pointer->data, (*matches)[j]) == 0) {
-                    found = true;
+        bool pattern_found = false;
+        for (size_t i = 0; i < ArrayLength(pattern_table); ++i) {
+            const Pattern* pattern_item = &pattern_table[i];
+            const char* const* twist_string = pattern_item->twist_string;
+            for (const char* const* p = twist_string; *p; ++p) {
+                if (strcmp(move_string, *p) == 0) {
+                    pattern_found = true;
                     break;
                 }
             }
-            if (found) {
-                for (
-                    const LinkedListNode* node = pointer;
-                    (node = node->next) != procedure.tail;
-                ) {
-                    for (size_t j = 0; ; ++j) {
-                        const char* pattern = (*patterns)[j];
-                        if (pattern[0]) {
-                            CycleReplace((char*)node->data, pattern);
-                        } else {
-                            break;
-                        }
+            if (pattern_found) {
+                const int* pattern_transform = pattern_item->transform;
+                int additional_move = pattern_item->additional_move;
+                if (additional_move != -1) {
+                    if (formula->length == formula->capacity) {
+                        REALLOC(formula->move, int, formula->capacity <<= 1);
                     }
+                    formula->move[formula->length++] =
+                        (transform[additional_move >> 3] << 2)
+                        ^ (additional_move & 7);
                 }
-                pointer = pointer->next;
-                LinkedListRemove(&procedure, pointer->prev);
+                for (int j = 0; j < 3; ++j) {
+                    int* item = &transform[j];
+                    *item = pattern_transform[*item >> 1] ^ (*item & 1);
+                }
                 break;
             }
         }
-    }
-
-    formula->length = 0;
-    formula->capacity = 64;
-    formula->move = MALLOC(int, formula->capacity);
-    for (
-        const LinkedListNode* node = procedure.head;
-        (node = node->next) != procedure.tail;
-    ) {
-        for (size_t i = 0; i < ArrayLength(twist_str); ++i) {
-            if (strcmp((char*)node->data, twist_str[i]) == 0) {
+        if (!pattern_found) {
+            for (size_t j = 0; j < ArrayLength(twist_str); ++j) {
+                if (strcmp(move_string, twist_str[j])) {
+                    continue;
+                }
                 if (formula->length == formula->capacity) {
                     REALLOC(formula->move, int, formula->capacity <<= 1);
                 }
-                formula->move[formula->length++] = i;
+                formula->move[formula->length++] =
+                    (transform[j >> 3] << 2) ^ (j & 7);
                 break;
             }
         }
+        free(move_string);
+        buffer += match->rm_eo;
     }
-    LinkedListDestroy(&procedure);
+
     FormulaCancelMoves(formula);
-    return formula;
+    return true;
 }
 
 void FormulaDestroy(Formula* formula) {
@@ -376,13 +354,6 @@ size_t FormulaGenerateIsomorphisms(const Formula* formula, Formula* result) {
     return p - result + 1;
 }
 
-
-void CycleReplace(char* c, const char* pattern) {
-    const char* position = strchr(pattern, *c);
-    if (position) {
-        *c = *++position ? *position : *pattern;
-    }
-}
 
 int FormulaCompareGeneric(const void* p, const void* q) {
     return FormulaCompare((const Formula*)p, (const Formula*)q);
