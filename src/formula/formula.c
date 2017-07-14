@@ -32,7 +32,7 @@ static int FormulaCompareGeneric(const void* p, const void* q);
 void FormulaInit() {
     int status = regcomp(
         &moves_regex,
-        "\\s*([UDRLFB]w?2?'?|[xyz]2?'?|\\[[udrlfb]2?'?\\])\\s*",
+        "\\s*(([UDRLFB]|2?[UDRLFB]w)[2']?|[xyz][2']?|\\[[udrlfb][2']?\\])\\s*",
         REG_EXTENDED
     );
     if (status) {
@@ -92,8 +92,12 @@ bool FormulaConstruct(Formula* formula, const char* string) {
     int transform[3] = {0, 2, 4};
 
     const char* buffer = string;
-    regmatch_t pmatch[2];
-    while (buffer && regexec(&moves_regex, buffer, 2, pmatch, 0) == 0) {
+    regmatch_t pmatch[3];
+    while (*buffer) {
+        if (regexec(&moves_regex, buffer, 3, pmatch, 0) == REG_NOMATCH) {
+            FormulaDestroy(formula);
+            return false;
+        }
         const regmatch_t* full_match = &pmatch[0];
         if (full_match->rm_so) {
             FormulaDestroy(formula);
@@ -101,15 +105,15 @@ bool FormulaConstruct(Formula* formula, const char* string) {
         }
         const regmatch_t* match = &pmatch[1];
         size_t length = match->rm_eo - match->rm_so;
-        char* move_string = MALLOC(char, length + 1);
-        strncpy(move_string, buffer + match->rm_so, length);
-        move_string[length] = '\0';
-        char* position = strstr(move_string, "2'");
-        if (position) {
-            while (*++position) {
-                *position = *(position + 1);
-            }
+        const char* begin = &buffer[match->rm_so];
+        if (*begin == '2') {
+            ++begin;
+            --length;
         }
+        char* move_string = MALLOC(char, length + 1);
+        strncpy(move_string, begin, length);
+        move_string[length] = '\0';
+
         bool pattern_found = false;
         for (size_t i = 0; i < ArrayLength(pattern_table); ++i) {
             const Pattern* pattern_item = &pattern_table[i];
