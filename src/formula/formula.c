@@ -135,10 +135,12 @@ bool FormulaConstruct(Formula* formula, const char* string) {
                         (transform[additional_move >> 3] << 2)
                         ^ (additional_move & 7);
                 }
+                int new_transform[3];
                 for (int j = 0; j < 3; ++j) {
-                    int* item = &transform[j];
-                    *item = pattern_transform[*item >> 1] ^ (*item & 1);
+                    int temp = pattern_transform[j];
+                    new_transform[j] = transform[temp >> 1] ^ (temp & 1);
                 }
+                memcpy(transform, new_transform, 3 * sizeof(int));
                 break;
             }
         }
