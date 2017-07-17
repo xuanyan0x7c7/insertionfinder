@@ -273,7 +273,7 @@ void StandardOutput(
                 puts("No solution found.");
             }
             for (size_t i = 0; i < finder->solution_count; ++i) {
-                printf("\nSolution #%lu:\n", i + 1);
+                printf("\nSolution #%zu:\n", i + 1);
                 const Worker* solution = &finder->solution_list[i];
                 for (size_t j = 0; j < solution->depth; ++j) {
                     const Insertion* insertion = &solution->solving_step[j];
@@ -287,7 +287,7 @@ void StandardOutput(
                         );
                         putchar(' ');
                     }
-                    printf("[@%lu]", j + 1);
+                    printf("[@%zu]", j + 1);
                     if (insert_place < skeleton->length) {
                         putchar(' ');
                         FormulaPrintRange(
@@ -296,12 +296,12 @@ void StandardOutput(
                             stdout
                         );
                     }
-                    printf("\nAt @%lu insert: ", j + 1);
+                    printf("\nAt @%zu insert: ", j + 1);
                     FormulaPrint(insertion->insertion, stdout);
                     putchar('\n');
                 }
                 printf(
-                    "Total moves: %lu,  %lu move%s cancelled.\n",
+                    "Total moves: %zu,  %zu move%s cancelled.\n",
                     finder->fewest_moves,
                     solution->cancellation,
                     solution->cancellation == 1 ? "" : "s"
