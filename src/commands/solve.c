@@ -379,15 +379,14 @@ void JSONOutput(
     json_object_set_boolean_member(object, "parity", parity);
     json_object_set_int_member(object, "corner_cycle_num", corner_cycles);
     json_object_set_int_member(object, "edge_cycle_num", edge_cycles);
-    if (
-        finder->solution_count
-        || (!parity && corner_cycles == 0 && edge_cycles == 0)
-    ) {
+    if (finder->solution_count) {
         json_object_set_int_member(
             object,
             "minimum_moves",
             finder->fewest_moves
         );
+    } else if (!parity && corner_cycles == 0 && edge_cycles == 0) {
+        json_object_set_int_member(object, "minimum_moves", 0);
     } else {
         json_object_set_null_member(object, "minimum_moves");
     }
