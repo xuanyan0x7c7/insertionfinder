@@ -410,6 +410,11 @@ void JSONOutput(
 void Solution2JSON(const Worker* solution, JsonArray* solution_array) {
     JsonObject* object = json_object_new();
 
+    char* final_solution = Formula2String(
+        &solution->solving_step[solution->depth].skeleton
+    );
+    json_object_set_string_member(object, "final_solution", final_solution);
+    free(final_solution);
     json_object_set_int_member(object, "cancellation", solution->cancellation);
 
     JsonArray* solving_step_array = json_array_new();
