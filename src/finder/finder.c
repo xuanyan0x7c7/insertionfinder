@@ -1,4 +1,3 @@
-#include <limits.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -87,7 +86,7 @@ void FinderConstruct(
     CubeTwistFormula(&finder->scramble_cube, scramble, true, true, false);
     CubeInverseState(&finder->scramble_cube, &finder->inverse_scramble_cube);
 
-    finder->fewest_moves = ULONG_MAX;
+    finder->fewest_moves = SIZE_MAX;
     finder->solution_count = 0;
     finder->solution_capacity = 16;
     finder->solution_list = MALLOC(Worker, finder->solution_capacity);

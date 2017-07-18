@@ -1,4 +1,3 @@
-#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -143,6 +142,6 @@ bool FormulaInsertIsWorthy(
             ++cancellation;
         }
     }
-    return fewest_moves == ULONG_MAX
+    return fewest_moves == SIZE_MAX
         || formula->length + insertion->length <= fewest_moves + cancellation;
 }

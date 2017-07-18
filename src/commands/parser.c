@@ -1,5 +1,6 @@
 #include <limits.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <getopt.h>
 #include "../utils/memory.h"
@@ -120,6 +121,6 @@ void ParseThreadArgs(CliParser* parsed_args) {
             parsed_args->max_threads = threads;
         }
     } else {
-        parsed_args->max_threads = ULONG_MAX;
+        parsed_args->max_threads = SIZE_MAX;
     }
 }
