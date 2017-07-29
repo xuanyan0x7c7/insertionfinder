@@ -445,10 +445,9 @@ void TryLastInsertion(Worker* worker, size_t insert_place, int index) {
     );
     for (size_t i = 0; i < algorithm->size; ++i) {
         Insertion* insertion = &worker->solving_step[worker->depth];
-        const Formula* skeleton = &insertion->skeleton;
         insertion->insertion = &algorithm->formula_list[i];
         if (!FormulaInsertIsWorthy(
-            skeleton,
+            &insertion->skeleton,
             insert_place,
             insertion->insertion,
             insert_place_mask,
@@ -498,10 +497,26 @@ void SolutionFound(
     size_t insert_place,
     const Algorithm* algorithm
 ) {
+    const Finder* finder = worker->finder;
     worker->solving_step[worker->depth].insert_place = insert_place;
+    uint32_t insert_place_mask[2];
+    FormulaGetInsertPlaceMask(
+        &worker->solving_step[worker->depth].skeleton,
+        insert_place,
+        insert_place_mask
+    );
     for (size_t i = 0; i < algorithm->size; ++i) {
-        worker->solving_step[worker->depth].insertion =
-            &algorithm->formula_list[i];
+        Insertion* insertion = &worker->solving_step[worker->depth];
+        insertion->insertion = &algorithm->formula_list[i];
+        if (!FormulaInsertIsWorthy(
+            &insertion->skeleton,
+            insert_place,
+            insertion->insertion,
+            insert_place_mask,
+            finder->fewest_moves
+        )) {
+            continue;
+        }
         PushInsertion(worker, NULL);
         UpdateFewestMoves(
             worker,
