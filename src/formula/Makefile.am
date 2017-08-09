@@ -1,2 +1,2 @@
-noinst_LIBRARIES = libformula.a
-libformula_a_SOURCES = formula.h utils.h formula.c insertion.c utils.c
+noinst_LTLIBRARIES = libformula.la
+libformula_la_SOURCES = formula.h utils.h formula.c insertion.c utils.c

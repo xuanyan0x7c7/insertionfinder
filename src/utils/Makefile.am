@@ -1,2 +1,2 @@
-noinst_LIBRARIES = libutils.a
-libutils_a_SOURCES = memory.h io.h memory.c io.c
+noinst_LTLIBRARIES = libutils.la
+libutils_la_SOURCES = memory.h io.h memory.c io.c

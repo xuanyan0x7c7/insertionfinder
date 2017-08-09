@@ -1,2 +1,2 @@
-noinst_LIBRARIES = libalgorithm.a
-libalgorithm_a_SOURCES = algorithm.h algorithm.c formula.c
+noinst_LTLIBRARIES = libalgorithm.la
+libalgorithm_la_SOURCES = algorithm.h algorithm.c formula.c

@@ -1,10 +1,12 @@
 AC_INIT([insertionfinder], [0.3.3], [xuanyan@xuanyan.ws])
+AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 AM_PROG_AR
+LT_INIT
 
 AC_PROG_CC_C99
-AC_PROG_RANLIB
 AC_PROG_LN_S
 
 AC_CHECK_HEADERS([getopt.h pthread.h regex.h unistd.h])
