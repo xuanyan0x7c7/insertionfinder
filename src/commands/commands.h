@@ -2,6 +2,6 @@
 #include <stdbool.h>
 #include "parser.h"
 
-bool Solve(const CliParser* parsed_args);
-bool Verify(const CliParser* parsed_args);
-bool GenerateAlgfiles(const CliParser* parsed_args);
+bool solve(const CliParser* parsed_args);
+bool verify(const CliParser* parsed_args);
+bool generate_alg_files(const CliParser* parsed_args);

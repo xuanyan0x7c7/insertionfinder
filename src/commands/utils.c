@@ -9,7 +9,7 @@
 #include "utils.h"
 
 
-char* Trim(const char* string) {
+char* trim(const char* string) {
     const char* begin = string;
     const char* end = string;
     while (*end != '\0') {
@@ -27,20 +27,20 @@ char* Trim(const char* string) {
     return result;
 }
 
-char* GetLine(FILE* stream) {
+char* get_line(FILE* stream) {
     char* string;
     size_t temp = 0;
     if (getline(&string, &temp, stream) == EOF) {
         free(string);
         return NULL;
     }
-    char* result = Trim(string);
+    char* result = trim(string);
     free(string);
     return result;
 }
 
 
-bool CubeEqualGeneric(const void* p, const void* q) {
+bool cube_equal_generic(const void* p, const void* q) {
     const int* corner1 = ((const Cube*)p)->corner;
     const int* corner2 = ((const Cube*)q)->corner;
     const int* edge1 = ((const Cube*)p)->edge;
@@ -58,7 +58,7 @@ bool CubeEqualGeneric(const void* p, const void* q) {
     return true;
 }
 
-size_t CubeHashGeneric(const void* p) {
+size_t cube_hash_generic(const void* p) {
     const int* corner = ((const Cube*)p)->corner;
     const int* edge = ((const Cube*)p)->edge;
     size_t hash = 0;
@@ -71,18 +71,18 @@ size_t CubeHashGeneric(const void* p) {
     return hash;
 }
 
-int AlgorithmCompareGeneric(const void* p, const void* q) {
-    return AlgorithmCompare(*(const Algorithm**)p, *(const Algorithm**)q);
+int algorithm_compare_generic(const void* p, const void* q) {
+    return algorithm_compare(*(const Algorithm**)p, *(const Algorithm**)q);
 }
 
-void AlgorithmFreeGeneric(void* p) {
+void algorithm_free_generic(void* p) {
     Algorithm* algorithm = (Algorithm*)p;
-    AlgorithmDestroy(algorithm);
+    algorithm_destroy(algorithm);
     free(algorithm);
 }
 
 
-void PrintJson(JsonNode* json, FILE* stream) {
+void print_json(JsonNode* json, FILE* stream) {
     JsonGenerator* generator = json_generator_new();
     json_generator_set_root(generator, json);
 

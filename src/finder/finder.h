@@ -59,28 +59,28 @@ struct Insertion {
     const Formula *insertion;
 };
 
-void FinderConstruct(
+void finder_construct(
     Finder* finder,
     size_t algorithm_count,
     Algorithm** algorithm_list,
     const Formula* scramble
 );
-void FinderDestroy(Finder* finder);
+void finder_destroy(Finder* finder);
 
-FinderSolveResult FinderSolve(
+FinderSolveResult finder_solve(
     Finder* finder,
     const Formula* skeleton,
     size_t max_threads
 );
 
-void FinderWorkerConstruct(
+void finder_worker_construct(
     FinderWorker* worker,
     Finder* finder,
     const Formula* skeleton
 );
-void FinderWorkerDestroy(FinderWorker* worker);
+void finder_worker_destroy(FinderWorker* worker);
 
-void FinderWorkerSearch(
+void finder_worker_search(
     FinderWorker* worker,
     bool parity, int corner_cycles, int edge_cycles,
     size_t begin, size_t end

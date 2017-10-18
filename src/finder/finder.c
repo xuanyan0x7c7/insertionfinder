@@ -27,18 +27,18 @@ struct WorkerThread {
     size_t end;
 };
 
-static FinderSolveStatus FinderSolveMain(
+static FinderSolveStatus finder_solve_main(
     Finder* finder,
     const Formula* skeleton,
     size_t max_threads
 );
 
-static void* WorkerThreadStart(void* arg);
+static void* worker_thread_start(void* arg);
 
-static int SolutionCompare(const void* p, const void* q);
+static int solution_compare(const void* p, const void* q);
 
 
-void FinderConstruct(
+void finder_construct(
     Finder* finder,
     size_t algorithm_count, Algorithm** algorithm_list,
     const Formula* scramble
@@ -70,21 +70,21 @@ void FinderConstruct(
             finder->change_edge = true;
         }
         if (parity && corner_cycles == 0 && edge_cycles == 0) {
-            finder->parity_index[CubeParityIndex(state)] = i;
+            finder->parity_index[cube_parity_index(state)] = i;
         }
         if (!parity && corner_cycles == 1 && edge_cycles == 0) {
-            finder->corner_cycle_index[CubeCorner3CycleIndex(state)] = i;
+            finder->corner_cycle_index[cube_corner_cycle_index(state)] = i;
         }
         if (!parity && corner_cycles == 0 && edge_cycles == 1) {
-            finder->edge_cycle_index[CubeEdge3CycleIndex(state)] = i;
+            finder->edge_cycle_index[cube_edge_cycle_index(state)] = i;
         }
     }
 
-    FormulaConstruct(&finder->scramble, NULL);
-    FormulaDuplicate(&finder->scramble, scramble);
-    CubeConstruct(&finder->scramble_cube);
-    CubeTwistFormula(&finder->scramble_cube, scramble, true, true, false);
-    CubeInverseState(&finder->scramble_cube, &finder->inverse_scramble_cube);
+    formula_construct(&finder->scramble, NULL);
+    formula_duplicate(&finder->scramble, scramble);
+    cube_construct(&finder->scramble_cube);
+    cube_twist_formula(&finder->scramble_cube, scramble, true, true, false);
+    cube_inverse_state(&finder->scramble_cube, &finder->inverse_scramble_cube);
 
     finder->fewest_moves = SIZE_MAX;
     finder->solution_count = 0;
@@ -94,19 +94,19 @@ void FinderConstruct(
     pthread_mutex_init(&finder->mutex, NULL);
 }
 
-void FinderDestroy(Finder* finder) {
-    FormulaDestroy(&finder->scramble);
+void finder_destroy(Finder* finder) {
+    formula_destroy(&finder->scramble);
     Worker* begin = finder->solution_list;
     Worker* end = begin + finder->solution_count;
     for (Worker* p = begin; p < end; ++p) {
-        FinderWorkerDestroy(p);
+        finder_worker_destroy(p);
     }
     free(finder->solution_list);
     pthread_mutex_destroy(&finder->mutex);
 }
 
 
-FinderSolveResult FinderSolve(
+FinderSolveResult finder_solve(
     Finder* finder,
     const Formula* skeleton,
     size_t max_threads
@@ -115,7 +115,7 @@ FinderSolveResult FinderSolve(
     struct timespec time_begin;
     struct timespec time_end;
     clock_gettime(CLOCK_MONOTONIC, &time_begin);
-    result.status = FinderSolveMain(finder, skeleton, max_threads);
+    result.status = finder_solve_main(finder, skeleton, max_threads);
     clock_gettime(CLOCK_MONOTONIC, &time_end);
     result.duration =
         (time_end.tv_sec - time_begin.tv_sec) * 1000000000ull
@@ -124,17 +124,17 @@ FinderSolveResult FinderSolve(
 }
 
 
-FinderSolveStatus FinderSolveMain(
+FinderSolveStatus finder_solve_main(
     Finder* finder,
     const Formula* skeleton,
     size_t max_threads
 ) {
     Cube cube = identity_cube;
-    CubeTwistFormula(&cube, &finder->scramble, true, true, false);
-    CubeTwistFormula(&cube, skeleton, true, true, false);
-    int parity = CubeHasParity(&cube);
-    int corner_cycles = CubeCornerCycles(&cube);
-    int edge_cycles = CubeEdgeCycles(&cube);
+    cube_twist_formula(&cube, &finder->scramble, true, true, false);
+    cube_twist_formula(&cube, skeleton, true, true, false);
+    int parity = cube_has_parity(&cube);
+    int corner_cycles = cube_corner_cycles(&cube);
+    int edge_cycles = cube_edge_cycles(&cube);
     if (!parity && corner_cycles == 0 && edge_cycles == 0) {
         return SOLVE_SUCCESS_SOLVED;
     } else if (parity && !finder->change_parity) {
@@ -168,7 +168,7 @@ FinderSolveStatus FinderSolveMain(
         thread->edge_cycles = edge_cycles;
         thread->begin = split_points[i];
         thread->end = split_points[i + 1] - 1;
-        pthread_create(&thread->thread_id, NULL, WorkerThreadStart, thread);
+        pthread_create(&thread->thread_id, NULL, worker_thread_start, thread);
     }
     for (size_t i = 0; i < thread_count; ++i) {
         pthread_join(worker_threads[i].thread_id, NULL);
@@ -189,26 +189,26 @@ FinderSolveStatus FinderSolveMain(
         finder->solution_list,
         finder->solution_count,
         sizeof(Worker),
-        SolutionCompare
+        solution_compare
     );
 
     return SOLVE_SUCCESS;
 }
 
 
-void* WorkerThreadStart(void* arg) {
+void* worker_thread_start(void* arg) {
     WorkerThread* thread = (WorkerThread*)arg;
-    FinderWorkerConstruct(&thread->worker, thread->finder, thread->skeleton);
-    FinderWorkerSearch(
+    finder_worker_construct(&thread->worker, thread->finder, thread->skeleton);
+    finder_worker_search(
         &thread->worker,
         thread->parity, thread->corner_cycles, thread->edge_cycles,
         thread->begin, thread->end
     );
-    FinderWorkerDestroy(&thread->worker);
+    finder_worker_destroy(&thread->worker);
     return NULL;
 }
 
 
-int SolutionCompare(const void* p, const void* q) {
+int solution_compare(const void* p, const void* q) {
     return ((const Worker*)p)->cancellation - ((const Worker*)q)->cancellation;
 }

@@ -8,30 +8,30 @@
 
 typedef bool Executor(const CliParser* parsed_args);
 
-bool Version(const CliParser* parsed_args) {
+static bool version(const CliParser* parsed_args) {
     puts("Insertion Finder " VERSION);
     return true;
 }
 
 
 int main(int argc, char** argv) {
-    Init();
+    init();
 
     Executor* executor = NULL;
-    CliParser parsed_args = Parse(argc, argv);
+    CliParser parsed_args = parse(argc, argv);
     switch (parsed_args.command) {
         case COMMAND_SOLVE:
-            executor = Solve;
+            executor = solve;
             break;
         case COMMAND_VERIFY:
-            executor = Verify;
+            executor = verify;
             break;
         case COMMAND_GENERATE_ALGFILE:
-            executor = GenerateAlgfiles;
+            executor = generate_alg_files;
             break;
         case COMMAND_HELP:
         case COMMAND_VERSION:
-            executor = Version;
+            executor = version;
             break;
         default:
             executor = NULL;

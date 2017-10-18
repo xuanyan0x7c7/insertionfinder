@@ -7,7 +7,7 @@
 #include "utils.h"
 
 
-size_t FormulaCancelMoves(Formula* formula) {
+size_t formula_cancel_moves(Formula* formula) {
     int* begin = formula->move;
     int* end = begin + formula->length;
     int* p = begin - 1;
@@ -49,7 +49,7 @@ size_t FormulaCancelMoves(Formula* formula) {
 }
 
 
-void FormulaGetInsertPlaceMask(
+void formula_get_insert_place_mask(
     const Formula* formula,
     size_t insert_place,
     uint32_t* mask
@@ -58,29 +58,29 @@ void FormulaGetInsertPlaceMask(
     if (insert_place == 0) {
         mask[0] = 0;
     } else {
-        mask[0] = MoveMask(move[insert_place - 1]);
+        mask[0] = move_mask(move[insert_place - 1]);
         if (
             insert_place > 1
             && move[insert_place - 1] >> 3 == move[insert_place - 2] >> 3
         ) {
-            mask[0] |= MoveMask(move[insert_place - 2]);
+            mask[0] |= move_mask(move[insert_place - 2]);
         }
     }
     if (insert_place == formula->length) {
         mask[1] = 0;
     } else {
-        mask[1] = MoveMask(move[insert_place]);
+        mask[1] = move_mask(move[insert_place]);
         if (
             insert_place + 1 < formula->length
             && move[insert_place] >> 3 == move[insert_place + 1] >> 3
         ) {
-            mask[1] |= MoveMask(move[insert_place + 1]);
+            mask[1] |= move_mask(move[insert_place + 1]);
         }
     }
 }
 
 
-size_t FormulaInsert(
+size_t formula_insert(
     const Formula* formula,
     size_t insert_place,
     const Formula* insertion,
@@ -101,11 +101,11 @@ size_t FormulaInsert(
         formula->move + insert_place,
         (formula->length - insert_place) * sizeof(int)
     );
-    size_t place = FormulaCancelMoves(result);
+    size_t place = formula_cancel_moves(result);
     return place <= insert_place ? place : insert_place + 1;
 }
 
-bool FormulaInsertIsWorthy(
+bool formula_insert_is_worthy(
     const Formula* formula,
     size_t insert_place,
     const Formula* insertion,

@@ -15,14 +15,14 @@ struct LinkedList {
     Destructor* destroy;
 };
 
-void LinkedListConstruct(LinkedList* list, Destructor* destroy);
-void LinkedListDestroy(LinkedList* list);
+void linkedlist_construct(LinkedList* list, Destructor* destroy);
+void linkedlist_destroy(LinkedList* list);
 
-void LinkedListInsertBefore(LinkedListNode* node, void* data);
-void LinkedListInsertAfter(LinkedListNode* node, void* data);
-void LinkedListRemove(LinkedList* list, LinkedListNode* node);
+void linkedlist_insert_before(LinkedListNode* node, void* data);
+void linkedlist_insert_after(LinkedListNode* node, void* data);
+void linkedlist_remove(LinkedList* list, LinkedListNode* node);
 
-void LinkedListSetItem(
+void linkedlist_set_item(
     LinkedList* list,
     LinkedListNode* node,
     void* data

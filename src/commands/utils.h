@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <json-glib/json-glib.h>
 
-char* Trim(const char* string);
-char* GetLine(FILE* stream);
+char* trim(const char* string);
+char* get_line(FILE* stream);
 
-bool CubeEqualGeneric(const void* p, const void* q);
-size_t CubeHashGeneric(const void* p);
-int AlgorithmCompareGeneric(const void* p, const void* q);
-void AlgorithmFreeGeneric(void* p);
+bool cube_equal_generic(const void* p, const void* q);
+size_t cube_hash_generic(const void* p);
+int algorithm_compare_generic(const void* p, const void* q);
+void algorithm_free_generic(void* p);
 
-void PrintJson(JsonNode* json, FILE* stream);
+void print_json(JsonNode* json, FILE* stream);

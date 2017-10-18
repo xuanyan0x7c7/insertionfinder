@@ -10,18 +10,18 @@
 typedef void OutputFunction(const Formula*, const Formula*, bool, int, int);
 
 
-static void StandardOutput(
+static void standard_output(
     const Formula* scramble, const Formula* skeleton,
     bool parity, int corner_cycles, int edge_cycles
 );
 
-static void JSONOutput(
+static void json_output(
     const Formula* scramble, const Formula* skeleton,
     bool parity, int corner_cycles, int edge_cycles
 );
 
 
-bool Verify(const CliParser* parsed_args) {
+bool verify(const CliParser* parsed_args) {
     const char* filepath = NULL;
     if (parsed_args->casefile_count) {
         filepath = parsed_args->casefile_list[0];
@@ -37,8 +37,8 @@ bool Verify(const CliParser* parsed_args) {
     bool success = true;
     do {
         if (!(
-            (scramble_string = GetLine(input))
-            && (skeleton_string = GetLine(input))
+            (scramble_string = get_line(input))
+            && (skeleton_string = get_line(input))
         )) {
             fputs("Error input\n", stderr);
             success = false;
@@ -47,12 +47,12 @@ bool Verify(const CliParser* parsed_args) {
 
         Formula scramble;
         Formula skeleton;
-        if (!FormulaConstruct(&scramble, scramble_string)) {
+        if (!formula_construct(&scramble, scramble_string)) {
             fprintf(stderr, "Invalid scramble sequence: %s\n", scramble_string);
             success = false;
             break;
         }
-        if (!FormulaConstruct(&skeleton, skeleton_string)) {
+        if (!formula_construct(&skeleton, skeleton_string)) {
             fprintf(
                 stderr,
                 "Invalid skeleton sequence: %s\n",
@@ -63,13 +63,14 @@ bool Verify(const CliParser* parsed_args) {
         }
 
         Cube cube = identity_cube;
-        CubeTwistFormula(&cube, &scramble, true, true, false);
-        CubeTwistFormula(&cube, &skeleton, true, true, false);
-        bool parity = CubeHasParity(&cube);
-        int corner_cycles = CubeCornerCycles(&cube);
-        int edge_cycles = CubeEdgeCycles(&cube);
+        cube_twist_formula(&cube, &scramble, true, true, false);
+        cube_twist_formula(&cube, &skeleton, true, true, false);
+        bool parity = cube_has_parity(&cube);
+        int corner_cycles = cube_corner_cycles(&cube);
+        int edge_cycles = cube_edge_cycles(&cube);
 
-        OutputFunction* print = parsed_args->json ? JSONOutput : StandardOutput;
+        OutputFunction* print =
+            parsed_args->json ? json_output : standard_output;
         print(&scramble, &skeleton, parity, corner_cycles, edge_cycles);
 
         if (input != stdin) {
@@ -83,15 +84,15 @@ bool Verify(const CliParser* parsed_args) {
 }
 
 
-void StandardOutput(
+void standard_output(
     const Formula* scramble, const Formula* skeleton,
     bool parity, int corner_cycles, int edge_cycles
 ) {
     printf("Scramble: ");
-    FormulaPrint(scramble, stdout);
+    formula_print(scramble, stdout);
     putchar('\n');
     printf("Skeleton: ");
-    FormulaPrint(skeleton, stdout);
+    formula_print(skeleton, stdout);
     putchar('\n');
     if (corner_cycles == 0 && edge_cycles == 0) {
         if (parity) {
@@ -123,17 +124,17 @@ void StandardOutput(
 }
 
 
-void JSONOutput(
+void json_output(
     const Formula* scramble, const Formula* skeleton,
     bool parity, int corner_cycles, int edge_cycles
 ) {
     JsonObject* object = json_object_new();
 
-    char* scramble_string = Formula2String(scramble);
+    char* scramble_string = formula_to_string(scramble);
     json_object_set_string_member(object, "scramble", scramble_string);
     free(scramble_string);
 
-    char* skeleton_string = Formula2String(skeleton);
+    char* skeleton_string = formula_to_string(skeleton);
     json_object_set_string_member(object, "skeleton", skeleton_string);
     free(skeleton_string);
 
@@ -145,6 +146,6 @@ void JSONOutput(
     json_node_init_object(json, object);
     json_object_unref(object);
 
-    PrintJson(json, stdout);
+    print_json(json, stdout);
     json_node_unref(json);
 }
