@@ -58,23 +58,23 @@ void formula_get_insert_place_mask(
     if (insert_place == 0) {
         mask[0] = 0;
     } else {
-        mask[0] = move_mask(move[insert_place - 1]);
+        mask[0] = formula_move_mask(move[insert_place - 1]);
         if (
             insert_place > 1
             && move[insert_place - 1] >> 3 == move[insert_place - 2] >> 3
         ) {
-            mask[0] |= move_mask(move[insert_place - 2]);
+            mask[0] |= formula_move_mask(move[insert_place - 2]);
         }
     }
     if (insert_place == formula->length) {
         mask[1] = 0;
     } else {
-        mask[1] = move_mask(move[insert_place]);
+        mask[1] = formula_move_mask(move[insert_place]);
         if (
             insert_place + 1 < formula->length
             && move[insert_place] >> 3 == move[insert_place + 1] >> 3
         ) {
-            mask[1] |= move_mask(move[insert_place + 1]);
+            mask[1] |= formula_move_mask(move[insert_place + 1]);
         }
     }
 }
@@ -87,8 +87,7 @@ size_t formula_insert(
     Formula* result
 ) {
     result->length = formula->length + insertion->length;
-    result->capacity = 32;
-    while ((result->capacity <<= 1) < result->length);
+    result->capacity = formula_get_min_capacity(result->length);
     result->move = MALLOC(int, result->capacity);
     memcpy(result->move, formula->move, insert_place * sizeof(int));
     memcpy(
@@ -119,7 +118,7 @@ bool formula_insert_is_worthy(
             return false;
         }
         uint32_t high_mask = begin_mask >>= 24;
-        cancellation += (high_mask & (high_mask - 1)) ? 2 : 1;
+        cancellation += high_mask & (high_mask - 1) ? 2 : 1;
     }
     uint32_t end_mask = insert_place_mask[1] & insertion->end_mask;
     if (end_mask) {

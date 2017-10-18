@@ -67,13 +67,13 @@ void cube_twist_move(
 ) {
     typedef int Array[24];
     if (twist_corners) {
-        Array* table = computed_corner_twist_table[move];
+        const Array* table = computed_corner_twist_table[move];
         for (int i = 0; i < 8; ++i) {
             cube->corner[i] = table[i][cube->corner[i]];
         }
     }
     if (twist_edges) {
-        Array* table = computed_edge_twist_table[move];
+        const Array* table = computed_edge_twist_table[move];
         for (int i = 0; i < 12; ++i) {
             cube->edge[i] = table[i][cube->edge[i]];
         }

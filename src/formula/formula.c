@@ -28,7 +28,6 @@ static regex_t moves_regex;
 
 static int compare(const void* p, const void* q);
 static void formula_append(Formula* formula, int move);
-static size_t get_min_capacity(size_t length);
 
 
 void formula_init() {
@@ -181,7 +180,7 @@ bool formula_load(Formula* formula, FILE* stream) {
         return false;
     }
     formula->length = length;
-    formula->capacity = get_min_capacity(length);
+    formula->capacity = formula_get_min_capacity(length);
     formula->move = MALLOC(int, formula->capacity);
     int8_t move[length];
     if (!safe_read(move, sizeof(int8_t), length, stream)) {
@@ -190,13 +189,13 @@ bool formula_load(Formula* formula, FILE* stream) {
     for (size_t i = 0; i < length; ++i) {
         formula->move[i] = move[i];
     }
-    formula->begin_mask = move_mask(inverse_move_table[move[0]]);
+    formula->begin_mask = formula_move_mask(inverse_move_table[move[0]]);
     if (length > 1 && move[0] >> 3 == move[1] >> 3) {
-        formula->begin_mask |= move_mask(inverse_move_table[move[1]]);
+        formula->begin_mask |= formula_move_mask(inverse_move_table[move[1]]);
     }
-    formula->end_mask = move_mask(inverse_move_table[move[length - 1]]);
+    formula->end_mask = formula_move_mask(inverse_move_table[move[length - 1]]);
     if (length > 1 && move[length - 1] >> 3 == move[length - 2] >> 3) {
-        formula->end_mask |= move_mask(inverse_move_table[move[length - 2]]);
+        formula->end_mask |= formula_move_mask(inverse_move_table[move[length - 2]]);
     }
     if (length > 2) {
         uint32_t set_up_mask = (formula->begin_mask & formula->end_mask) >> 24;
@@ -216,7 +215,7 @@ bool formula_load(Formula* formula, FILE* stream) {
 void formula_duplicate(Formula* formula, const Formula* source) {
     size_t length = source->length;
     formula->length = length;
-    formula->capacity = get_min_capacity(length);
+    formula->capacity = formula_get_min_capacity(length);
     formula->move = MALLOC(int, formula->capacity);
     memcpy(formula->move, source->move, length * sizeof(int));
 }
@@ -308,7 +307,7 @@ size_t formula_generate_isomorphisms(const Formula* formula, Formula* result) {
     size_t length = formula->length;
     for (size_t i = 0; i < 96; ++i) {
         result[i].length = length;
-        result[i].capacity = get_min_capacity(length);
+        result[i].capacity = formula_get_min_capacity(length);
         result[i].move = MALLOC(int, result[i].capacity);
     }
     for (size_t i = 0; i < 24; ++i) {
@@ -364,11 +363,4 @@ void formula_append(Formula* formula, int move) {
         REALLOC(formula->move, int, formula->capacity <<= 1);
     }
     formula->move[formula->length++] = move;
-}
-
-
-size_t get_min_capacity(size_t length) {
-    size_t capacity = 32;
-    while ((capacity <<= 1) < length);
-    return capacity;
 }
