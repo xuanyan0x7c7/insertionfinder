@@ -3,7 +3,7 @@
 #include "memory.h"
 
 
-void* SafeMalloc(size_t size) {
+void* safe_malloc(size_t size) {
     void* p = malloc(size);
     if (p) {
         return p;
@@ -13,7 +13,7 @@ void* SafeMalloc(size_t size) {
     }
 }
 
-void* SafeRealloc(void* p, size_t size) {
+void* safe_realloc(void* p, size_t size) {
     p = realloc(p, size);
     if (p) {
         return p;

@@ -37,11 +37,11 @@ typedef void OutputFunction(
 );
 
 
-static FILE* OpenAlgorithmFile(const char* path);
+static FILE* open_algorithm_file(const char* path);
 
-static void Solving(SolvingFunctionArgs* args, FinderSolveResult* return_value);
+static void solving(SolvingFunctionArgs* args, FinderSolveResult* return_value);
 
-static void StandardOutput(
+static void standard_output(
     const Formula* scramble, const Formula* skeleton,
     bool parity,
     int corner_cycles, int edge_cycles,
@@ -49,7 +49,7 @@ static void StandardOutput(
     SolvingFunction* solve, SolvingFunctionArgs* args
 );
 
-static void JSONOutput(
+static void json_output(
     const Formula* scramble, const Formula* skeleton,
     bool parity,
     int corner_cycles, int edge_cycles,
@@ -57,45 +57,45 @@ static void JSONOutput(
     SolvingFunction* solve, SolvingFunctionArgs* args
 );
 
-static void Solution2JSON(const Worker* solution, JsonArray* solution_array);
+static void solution_to_json(const Worker* solution, JsonArray* solution_array);
 
 
-bool Solve(const CliParser* parsed_args) {
+bool solve(const CliParser* parsed_args) {
     HashMap map;
-    HashMapConstruct(
+    hashmap_construct(
         &map,
-        CubeEqualGeneric,
-        CubeHashGeneric,
+        cube_equal_generic,
+        cube_hash_generic,
         NULL,
-        AlgorithmFreeGeneric
+        algorithm_free_generic
     );
 
     for (size_t i = 0; i < parsed_args->algfile_count; ++i) {
         const char* path = parsed_args->algfile_list[i];
-        FILE* algorithm_file = OpenAlgorithmFile(path);
+        FILE* algorithm_file = open_algorithm_file(path);
         if (!algorithm_file) {
             fprintf(stderr, "Cannot open algorithm file: %s\n", path);
             continue;
         }
         size_t size;
-        if (!SafeRead(&size, sizeof(size_t), 1, algorithm_file)) {
+        if (!safe_read(&size, sizeof(size_t), 1, algorithm_file)) {
             fprintf(stderr, "Invalid algorithm file: %s\n", path);
             continue;
         }
         for (size_t j = 0; j < size; ++j) {
             Algorithm* algorithm = MALLOC(Algorithm);
-            if (!AlgorithmLoad(algorithm, algorithm_file)) {
+            if (!algorithm_load(algorithm, algorithm_file)) {
                 fprintf(stderr, "Invalid algorithm file: %s\n", path);
                 free(algorithm);
                 break;
             }
             HashMapNode* node;
-            if (!HashMapInsert(&map, &algorithm->state, algorithm, &node)) {
+            if (!hashmap_insert(&map, &algorithm->state, algorithm, &node)) {
                 Algorithm* dest = (Algorithm*)node->value;
                 for (size_t k = 0; k < algorithm->size; ++k) {
-                    AlgorithmAddFormula(dest, &algorithm->formula_list[k]);
+                    algorithm_add_formula(dest, &algorithm->formula_list[k]);
                 }
-                AlgorithmDestroy(algorithm);
+                algorithm_destroy(algorithm);
                 free(algorithm);
             }
         }
@@ -105,19 +105,19 @@ bool Solve(const CliParser* parsed_args) {
     Algorithm** algorithm_list = MALLOC(Algorithm*, map.size);
     size_t index = 0;
     for (
-        HashMapNode* node = HashMapIterStart(&map);
+        HashMapNode* node = hashmap_iter_start(&map);
         node;
-        node = HashMapIterNext(&map, node)
+        node = hashmap_iter_next(&map, node)
     ) {
         algorithm_list[index] = (Algorithm*)node->value;
-        AlgorithmSortFormula(algorithm_list[index]);
+        algorithm_sort_formula(algorithm_list[index]);
         ++index;
     }
     qsort(
         algorithm_list,
         map.size,
         sizeof(Algorithm*),
-        AlgorithmCompareGeneric
+        algorithm_compare_generic
     );
 
     const char* filepath = NULL;
@@ -135,8 +135,8 @@ bool Solve(const CliParser* parsed_args) {
     bool success = true;
     do {
         if (!(
-            (scramble_string = GetLine(input))
-            && (skeleton_string = GetLine(input))
+            (scramble_string = get_line(input))
+            && (skeleton_string = get_line(input))
         )) {
             fputs("Error input\n", stderr);
             success = false;
@@ -145,12 +145,12 @@ bool Solve(const CliParser* parsed_args) {
 
         Formula scramble;
         Formula skeleton;
-        if (!FormulaConstruct(&scramble, scramble_string)) {
+        if (!formula_construct(&scramble, scramble_string)) {
             fprintf(stderr, "Invalid scramble sequence: %s\n", scramble_string);
             success = false;
             break;
         }
-        if (!FormulaConstruct(&skeleton, skeleton_string)) {
+        if (!formula_construct(&skeleton, skeleton_string)) {
             fprintf(
                 stderr,
                 "Invalid skeleton sequence: %s\n",
@@ -161,37 +161,38 @@ bool Solve(const CliParser* parsed_args) {
         }
 
         Cube cube = identity_cube;
-        CubeTwistFormula(&cube, &scramble, true, true, false);
-        CubeTwistFormula(&cube, &skeleton, true, true, false);
-        bool parity = CubeHasParity(&cube);
-        int corner_cycles = CubeCornerCycles(&cube);
-        int edge_cycles = CubeEdgeCycles(&cube);
+        cube_twist_formula(&cube, &scramble, true, true, false);
+        cube_twist_formula(&cube, &skeleton, true, true, false);
+        bool parity = cube_has_parity(&cube);
+        int corner_cycles = cube_corner_cycles(&cube);
+        int edge_cycles = cube_edge_cycles(&cube);
 
         Finder finder;
-        FinderConstruct(&finder, map.size, algorithm_list, &scramble);
+        finder_construct(&finder, map.size, algorithm_list, &scramble);
         SolvingFunctionArgs args = {
             .finder = &finder,
             .skeleton = &skeleton,
             .max_threads = parsed_args->max_threads
         };
-        OutputFunction* print = parsed_args->json ? JSONOutput : StandardOutput;
+        OutputFunction* print =
+            parsed_args->json ? json_output : standard_output;
         print(
             &scramble, &skeleton,
             parity, corner_cycles, edge_cycles,
             &finder,
-            Solving, &args
+            solving, &args
         );
 
-        FormulaDestroy(&scramble);
-        FormulaDestroy(&skeleton);
-        FinderDestroy(&finder);
+        formula_destroy(&scramble);
+        formula_destroy(&skeleton);
+        finder_destroy(&finder);
 
         if (input != stdin) {
             fclose(input);
         }
     } while (false);
 
-    HashMapDestroy(&map);
+    hashmap_destroy(&map);
     free(algorithm_list);
     free(scramble_string);
     free(skeleton_string);
@@ -199,7 +200,7 @@ bool Solve(const CliParser* parsed_args) {
 }
 
 
-FILE* OpenAlgorithmFile(const char* path) {
+FILE* open_algorithm_file(const char* path) {
     FILE* file = fopen(path, "rb");
     if (file) {
         return file;
@@ -214,8 +215,8 @@ FILE* OpenAlgorithmFile(const char* path) {
 }
 
 
-void Solving(SolvingFunctionArgs* args, FinderSolveResult* return_value) {
-    *return_value = FinderSolve(
+void solving(SolvingFunctionArgs* args, FinderSolveResult* return_value) {
+    *return_value = finder_solve(
         args->finder,
         args->skeleton,
         args->max_threads
@@ -223,7 +224,7 @@ void Solving(SolvingFunctionArgs* args, FinderSolveResult* return_value) {
 }
 
 
-void StandardOutput(
+void standard_output(
     const Formula* scramble, const Formula* skeleton,
     bool parity,
     int corner_cycles, int edge_cycles,
@@ -231,10 +232,10 @@ void StandardOutput(
     SolvingFunction* solve, SolvingFunctionArgs* args
 ) {
     printf("Scramble: ");
-    FormulaPrint(scramble, stdout);
+    formula_print(scramble, stdout);
     putchar('\n');
     printf("Skeleton: ");
-    FormulaPrint(skeleton, stdout);
+    formula_print(skeleton, stdout);
     putchar('\n');
 
     if (corner_cycles == 0 && edge_cycles == 0) {
@@ -280,7 +281,7 @@ void StandardOutput(
                     const Formula* skeleton = &insertion->skeleton;
                     size_t insert_place = insertion->insert_place;
                     if (insert_place > 0) {
-                        FormulaPrintRange(
+                        formula_print_range(
                             skeleton,
                             0, insert_place,
                             stdout
@@ -290,14 +291,14 @@ void StandardOutput(
                     printf("[@%zu]", j + 1);
                     if (insert_place < skeleton->length) {
                         putchar(' ');
-                        FormulaPrintRange(
+                        formula_print_range(
                             skeleton,
                             insert_place, skeleton->length,
                             stdout
                         );
                     }
                     printf("\nAt @%zu insert: ", j + 1);
-                    FormulaPrint(insertion->insertion, stdout);
+                    formula_print(insertion->insertion, stdout);
                     putchar('\n');
                 }
                 printf(
@@ -307,7 +308,7 @@ void StandardOutput(
                     solution->cancellation == 1 ? "" : "s"
                 );
                 printf("Full solution: ");
-                FormulaPrint(
+                formula_print(
                     &solution->solving_step[solution->depth].skeleton,
                     stdout
                 );
@@ -354,7 +355,7 @@ void StandardOutput(
 }
 
 
-void JSONOutput(
+void json_output(
     const Formula* scramble, const Formula* skeleton,
     bool parity,
     int corner_cycles, int edge_cycles,
@@ -366,12 +367,12 @@ void JSONOutput(
 
     JsonObject* object = json_object_new();
 
-    char* scramble_string = Formula2String(scramble);
+    char* scramble_string = formula_to_string(scramble);
     json_object_set_string_member(object, "scramble", scramble_string);
     free(scramble_string);
     json_object_set_int_member(object, "scramble_moves", scramble->length);
 
-    char* skeleton_string = Formula2String(skeleton);
+    char* skeleton_string = formula_to_string(skeleton);
     json_object_set_string_member(object, "skeleton", skeleton_string);
     free(skeleton_string);
     json_object_set_int_member(object, "skeleton_moves", skeleton->length);
@@ -393,7 +394,7 @@ void JSONOutput(
 
     JsonArray* solution_array = json_array_new();
     for (size_t i = 0; i < finder->solution_count; ++i) {
-        Solution2JSON(&finder->solution_list[i], solution_array);
+        solution_to_json(&finder->solution_list[i], solution_array);
     }
     json_object_set_array_member(object, "solution", solution_array);
     json_object_set_int_member(object, "duration", result.duration);
@@ -402,15 +403,15 @@ void JSONOutput(
     json_node_init_object(json, object);
     json_object_unref(object);
 
-    PrintJson(json, stdout);
+    print_json(json, stdout);
     json_node_unref(json);
 }
 
 
-void Solution2JSON(const Worker* solution, JsonArray* solution_array) {
+void solution_to_json(const Worker* solution, JsonArray* solution_array) {
     JsonObject* object = json_object_new();
 
-    char* final_solution = Formula2String(
+    char* final_solution = formula_to_string(
         &solution->solving_step[solution->depth].skeleton
     );
     json_object_set_string_member(object, "final_solution", final_solution);
@@ -430,13 +431,13 @@ void Solution2JSON(const Worker* solution, JsonArray* solution_array) {
         size_t temp_size;
         FILE* skeleton_stream = open_memstream(&skeleton_string, &temp_size);
         if (insert_place > 0) {
-            FormulaPrintRange(skeleton, 0, insert_place, skeleton_stream);
+            formula_print_range(skeleton, 0, insert_place, skeleton_stream);
             fputc(' ', skeleton_stream);
         }
         fputc('@', skeleton_stream);
         if (insert_place < skeleton->length) {
             fputc(' ', skeleton_stream);
-            FormulaPrintRange(
+            formula_print_range(
                 skeleton,
                 insert_place, skeleton->length,
                 skeleton_stream
@@ -450,7 +451,7 @@ void Solution2JSON(const Worker* solution, JsonArray* solution_array) {
         );
         free(skeleton_string);
 
-        char* insertion_string = Formula2String(insertion->insertion);
+        char* insertion_string = formula_to_string(insertion->insertion);
         json_object_set_string_member(
             solving_step_object,
             "insertion",

@@ -1,3 +1,3 @@
-noinst_LIBRARIES = libfinder.a
-libfinder_a_SOURCES = finder.h finder.c worker.c
-libfinder_a_CFLAGS = -pthread
+noinst_LTLIBRARIES = libfinder.la
+libfinder_la_SOURCES = finder.h finder.c worker.c
+libfinder_la_CFLAGS = -pthread

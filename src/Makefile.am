@@ -1,13 +1,13 @@
 SUBDIRS = algorithm commands cube data-structure finder formula utils
 bin_PROGRAMS = insertionfinder
 insertionfinder_SOURCES = init.h init.c main.c
-insertionfinder_LDADD = commands/libcommands.a \
-	finder/libfinder.a \
-	algorithm/libalgorithm.a \
-	cube/libcube.a \
-	formula/libformula.a \
-	data-structure/libdatastructure.a \
-	utils/libutils.a \
+insertionfinder_LDADD = commands/libcommands.la \
+	finder/libfinder.la \
+	algorithm/libalgorithm.la \
+	cube/libcube.la \
+	formula/libformula.la \
+	data-structure/libdatastructure.la \
+	utils/libutils.la \
 	$(json_LIBS) \
 	-lm
 AM_LDFLAGS = -pthread

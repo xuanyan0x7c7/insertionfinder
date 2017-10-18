@@ -38,4 +38,4 @@ enum {
     SHORT_PARAMETER_THREADS = 't'
 };
 
-CliParser Parse(int argc, char** argv);
+CliParser parse(int argc, char** argv);

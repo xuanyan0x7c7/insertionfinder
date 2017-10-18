@@ -5,10 +5,10 @@
 #include "hash-map.h"
 
 
-static void Noop(void* data) {}
+static void noop(void* data) {}
 
 
-void HashMapConstruct(
+void hashmap_construct(
     HashMap* map,
     EqualFunction* key_equal,
     HashFunction* hash,
@@ -23,11 +23,11 @@ void HashMapConstruct(
     }
     map->key_equal = key_equal;
     map->hash = hash;
-    map->destroy_key = destroy_key ? destroy_key : Noop;
-    map->destroy_value = destroy_value ? destroy_value : Noop;
+    map->destroy_key = destroy_key ? destroy_key : noop;
+    map->destroy_value = destroy_value ? destroy_value : noop;
 }
 
-void HashMapDestroy(HashMap* map) {
+void hashmap_destroy(HashMap* map) {
     for (size_t i = 0; i < map->buckets; ++i) {
         if (map->buffer[i].status == NODE_FILLED) {
             map->destroy_key(map->buffer[i].key);
@@ -38,7 +38,7 @@ void HashMapDestroy(HashMap* map) {
 }
 
 
-HashMapNode* HashMapFind(const HashMap* map, const void* key) {
+HashMapNode* hashmap_find(const HashMap* map, const void* key) {
     size_t index = map->hash(key) & (map->buckets - 1);
     while (map->buffer[index].status != NODE_EMPTY) {
         if (
@@ -52,7 +52,7 @@ HashMapNode* HashMapFind(const HashMap* map, const void* key) {
     return NULL;
 }
 
-bool HashMapInsert(HashMap* map, void* key, void* value, HashMapNode** node) {
+bool hashmap_insert(HashMap* map, void* key, void* value, HashMapNode** node) {
     size_t buckets_mask = map->buckets - 1;
     size_t hash = map->hash(key);
     size_t index = hash & buckets_mask;
@@ -104,7 +104,7 @@ bool HashMapInsert(HashMap* map, void* key, void* value, HashMapNode** node) {
     return true;
 }
 
-void HashMapRemove(HashMap* map, HashMapNode* node) {
+void hashmap_remove(HashMap* map, HashMapNode* node) {
     --map->size;
     node->status = NODE_REMOVED;
     map->destroy_key(node->key);
@@ -129,7 +129,7 @@ void HashMapRemove(HashMap* map, HashMapNode* node) {
 }
 
 
-HashMapNode* HashMapIterStart(const HashMap* map) {
+HashMapNode* hashmap_iter_start(const HashMap* map) {
     const HashMapNode* begin = map->buffer;
     const HashMapNode* end = map->buffer + map->buckets;
     for (HashMapNode* iter = (HashMapNode*)begin; iter != end; ++iter) {
@@ -140,7 +140,7 @@ HashMapNode* HashMapIterStart(const HashMap* map) {
     return NULL;
 }
 
-HashMapNode* HashMapIterNext(const HashMap* map, const HashMapNode* node) {
+HashMapNode* hashmap_iter_next(const HashMap* map, const HashMapNode* node) {
     const HashMapNode* end = map->buffer + map->buckets;
     for (HashMapNode* iter = (HashMapNode*)node; ++iter != end;) {
         if (iter->status == NODE_FILLED) {

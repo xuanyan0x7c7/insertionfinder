@@ -32,39 +32,39 @@ struct Formula {
     uint32_t set_up_mask;
 };
 
-void FormulaInit();
+void formula_init();
 
-bool FormulaConstruct(Formula* formula, const char* string);
-void FormulaDestroy(Formula* formula);
+bool formula_construct(Formula* formula, const char* string);
+void formula_destroy(Formula* formula);
 
-void FormulaSave(const Formula* formula, FILE* stream);
-bool FormulaLoad(Formula* formula, FILE* stream);
-void FormulaDuplicate(Formula* formula, const Formula* source);
+void formula_save(const Formula* formula, FILE* stream);
+bool formula_load(Formula* formula, FILE* stream);
+void formula_duplicate(Formula* formula, const Formula* source);
 
-void FormulaPrint(const Formula* formula, FILE* stream);
-void FormulaPrintRange(
+void formula_print(const Formula* formula, FILE* stream);
+void formula_print_range(
     const Formula* formula,
     size_t begin, size_t end,
     FILE* stream
 );
 
-char* Formula2String(const Formula* formula);
+char* formula_to_string(const Formula* formula);
 
-size_t FormulaCancelMoves(Formula* formula);
+size_t formula_cancel_moves(Formula* formula);
 
-void FormulaGetInsertPlaceMask(
+void formula_get_insert_place_mask(
     const Formula* formula,
     size_t insert_place,
     uint32_t* mask
 );
 
-size_t FormulaInsert(
+size_t formula_insert(
     const Formula* formula,
     size_t insert_place,
     const Formula* insertion,
     Formula* result
 );
-bool FormulaInsertIsWorthy(
+bool formula_insert_is_worthy(
     const Formula* formula,
     size_t insert_place,
     const Formula* insertion,
@@ -72,9 +72,9 @@ bool FormulaInsertIsWorthy(
     size_t fewest_moves
 );
 
-bool FormulaSwappable(const Formula* formula, size_t index);
-void FormulaSwapAdjacent(Formula* formula, size_t index);
-void FormulaNormalize(Formula* formula);
-int FormulaCompare(const Formula* f1, const Formula* f2);
+bool formula_swappable(const Formula* formula, size_t index);
+void formula_swap_adjacent(Formula* formula, size_t index);
+void formula_normalize(Formula* formula);
+int formula_compare(const Formula* f1, const Formula* f2);
 
-size_t FormulaGenerateIsomorphisms(const Formula* formula, Formula* result);
+size_t formula_generate_isomorphisms(const Formula* formula, Formula* result);

@@ -23,10 +23,10 @@ static const struct option long_options[] = {
     {NULL, 0, NULL, 0}
 };
 
-static void ParseThreadArgs(CliParser* parsed_args);
+static void parse_thread_args(CliParser* parsed_args);
 
 
-CliParser Parse(int argc, char** argv) {
+CliParser parse(int argc, char** argv) {
     CliParser parsed_args;
     parsed_args.command = -1;
     parsed_args.json = false;
@@ -49,71 +49,71 @@ CliParser Parse(int argc, char** argv) {
             break;
         }
         switch (c) {
-            case 0:
-                switch (option_index) {
-                    case COMMAND_SOLVE:
-                    case COMMAND_VERIFY:
-                    case COMMAND_GENERATE_ALGFILE:
-                    case COMMAND_HELP:
-                    case COMMAND_VERSION:
-                        parsed_args.command = option_index;
-                        break;
-                    case PARAMETER_JSON:
-                        parsed_args.json = true;
-                        break;
-                    case PARAMETER_ALGFILE:
-                        parsed_args.algfile_list[
-                            parsed_args.algfile_count++
-                        ] = optarg;
-                        break;
-                    case PARAMETER_CASEFILE:
-                        parsed_args.casefile_list[
-                            parsed_args.casefile_count++
-                        ] = optarg;
-                        break;
-                    case PARAMETER_FILE:
-                        parsed_args.file_list[
-                            parsed_args.file_count++
-                        ] = optarg;
-                    break;
-                    case PARAMETER_THREADS:
-                        ParseThreadArgs(&parsed_args);
-                        break;
-                }
+        case 0:
+            switch (option_index) {
+            case COMMAND_SOLVE:
+            case COMMAND_VERIFY:
+            case COMMAND_GENERATE_ALGFILE:
+            case COMMAND_HELP:
+            case COMMAND_VERSION:
+                parsed_args.command = option_index;
                 break;
-            case SHORT_COMMAND_SOLVE:
-                parsed_args.command = COMMAND_SOLVE;
+            case PARAMETER_JSON:
+                parsed_args.json = true;
                 break;
-            case SHORT_COMMAND_VERIFY:
-                parsed_args.command = COMMAND_VERIFY;
+            case PARAMETER_ALGFILE:
+                parsed_args.algfile_list[
+                    parsed_args.algfile_count++
+                ] = optarg;
                 break;
-            case SHORT_COMMAND_HELP:
-                parsed_args.command = COMMAND_HELP;
-                break;
-            case SHORT_COMMAND_VERSION:
-                parsed_args.command = COMMAND_VERSION;
-                break;
-            case SHORT_PARAMETER_ALGFILE:
-                parsed_args.algfile_list[parsed_args.algfile_count++] = optarg;
-                break;
-            case SHORT_PARAMETER_CASEFILE:
+            case PARAMETER_CASEFILE:
                 parsed_args.casefile_list[
                     parsed_args.casefile_count++
                 ] = optarg;
                 break;
-            case SHORT_PARAMETER_FILE:
-                parsed_args.file_list[parsed_args.file_count++] = optarg;
+            case PARAMETER_FILE:
+                parsed_args.file_list[
+                    parsed_args.file_count++
+                ] = optarg;
+            break;
+            case PARAMETER_THREADS:
+                parse_thread_args(&parsed_args);
                 break;
-            case SHORT_PARAMETER_THREADS:
-                ParseThreadArgs(&parsed_args);
-                break;
+            }
+            break;
+        case SHORT_COMMAND_SOLVE:
+            parsed_args.command = COMMAND_SOLVE;
+            break;
+        case SHORT_COMMAND_VERIFY:
+            parsed_args.command = COMMAND_VERIFY;
+            break;
+        case SHORT_COMMAND_HELP:
+            parsed_args.command = COMMAND_HELP;
+            break;
+        case SHORT_COMMAND_VERSION:
+            parsed_args.command = COMMAND_VERSION;
+            break;
+        case SHORT_PARAMETER_ALGFILE:
+            parsed_args.algfile_list[parsed_args.algfile_count++] = optarg;
+            break;
+        case SHORT_PARAMETER_CASEFILE:
+            parsed_args.casefile_list[
+                parsed_args.casefile_count++
+            ] = optarg;
+            break;
+        case SHORT_PARAMETER_FILE:
+            parsed_args.file_list[parsed_args.file_count++] = optarg;
+            break;
+        case SHORT_PARAMETER_THREADS:
+            parse_thread_args(&parsed_args);
+            break;
         }
     }
     return parsed_args;
 }
 
 
-void ParseThreadArgs(CliParser* parsed_args) {
+void parse_thread_args(CliParser* parsed_args) {
     if (optarg) {
         char* end;
         long threads = strtol(optarg, &end, 10);

@@ -6,10 +6,10 @@
 typedef LinkedList List;
 typedef LinkedListNode Node;
 
-static void Noop(void* data) {}
+static void noop(void* data) {}
 
 
-void LinkedListConstruct(List* list, Destructor* destroy) {
+void linkedlist_construct(List* list, Destructor* destroy) {
     list->head = MALLOC(Node);
     list->tail = MALLOC(Node);
     list->head->data = NULL;
@@ -18,10 +18,10 @@ void LinkedListConstruct(List* list, Destructor* destroy) {
     list->tail->data = NULL;
     list->tail->prev = list->head;
     list->tail->next = NULL;
-    list->destroy = destroy ? destroy : Noop;
+    list->destroy = destroy ? destroy : noop;
 }
 
-void LinkedListDestroy(List* list) {
+void linkedlist_destroy(List* list) {
     Node* node = list->head;
     Node* next = node->next;
     while ((node = next) != list->tail) {
@@ -34,7 +34,7 @@ void LinkedListDestroy(List* list) {
 }
 
 
-void LinkedListInsertBefore(Node* node, void* data) {
+void linkedlist_insert_before(Node* node, void* data) {
     Node* new_node = MALLOC(Node);
     new_node->data = data;
     new_node->prev = node->prev;
@@ -43,7 +43,7 @@ void LinkedListInsertBefore(Node* node, void* data) {
     node->prev = new_node;
 }
 
-void LinkedListInsertAfter(Node* node, void* data) {
+void linkedlist_insert_after(Node* node, void* data) {
     Node* new_node = MALLOC(Node);
     new_node->data = data;
     new_node->prev = node;
@@ -52,7 +52,7 @@ void LinkedListInsertAfter(Node* node, void* data) {
     node->next = new_node;
 }
 
-void LinkedListRemove(List* list, Node* node) {
+void linkedlist_remove(List* list, Node* node) {
     node->prev->next = node->next;
     node->next->prev = node->prev;
     list->destroy(node->data);
@@ -60,7 +60,7 @@ void LinkedListRemove(List* list, Node* node) {
 }
 
 
-void LinkedListSetItem(List* list, Node* node, void* data) {
+void linkedlist_set_item(List* list, Node* node, void* data) {
     list->destroy(node->data);
     node->data = data;
 }

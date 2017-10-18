@@ -18,17 +18,17 @@ struct Algorithm {
     Formula* formula_list;
 };
 
-void AlgorithmConstruct(Algorithm* algorithm, const Cube* state);
-void AlgorithmDestroy(Algorithm* algorithm);
+void algorithm_construct(Algorithm* algorithm, const Cube* state);
+void algorithm_destroy(Algorithm* algorithm);
 
-void AlgorithmSave(const Algorithm* algorithm, FILE* stream);
-bool AlgorithmLoad(Algorithm* algorithm, FILE* stream);
+void algorithm_save(const Algorithm* algorithm, FILE* stream);
+bool algorithm_load(Algorithm* algorithm, FILE* stream);
 
-bool AlgorithmContainsFormula(
+bool algorithm_contains_formula(
     const Algorithm* algorithm,
     const Formula* formula
 );
-void AlgorithmAddFormula(Algorithm* algorithm, const Formula* formula);
-void AlgorithmSortFormula(Algorithm* algorithm);
+void algorithm_add_formula(Algorithm* algorithm, const Formula* formula);
+void algorithm_sort_formula(Algorithm* algorithm);
 
-int AlgorithmCompare(const Algorithm* x, const Algorithm* y);
+int algorithm_compare(const Algorithm* x, const Algorithm* y);

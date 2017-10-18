@@ -7,51 +7,51 @@
 #include "algorithm.h"
 
 
-static int CubeCompare(const Cube* x, const Cube* y);
+static int cube_compare(const Cube* x, const Cube* y);
 
 
-void AlgorithmConstruct(Algorithm* algorithm, const Cube* state) {
+void algorithm_construct(Algorithm* algorithm, const Cube* state) {
     memcpy(&algorithm->state, state, sizeof(Cube));
-    algorithm->mask = CubeMask(state);
-    algorithm->parity = CubeHasParity(state);
-    algorithm->corner_cycles = CubeCornerCycles(state);
-    algorithm->edge_cycles = CubeEdgeCycles(state);
+    algorithm->mask = cube_mask(state);
+    algorithm->parity = cube_has_parity(state);
+    algorithm->corner_cycles = cube_corner_cycles(state);
+    algorithm->edge_cycles = cube_edge_cycles(state);
     algorithm->size = 0;
     algorithm->capacity = 8;
     algorithm->formula_list = MALLOC(Formula, algorithm->capacity);
 }
 
-void AlgorithmDestroy(Algorithm* algorithm) {
+void algorithm_destroy(Algorithm* algorithm) {
     Formula* begin = algorithm->formula_list;
     Formula* end = begin + algorithm->size;
     for (Formula* p = begin; p < end; ++p) {
-        FormulaDestroy(p);
+        formula_destroy(p);
     }
     free(algorithm->formula_list);
 }
 
 
-void AlgorithmSave(const Algorithm* algorithm, FILE* stream) {
-    CubeSave(&algorithm->state, stream);
+void algorithm_save(const Algorithm* algorithm, FILE* stream) {
+    cube_save(&algorithm->state, stream);
     fwrite(&algorithm->size, sizeof(size_t), 1, stream);
     const Formula* begin = algorithm->formula_list;
     const Formula* end = begin + algorithm->size;
     for (const Formula* p = begin; p < end; ++p) {
-        FormulaSave(p, stream);
+        formula_save(p, stream);
     }
 }
 
-bool AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
+bool algorithm_load(Algorithm* algorithm, FILE* stream) {
     Cube* state = &algorithm->state;
-    if (!CubeLoad(state, stream)) {
+    if (!cube_load(state, stream)) {
         return false;
     }
-    algorithm->mask = CubeMask(state);
-    algorithm->parity = CubeHasParity(state);
-    algorithm->corner_cycles = CubeCornerCycles(state);
-    algorithm->edge_cycles = CubeEdgeCycles(state);
+    algorithm->mask = cube_mask(state);
+    algorithm->parity = cube_has_parity(state);
+    algorithm->corner_cycles = cube_corner_cycles(state);
+    algorithm->edge_cycles = cube_edge_cycles(state);
     size_t size;
-    if (!SafeRead(&size, sizeof(size_t), 1, stream)) {
+    if (!safe_read(&size, sizeof(size_t), 1, stream)) {
         return false;
     }
     algorithm->size = size;
@@ -60,7 +60,7 @@ bool AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
     Formula* begin = algorithm->formula_list;
     Formula* end = begin + algorithm->size;
     for (Formula* p = begin; p < end; ++p) {
-        if (!FormulaLoad(p, stream)) {
+        if (!formula_load(p, stream)) {
             return false;
         }
     }
@@ -68,7 +68,7 @@ bool AlgorithmLoad(Algorithm* algorithm, FILE* stream) {
 }
 
 
-int AlgorithmCompare(const Algorithm* x, const Algorithm* y) {
+int algorithm_compare(const Algorithm* x, const Algorithm* y) {
     int cycles_diff = (x->corner_cycles + x->edge_cycles + x->parity) - (
         y->corner_cycles + y->edge_cycles + y->parity
     );
@@ -81,11 +81,11 @@ int AlgorithmCompare(const Algorithm* x, const Algorithm* y) {
     if (x->corner_cycles != y->corner_cycles) {
         return x->corner_cycles - y->corner_cycles;
     }
-    return CubeCompare(&x->state, &y->state);
+    return cube_compare(&x->state, &y->state);
 }
 
 
-int CubeCompare(const Cube* x, const Cube* y) {
+int cube_compare(const Cube* x, const Cube* y) {
     const int* corner1 = x->corner;
     const int* corner2 = y->corner;
     const int* edge1 = x->edge;

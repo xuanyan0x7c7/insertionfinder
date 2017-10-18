@@ -4,7 +4,7 @@
 #include "io.h"
 
 
-bool SafeRead(void* p, size_t size, size_t n, FILE* stream) {
+bool safe_read(void* p, size_t size, size_t n, FILE* stream) {
     size_t bytes = fread(p, size, n, stream);
     if (bytes == n) {
         return true;
@@ -14,7 +14,7 @@ bool SafeRead(void* p, size_t size, size_t n, FILE* stream) {
     }
 }
 
-bool SafeWrite(const void* p, size_t size, size_t n, FILE* stream) {
+bool safe_write(const void* p, size_t size, size_t n, FILE* stream) {
     size_t bytes = fwrite(p, size, n, stream);
     if (bytes == n) {
         return true;

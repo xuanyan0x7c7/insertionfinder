@@ -2,7 +2,7 @@
 #include "formula/formula.h"
 
 
-void Init() {
-    CubeInit();
-    FormulaInit();
+void init() {
+    cube_init();
+    formula_init();
 }
