@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <cstdint>
 #include <exception>
 #include <limits>
@@ -28,7 +29,7 @@ namespace InsertionFinder {
 
     class Formula {
     public:
-        static constexpr array<int, 24> inverse_twist_table = {
+        static constexpr std::array<int, 24> inverse_twist_table = {
             0, 3, 2, 1,
             4, 7, 6, 5,
             8, 11, 10, 9,
@@ -43,6 +44,12 @@ namespace InsertionFinder {
         std::uint32_t end_mask;
         std::uint32_t set_up_mask;
     public:
+        Formula() {}
+        Formula(const Formula&) = default;
+        Formula(Formula&&) = default;
+        Formula& operator=(const Formula&) = default;
+        Formula& operator=(Formula&&) = default;
+        ~Formula() = default;
         explicit Formula(const std::string& formula_string);
     public:
         std::size_t length() const noexcept {
@@ -50,6 +57,14 @@ namespace InsertionFinder {
         }
         int operator[](std::size_t index) const {
             return this->twists[index];
+        }
+    public:
+        static int compare(const Formula& lhs, const Formula& rhs) noexcept;
+        bool operator==(const Formula& rhs) const noexcept {
+            return this->compare(*this, rhs) == 0;
+        }
+        bool operator<(const Formula& rhs) const noexcept {
+            return this->compare(*this, rhs) < 0;
         }
     public:
         friend std::ostream& ::operator<<(std::ostream& out, const Formula& formula);
@@ -75,5 +90,8 @@ namespace InsertionFinder {
         void swap_adjacent(std::size_t place) {
             std::swap(this->twists[place - 1], this->twists[place]);
         }
+    public:
+        void normalize() noexcept;
+        std::vector<Formula> generate_isomorphisms() const;
     };
 };

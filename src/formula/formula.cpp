@@ -118,6 +118,23 @@ Formula::Formula(const string& formula_string) {
     if (!temp_string.empty()) {
         throw FormulaError(formula_string);
     }
+
+    this->cancel_moves();
+}
+
+
+int Formula::compare(const Formula& lhs, const Formula& rhs) noexcept {
+    const auto& t1 = lhs.twists;
+    const auto& t2 = rhs.twists;
+    if (t1 != t2) {
+        return static_cast<int>(t1.size()) - static_cast<int>(t2.size());
+    }
+    for (size_t i = 0, l = t1.size(); i < l; ++i) {
+        if (t1[i] != t2[i]) {
+            return t1[i] - t2[i];
+        }
+    }
+    return 0;
 }
 
 
