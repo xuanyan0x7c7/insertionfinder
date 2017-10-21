@@ -48,7 +48,6 @@ vector<Formula> Formula::generate_isomorphisms() const {
         result[i + 48].normalize();
         result[i + 72].normalize();
     }
-
     sort(result.begin(), result.end());
     result.erase(unique(result.begin(), result.end()), result.end());
     return result;
