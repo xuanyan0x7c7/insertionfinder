@@ -1,14 +1,19 @@
 #include <array>
 #include <algorithm>
+#include <cstdint>
+#include <istream>
+#include <memory>
 #include <ostream>
 #include <regex>
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <vector>
 #include <formula.hpp>
-#include <iostream>
+#include "./utils.hpp"
 using namespace std;
 using namespace InsertionFinder;
+using namespace Details;
 
 
 namespace {
@@ -157,4 +162,49 @@ string Formula::to_string() const {
     stringstream stream;
     stream << *this;
     return stream.str();
+}
+
+
+void Formula::save_to(ostream& out) const {
+    size_t length = this->twists.size();
+    out.write(reinterpret_cast<char*>(&length), sizeof(size_t));
+    auto data = make_unique<int8_t[]>(length);
+    for (size_t i = 0; i < length; ++i) {
+        data[i] = this->twists[i];
+    }
+    out.write(reinterpret_cast<char*>(data.get()), length * sizeof(int8_t));
+}
+
+void Formula::read_from(istream& in) {
+    size_t length;
+    in.read(reinterpret_cast<char*>(&length), sizeof(size_t));
+    if (in.gcount() != sizeof(size_t)) {
+        throw FormulaStreamError();
+    }
+    auto data = make_unique<int8_t[]>(length);
+    in.read(reinterpret_cast<char*>(data.get()), length);
+    if (static_cast<size_t>(in.gcount()) != length) {
+        throw FormulaStreamError();
+    }
+    this->twists = vector<int>(data.get(), data.get() + length);
+
+    auto& twists = this->twists;
+    this->begin_mask = twist_mask(this->inverse_twist_table[twists[0]]);
+    if (length > 1 && twists[0] >> 3 == twists[1] >> 3) {
+        this->begin_mask |= this->inverse_twist_table[twists[1]];
+    }
+    this->end_mask = twist_mask(this->inverse_twist_table[twists[length - 1]]);
+    if (length > 1 && twists[length - 1] >> 3 == twists[length - 2] >> 3) {
+        this->end_mask |= this->inverse_twist_table[twists[length - 2]];
+    }
+    this->set_up_mask = 0;
+    if (length > 2) {
+        uint32_t set_up_mask = (this->begin_mask & this->end_mask) >> 24;
+        for (size_t i = 0; i < 6; ++i) {
+            if (set_up_mask & 1 << i) {
+                this->set_up_mask |= 0xe << (i << 2);
+            }
+        }
+        this->set_up_mask &= this->end_mask;
+    }
 }

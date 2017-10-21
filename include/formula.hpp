@@ -2,6 +2,7 @@
 #include <array>
 #include <cstdint>
 #include <exception>
+#include <istream>
 #include <limits>
 #include <ostream>
 #include <string>
@@ -12,7 +13,7 @@ namespace InsertionFinder {class Formula;};
 std::ostream& operator<<(std::ostream&, const InsertionFinder::Formula&);
 
 namespace InsertionFinder {
-    class FormulaError: std::exception {
+    class FormulaError: public std::exception {
     private:
         const std::string formula_string;
         const std::string explanation_string;
@@ -24,6 +25,12 @@ namespace InsertionFinder {
     public:
         virtual const char* what() const noexcept override {
             return explanation_string.c_str();
+        }
+    };
+
+    struct FormulaStreamError: std::exception {
+        virtual const char* what() const noexcept override {
+            return "Failed to read formula from stream";
         }
     };
 
@@ -70,6 +77,9 @@ namespace InsertionFinder {
         friend std::ostream& ::operator<<(std::ostream& out, const Formula& formula);
         void print(std::ostream& out, std::size_t begin, std::size_t end) const;
         std::string to_string() const;
+    public:
+        void save_to(std::ostream& out) const;
+        void read_from(std::istream& in);
     private:
         std::size_t cancel_moves();
     public:
