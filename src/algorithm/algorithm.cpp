@@ -172,7 +172,7 @@ void Algorithm::save_to(ostream& out) const {
     for (size_t i = 0; i < length; ++i) {
         data[i] = this->twists[i];
     }
-    out.write(reinterpret_cast<char*>(data.get()), length * sizeof(int8_t));
+    out.write(reinterpret_cast<char*>(data.get()), length);
 }
 
 void Algorithm::read_from(istream& in) {
