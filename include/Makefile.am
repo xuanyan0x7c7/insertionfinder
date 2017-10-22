@@ -1,1 +1,1 @@
-nobase_include_HEADERS = algorithm.hpp
+nobase_include_HEADERS = algorithm.hpp cube.hpp
