@@ -9,7 +9,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <formula.hpp>
+#include <algorithm.hpp>
 #include "./utils.hpp"
 using namespace std;
 using namespace InsertionFinder;
@@ -85,17 +85,17 @@ namespace {
 };
 
 
-Formula::Formula(const string& formula_string) {
+Algorithm::Algorithm(const string& algorithm_string) {
     static const regex twists_regex(
         R"(\s*((?:[UDRLFB]|2?[UDRLFB]w)[2']?|[xyz][2']?|\[[udrlfb][2']?\])\s*)",
         regex_constants::ECMAScript | regex_constants::optimize
     );
     array<int, 3> transform = {0, 2, 4};
     smatch match_result;
-    string temp_string = formula_string;
+    string temp_string = algorithm_string;
     while (regex_search(temp_string, match_result, twists_regex)) {
         if (match_result.position()) {
-            throw FormulaError(formula_string);
+            throw AlgorithmError(algorithm_string);
         }
         if (
             auto find_result = pattern_table.find(match_result[1]);
@@ -121,14 +121,14 @@ Formula::Formula(const string& formula_string) {
         temp_string = match_result.suffix();
     }
     if (!temp_string.empty()) {
-        throw FormulaError(formula_string);
+        throw AlgorithmError(algorithm_string);
     }
 
     this->cancel_moves();
 }
 
 
-int Formula::compare(const Formula& lhs, const Formula& rhs) noexcept {
+int Algorithm::compare(const Algorithm& lhs, const Algorithm& rhs) noexcept {
     const auto& t1 = lhs.twists;
     const auto& t2 = rhs.twists;
     if (int x = static_cast<int>(t1.size()) - static_cast<int>(t2.size())) {
@@ -143,12 +143,12 @@ int Formula::compare(const Formula& lhs, const Formula& rhs) noexcept {
 }
 
 
-ostream& operator<<(ostream& out, const Formula& formula) {
-    formula.print(out, 0, formula.twists.size());
+ostream& operator<<(ostream& out, const Algorithm& algorithm) {
+    algorithm.print(out, 0, algorithm.twists.size());
     return out;
 }
 
-void Formula::print(ostream& out, size_t begin, size_t end) const {
+void Algorithm::print(ostream& out, size_t begin, size_t end) const {
     if (begin >= end) {
         return;
     }
@@ -158,14 +158,14 @@ void Formula::print(ostream& out, size_t begin, size_t end) const {
     }
 }
 
-string Formula::to_string() const {
+string Algorithm::to_string() const {
     stringstream stream;
     stream << *this;
     return stream.str();
 }
 
 
-void Formula::save_to(ostream& out) const {
+void Algorithm::save_to(ostream& out) const {
     size_t length = this->twists.size();
     out.write(reinterpret_cast<char*>(&length), sizeof(size_t));
     auto data = make_unique<int8_t[]>(length);
@@ -175,16 +175,16 @@ void Formula::save_to(ostream& out) const {
     out.write(reinterpret_cast<char*>(data.get()), length * sizeof(int8_t));
 }
 
-void Formula::read_from(istream& in) {
+void Algorithm::read_from(istream& in) {
     size_t length;
     in.read(reinterpret_cast<char*>(&length), sizeof(size_t));
     if (in.gcount() != sizeof(size_t)) {
-        throw FormulaStreamError();
+        throw AlgorithmStreamError();
     }
     auto data = make_unique<int8_t[]>(length);
     in.read(reinterpret_cast<char*>(data.get()), length);
     if (static_cast<size_t>(in.gcount()) != length) {
-        throw FormulaStreamError();
+        throw AlgorithmStreamError();
     }
     this->twists = vector<int>(data.get(), data.get() + length);
 

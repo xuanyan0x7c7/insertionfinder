@@ -14,7 +14,7 @@ AC_CONFIG_FILES([
     Makefile
     include/Makefile
     src/Makefile
-    src/formula/Makefile
+    src/algorithm/Makefile
 ])
 
 AC_OUTPUT

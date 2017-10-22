@@ -1,1 +1,1 @@
-nobase_include_HEADERS = formula.hpp
+nobase_include_HEADERS = algorithm.hpp

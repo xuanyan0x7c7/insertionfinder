@@ -2,14 +2,14 @@
 #include <cstdint>
 #include <limits>
 #include <utility>
-#include <formula.hpp>
+#include <algorithm.hpp>
 #include "./utils.hpp"
 using namespace std;
 using namespace InsertionFinder;
 using namespace Details;
 
 
-size_t Formula::cancel_moves() {
+size_t Algorithm::cancel_moves() {
     auto begin = this->twists.begin();
     auto end = this->twists.cend();
     auto p = begin - 1;
@@ -52,7 +52,7 @@ size_t Formula::cancel_moves() {
 
 
 pair<uint32_t, uint32_t>
-Formula::get_insert_place_mask(size_t insert_place) const {
+Algorithm::get_insert_place_mask(size_t insert_place) const {
     const auto& twists = this->twists;
     uint32_t mask_before;
     uint32_t mask_after;
@@ -82,9 +82,9 @@ Formula::get_insert_place_mask(size_t insert_place) const {
 }
 
 
-pair<Formula, size_t>
-Formula::insert(const Formula& insertion, size_t insert_place) const {
-    Formula result;
+pair<Algorithm, size_t>
+Algorithm::insert(const Algorithm& insertion, size_t insert_place) const {
+    Algorithm result;
     result.twists.reserve(this->twists.size() + insertion.twists.size());
     result.twists.insert(
         result.twists.end(),
@@ -103,8 +103,8 @@ Formula::insert(const Formula& insertion, size_t insert_place) const {
 }
 
 
-bool Formula::is_worthy_insertion(
-    const Formula& insertion, size_t insert_place,
+bool Algorithm::is_worthy_insertion(
+    const Algorithm& insertion, size_t insert_place,
     const pair<uint32_t, uint32_t>& insert_place_mask,
     size_t fewest_twists
 ) const {

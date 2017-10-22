@@ -9,32 +9,33 @@
 #include <utility>
 #include <vector>
 
-namespace InsertionFinder {class Formula;};
-std::ostream& operator<<(std::ostream&, const InsertionFinder::Formula&);
+namespace InsertionFinder {class Algorithm;};
+std::ostream& operator<<(std::ostream&, const InsertionFinder::Algorithm&);
 
 namespace InsertionFinder {
-    class FormulaError: public std::exception {
+    class AlgorithmError: public std::exception {
     private:
-        const std::string formula_string;
+        const std::string algorithm_string;
         const std::string explanation_string;
     public:
-        FormulaError(std::string formula_string):
-            formula_string(std::move(formula_string)),
-            explanation_string("Invalid formula string: " + this->formula_string)
-            {}
+        AlgorithmError(std::string algorithm_string):
+            algorithm_string(std::move(algorithm_string)),
+            explanation_string(
+                "Invalid algorithm string: " + this->algorithm_string
+            ) {}
     public:
         virtual const char* what() const noexcept override {
             return explanation_string.c_str();
         }
     };
 
-    struct FormulaStreamError: std::exception {
+    struct AlgorithmStreamError: std::exception {
         virtual const char* what() const noexcept override {
-            return "Failed to read formula from stream";
+            return "Failed to read algorithm from stream";
         }
     };
 
-    class Formula {
+    class Algorithm {
     public:
         static constexpr std::array<int, 24> inverse_twist_table = {
             0, 3, 2, 1,
@@ -51,13 +52,13 @@ namespace InsertionFinder {
         std::uint32_t end_mask;
         std::uint32_t set_up_mask;
     public:
-        Formula() {}
-        Formula(const Formula&) = default;
-        Formula(Formula&&) = default;
-        Formula& operator=(const Formula&) = default;
-        Formula& operator=(Formula&&) = default;
-        ~Formula() = default;
-        explicit Formula(const std::string& formula_string);
+        Algorithm() {}
+        Algorithm(const Algorithm&) = default;
+        Algorithm(Algorithm&&) = default;
+        Algorithm& operator=(const Algorithm&) = default;
+        Algorithm& operator=(Algorithm&&) = default;
+        ~Algorithm() = default;
+        explicit Algorithm(const std::string& algorithm_string);
     public:
         std::size_t length() const noexcept {
             return this->twists.size();
@@ -66,15 +67,16 @@ namespace InsertionFinder {
             return this->twists[index];
         }
     public:
-        static int compare(const Formula& lhs, const Formula& rhs) noexcept;
-        bool operator==(const Formula& rhs) const noexcept {
+        static int compare(const Algorithm& lhs, const Algorithm& rhs) noexcept;
+        bool operator==(const Algorithm& rhs) const noexcept {
             return this->compare(*this, rhs) == 0;
         }
-        bool operator<(const Formula& rhs) const noexcept {
+        bool operator<(const Algorithm& rhs) const noexcept {
             return this->compare(*this, rhs) < 0;
         }
     public:
-        friend std::ostream& ::operator<<(std::ostream& out, const Formula& formula);
+        friend std::ostream&
+        ::operator<<(std::ostream& out, const Algorithm& algorithm);
         void print(std::ostream& out, std::size_t begin, std::size_t end) const;
         std::string to_string() const;
     public:
@@ -85,10 +87,10 @@ namespace InsertionFinder {
     public:
         std::pair<std::uint32_t, std::uint32_t>
         get_insert_place_mask(std::size_t insert_place) const;
-        std::pair<Formula, std::size_t>
-        insert(const Formula& insertion, std::size_t insert_place) const;
+        std::pair<Algorithm, std::size_t>
+        insert(const Algorithm& insertion, std::size_t insert_place) const;
         bool is_worthy_insertion(
-            const Formula& insertion, std::size_t insert_place,
+            const Algorithm& insertion, std::size_t insert_place,
             const std::pair<std::uint32_t, std::uint32_t>& insert_place_mask,
             std::size_t fewest_twists = std::numeric_limits<std::size_t>::max()
         ) const;
@@ -102,6 +104,6 @@ namespace InsertionFinder {
         }
     public:
         void normalize() noexcept;
-        std::vector<Formula> generate_isomorphisms() const;
+        std::vector<Algorithm> generate_isomorphisms() const;
     };
 };

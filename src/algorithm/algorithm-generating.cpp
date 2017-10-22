@@ -1,11 +1,11 @@
 #include <algorithm>
 #include <vector>
-#include <formula.hpp>
+#include <algorithm.hpp>
 using namespace std;
 using namespace InsertionFinder;
 
 
-void Formula::normalize() noexcept {
+void Algorithm::normalize() noexcept {
     for (size_t i = 1, length = this->twists.size(); i < length; ++i) {
         if (this->swappable(i) && this->twists[i - 1] > this->twists[i]) {
             this->swap_adjacent(i++);
@@ -14,7 +14,7 @@ void Formula::normalize() noexcept {
 }
 
 
-vector<Formula> Formula::generate_isomorphisms() const {
+vector<Algorithm> Algorithm::generate_isomorphisms() const {
     static constexpr int transform_table[24][3] = {
         {0, 2, 4}, {0, 4, 3}, {0, 3, 5}, {0, 5, 2},
         {1, 2, 5}, {1, 4, 2}, {1, 3, 4}, {1, 5, 3},
@@ -23,7 +23,7 @@ vector<Formula> Formula::generate_isomorphisms() const {
         {4, 3, 0}, {2, 4, 0}, {5, 2, 0}, {3, 5, 0},
         {4, 2, 1}, {3, 4, 1}, {5, 3, 1}, {2, 5, 1}
     };
-    vector<Formula> result(96);
+    vector<Algorithm> result(96);
     size_t length = this->twists.size();
     for (size_t i = 0; i < 96; ++i) {
         result[i].twists.resize(length);
