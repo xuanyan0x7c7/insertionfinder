@@ -15,6 +15,7 @@ AC_CONFIG_FILES([
     include/Makefile
     src/Makefile
     src/algorithm/Makefile
+    src/case/Makefile
     src/cube/Makefile
 ])
 
