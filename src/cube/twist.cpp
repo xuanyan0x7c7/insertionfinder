@@ -64,6 +64,8 @@ namespace {
 };
 
 
+const array<Cube, 24> Cube::twist_cube = Cube::generate_twist_cube_table();
+
 array<Cube, 24> Cube::generate_twist_cube_table() noexcept {
     array<Cube, 24> twist_cube;
     for (int i = 0; i < 24; ++i) {
