@@ -22,8 +22,6 @@ namespace InsertionFinder {
 
     class Cube {
     private:
-        static const std::array<Cube, 24> twist_cube;
-    private:
         int corner[8];
         int edge[12];
     public:
@@ -37,6 +35,8 @@ namespace InsertionFinder {
     public:
         void save_to(std::ostream& out) const;
         void read_from(std::istream& in);
+    private:
+        static const std::array<Cube, 24> twist_cube;
     private:
         std::array<Cube, 24> generate_twist_cube_table() noexcept;
     public:
