@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <algorithm>
 #include <exception>
 #include <istream>
 #include <ostream>
@@ -28,5 +29,21 @@ namespace InsertionFinder {
     public:
         void save_to(std::ostream& out) const;
         void read_from(std::istream& in);
+    private:
+        bool contains_algorithm(const Algorithm& algorithm) const {
+            return std::find(
+                this->algorithm_list.cbegin(), this->algorithm_list.cend(),
+                algorithm
+            ) != this->algorithm_list.cend();
+        }
+    public:
+        void add_algorithm(const Algorithm& algorithm) {
+            if (!this->contains_algorithm(algorithm)) {
+                this->algorithm_list.push_back(algorithm);
+            }
+        }
+        void sort_algorithms() {
+            std::sort(this->algorithm_list.begin(), this->algorithm_list.end());
+        }
     };
 };
