@@ -189,13 +189,13 @@ void Algorithm::read_from(istream& in) {
     this->twists = vector<int>(data.get(), data.get() + length);
 
     auto& twists = this->twists;
-    this->begin_mask = twist_mask(this->inverse_twist_table[twists[0]]);
+    this->begin_mask = twist_mask(this->inverse_twist[twists[0]]);
     if (length > 1 && twists[0] >> 3 == twists[1] >> 3) {
-        this->begin_mask |= this->inverse_twist_table[twists[1]];
+        this->begin_mask |= this->inverse_twist[twists[1]];
     }
-    this->end_mask = twist_mask(this->inverse_twist_table[twists[length - 1]]);
+    this->end_mask = twist_mask(this->inverse_twist[twists[length - 1]]);
     if (length > 1 && twists[length - 1] >> 3 == twists[length - 2] >> 3) {
-        this->end_mask |= this->inverse_twist_table[twists[length - 2]];
+        this->end_mask |= this->inverse_twist[twists[length - 2]];
     }
     this->set_up_mask = 0;
     if (length > 2) {

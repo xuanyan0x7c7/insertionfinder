@@ -1,5 +1,4 @@
 #pragma once
-#include <array>
 #include <cstdint>
 #include <exception>
 #include <istream>
@@ -37,7 +36,7 @@ namespace InsertionFinder {
 
     class Algorithm {
     public:
-        static constexpr std::array<int, 24> inverse_twist_table = {
+        static constexpr int inverse_twist[24] = {
             0, 3, 2, 1,
             4, 7, 6, 5,
             8, 11, 10, 9,
