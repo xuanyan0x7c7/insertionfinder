@@ -5,4 +5,5 @@ insertionfinder_SOURCES = main.cpp
 insertionfinder_LDADD = \
     algorithm/libalgorithm.la \
     case/libcase.la \
-    cube/libcube.la
+    cube/libcube.la \
+    -lboost_program_options

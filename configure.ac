@@ -9,6 +9,8 @@ LT_INIT
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX([17])
 
+AC_CHECK_HEADERS([optional])
+
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
     Makefile

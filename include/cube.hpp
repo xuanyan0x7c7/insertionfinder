@@ -3,8 +3,8 @@
 #include <array>
 #include <exception>
 #include <istream>
-#include <optional>
 #include <ostream>
+#include <fallbacks/optional.hpp>
 #include <algorithm.hpp>
 
 namespace InsertionFinder {
