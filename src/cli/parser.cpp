@@ -1,11 +1,13 @@
 #include <cstdlib>
 #include <iostream>
 #include <boost/program_options.hpp>
+#include <boost/property_tree/ptree.hpp>
 #include <config.h>
 #include "./parser.hpp"
 #include "./commands.hpp"
 using namespace std;
 namespace po = boost::program_options;
+namespace pt = boost::property_tree;
 using namespace InsertionFinder;
 
 
@@ -16,6 +18,7 @@ namespace {
 
 void CLI::parse(int argc, char** argv) try {
     po::options_description cli_options;
+    bool json_output = false;
 
     po::options_description general_options("General options");
     general_options.add_options()
@@ -25,7 +28,8 @@ void CLI::parse(int argc, char** argv) try {
 
     po::options_description allowed_options("Allowed options");
     allowed_options.add_options()
-        ("verify,v", "verify cube state");
+        ("verify,v", "verify cube state")
+        ("json", "use JSON output");
     cli_options.add(allowed_options);
 
     po::variables_map vm;
@@ -40,8 +44,15 @@ void CLI::parse(int argc, char** argv) try {
         cout << version_string << endl;
         return;
     }
+    if (vm.count("json")) {
+        json_output = true;
+    }
     if (vm.count("verify")) {
-        CLI::verify_cube<istream>();
+        if (json_output) {
+            CLI::verify_cube<pt::ptree>();
+        } else {
+            CLI::verify_cube<ostream>();
+        }
         return;
     }
     cout << version_string << endl << cli_options << endl;
