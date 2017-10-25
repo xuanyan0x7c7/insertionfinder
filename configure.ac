@@ -18,6 +18,7 @@ AC_CONFIG_FILES([
     src/Makefile
     src/algorithm/Makefile
     src/case/Makefile
+    src/cli/Makefile
     src/cube/Makefile
 ])
 
