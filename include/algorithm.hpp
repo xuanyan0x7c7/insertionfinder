@@ -77,7 +77,7 @@ namespace InsertionFinder {
         friend std::ostream&
         ::operator<<(std::ostream& out, const Algorithm& algorithm);
         void print(std::ostream& out, std::size_t begin, std::size_t end) const;
-        std::string to_string() const;
+        std::string str() const;
     public:
         void save_to(std::ostream& out) const;
         void read_from(std::istream& in);

@@ -158,7 +158,7 @@ void Algorithm::print(ostream& out, size_t begin, size_t end) const {
     }
 }
 
-string Algorithm::to_string() const {
+string Algorithm::str() const {
     stringstream stream;
     stream << *this;
     return stream.str();
