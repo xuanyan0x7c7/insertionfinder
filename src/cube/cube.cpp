@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <istream>
+#include <functional>
 #include <memory>
 #include <ostream>
 #include <fallbacks/optional.hpp>
@@ -71,4 +72,16 @@ uint32_t Cube::mask() const noexcept {
         }
     }
     return mask;
+}
+
+
+size_t hash<Cube>::operator()(const Cube& cube) const noexcept {
+    size_t result = 0;
+    for (int i = 0; i < 8; ++i) {
+        result = result * 31 + cube.corner[i];
+    }
+    for (int i = 0; i < 12; ++i) {
+        result = result * 31 + cube.edge[i];
+    }
+    return result;
 }

@@ -2,10 +2,16 @@
 #include <cstdint>
 #include <array>
 #include <exception>
+#include <functional>
 #include <istream>
 #include <ostream>
 #include <fallbacks/optional.hpp>
 #include <algorithm.hpp>
+
+namespace InsertionFinder {class Cube;};
+template<> struct std::hash<InsertionFinder::Cube> {
+    std::size_t operator()(const InsertionFinder::Cube& cube) const noexcept;
+};
 
 namespace InsertionFinder {
     struct CubeStreamError: std::exception {
@@ -21,6 +27,7 @@ namespace InsertionFinder {
     };
 
     class Cube {
+        friend struct std::hash<Cube>;
     private:
         int corner[8];
         int edge[12];
