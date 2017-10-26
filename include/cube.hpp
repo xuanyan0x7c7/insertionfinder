@@ -43,6 +43,14 @@ namespace InsertionFinder {
     public:
         void save_to(std::ostream& out) const;
         void read_from(std::istream& in);
+    public:
+        static int compare(const Cube& lhs, const Cube& rhs) noexcept;
+        bool operator==(const Cube& rhs) const noexcept {
+            return this->compare(*this, rhs) == 0;
+        }
+        bool operator<(const Cube& rhs) const noexcept {
+            return this->compare(*this, rhs) < 0;
+        }
     private:
         static const std::array<Cube, 24> twist_cube;
         static const std::array<std::array<int, 24>, 7 * 24 * 11 * 24>

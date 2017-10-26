@@ -48,3 +48,21 @@ void Case::read_from(istream& in) {
         throw CaseStreamError();
     }
 }
+
+
+int Case::compare(const Case& lhs, const Case& rhs) noexcept {
+    if (
+        int cycles_diff =
+            (lhs._has_parity + lhs._corner_cycles + lhs._edge_cycles)
+            - (rhs._has_parity + rhs._corner_cycles + rhs._edge_cycles)
+    ) {
+        return cycles_diff;
+    }
+    if (lhs._has_parity != rhs._has_parity) {
+        return lhs._has_parity - rhs._has_parity;
+    }
+    if (lhs._corner_cycles != rhs._corner_cycles) {
+        return lhs._corner_cycles - rhs._corner_cycles;
+    }
+    return Cube::compare(lhs._state, rhs._state);
+}

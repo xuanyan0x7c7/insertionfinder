@@ -45,6 +45,21 @@ void Cube::read_from(istream& in) {
 }
 
 
+int Cube::compare(const Cube& lhs, const Cube& rhs) noexcept {
+    for (int i = 0; i < 8; ++i) {
+        if (lhs.corner[i] != rhs.corner[i]) {
+            return lhs.corner[i] - rhs.corner[i];
+        }
+    }
+    for (int i = 0; i < 12; ++i) {
+        if (lhs.edge[i] != rhs.edge[i]) {
+            return lhs.edge[i] - rhs.edge[i];
+        }
+    }
+    return 0;
+}
+
+
 Cube Cube::inverse() const noexcept {
     Cube result(nullopt);
     for (int i = 0; i < 8; ++i) {

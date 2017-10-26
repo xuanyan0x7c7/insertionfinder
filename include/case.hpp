@@ -30,6 +30,14 @@ namespace InsertionFinder {
         void save_to(std::ostream& out) const;
         void read_from(std::istream& in);
     public:
+        static int compare(const Case& lhs, const Case& rhs) noexcept;
+        bool operator==(const Case& rhs) const noexcept {
+            return this->compare(*this, rhs) == 0;
+        }
+        bool operator<(const Case& rhs) const noexcept {
+            return this->compare(*this, rhs) < 0;
+        }
+    public:
         const Cube& state() const {
             return this->_state;
         }
