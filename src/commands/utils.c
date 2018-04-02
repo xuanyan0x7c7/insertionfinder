@@ -28,7 +28,7 @@ char* trim(const char* string) {
 }
 
 char* get_line(FILE* stream) {
-    char* string;
+    char* string = NULL;
     size_t temp = 0;
     if (getline(&string, &temp, stream) == EOF) {
         free(string);

@@ -11,7 +11,7 @@ struct Cube {
     int edge[12];
 };
 
-Cube identity_cube;
+extern Cube identity_cube;
 
 void cube_init();
 

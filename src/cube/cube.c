@@ -7,6 +7,14 @@
 #include "common.h"
 
 
+Cube identity_cube;
+Cube one_move_cube[24];
+int computed_corner_twist_table[24][8][24];
+int computed_edge_twist_table[24][12][24];
+int parity_transform_table[7 * 24 * 11 * 24][24];
+int corner_cycle_transform_table[6 * 24 * 24][24];
+int edge_cycle_transform_table[10 * 24 * 24][24];
+
 void cube_init() {
     for (int i = 0; i < 8; ++i) {
         identity_cube.corner[i] = i * 3;

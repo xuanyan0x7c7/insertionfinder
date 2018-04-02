@@ -10,6 +10,7 @@
 #include "../finder/finder.h"
 #include "../formula/formula.h"
 #include "../utils/memory.h"
+#include "../utils/memstream.h"
 #include "../utils/io.h"
 #include "utils.h"
 #include "commands.h"

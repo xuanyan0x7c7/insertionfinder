@@ -6,6 +6,7 @@
 #include <regex.h>
 #include "../data-structure/linked-list.h"
 #include "../utils/memory.h"
+#include "../utils/memstream.h"
 #include "../utils/io.h"
 #include "formula.h"
 #include "utils.h"
@@ -34,7 +35,11 @@ void formula_init() {
     int status = regcomp(
         &moves_regex,
         "\\s*(([UDRLFB]|2?[UDRLFB]w)[2']?|[xyz][2']?|\\[[udrlfb][2']?\\])\\s*",
-        REG_EXTENDED
+        #ifdef REG_ENHANCED
+            REG_EXTENDED | REG_ENHANCED
+        #else
+            REG_EXTENDED
+        #endif
     );
     if (status) {
         char message[100];
@@ -162,6 +167,7 @@ bool formula_construct(Formula* formula, const char* string) {
 
 void formula_destroy(Formula* formula) {
     free(formula->move);
+    formula->move = NULL;
 }
 
 
