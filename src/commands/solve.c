@@ -337,20 +337,22 @@ void standard_output(
     } else if (result.duration < 60 * (int64_t)1000000000) {
         printf("Time usage: %.3f seconds.\n", result.duration / 1e9);
     } else if (result.duration < 60 * 60 * (int64_t)1000000000) {
+        int64_t duration = (result.duration % 1000000000 + 500000) / 1000000;
         printf(
-            "Time usage: %" PRId64 ":%02" PRId64 ".%3" PRId64 ".\n",
-            result.duration / (60 * (int64_t)1000000000),
-            (result.duration / 1000000000) % 60,
-            (result.duration % 1000000000 + 500000) / 1000000
+            "Time usage: %" PRId64 ":%02" PRId64 ".%03" PRId64 ".\n",
+            duration / (60 * (int64_t)1000000000),
+            duration / 1000000000 % 60,
+            duration % 1000000000 / 1000000
         );
     } else {
+        int64_t duration = (result.duration % 1000000000 + 500000) / 1000000;
         printf(
             "Time usage: %" PRId64 ":%02" PRId64
-            ":%02" PRId64 ".%3" PRId64 ".\n",
+            ":%02" PRId64 ".%03" PRId64 ".\n",
             result.duration / (60 * 60 * (int64_t)1000000000),
-            (result.duration / (60 * (int64_t)1000000000)) % 60,
-            (result.duration / 1000000000) % 60,
-            (result.duration % 1000000000 + 500000) / 1000000
+            result.duration / (60 * (int64_t)1000000000) % 60,
+            result.duration / 1000000000 % 60,
+            result.duration % 1000000000 / 1000000
         );
     }
 }
