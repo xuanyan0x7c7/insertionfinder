@@ -114,12 +114,19 @@ FinderSolveResult finder_solve(
     FinderSolveResult result;
     struct timespec time_begin;
     struct timespec time_end;
+    struct timespec cpu_time_begin;
+    struct timespec cpu_time_end;
     clock_gettime(CLOCK_MONOTONIC, &time_begin);
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cpu_time_begin);
     result.status = finder_solve_main(finder, skeleton, max_threads);
     clock_gettime(CLOCK_MONOTONIC, &time_end);
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cpu_time_end);
     result.duration =
         (time_end.tv_sec - time_begin.tv_sec) * 1000000000ull
         + (time_end.tv_nsec - time_begin.tv_nsec);
+    result.cpu_time =
+        (cpu_time_end.tv_sec - cpu_time_begin.tv_sec) * 1000000000ull
+        + (cpu_time_end.tv_nsec - cpu_time_begin.tv_nsec);
     return result;
 }
 

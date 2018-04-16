@@ -20,6 +20,7 @@ typedef struct FinderSolveResult FinderSolveResult;
 struct FinderSolveResult {
     FinderSolveStatus status;
     int64_t duration;
+    int64_t cpu_time;
 };
 
 typedef struct Finder Finder;

@@ -337,22 +337,49 @@ void standard_output(
     } else if (result.duration < 60 * (int64_t)1000000000) {
         printf("Time usage: %.3f seconds.\n", result.duration / 1e9);
     } else if (result.duration < 60 * 60 * (int64_t)1000000000) {
-        int64_t duration = (result.duration % 1000000000 + 500000) / 1000000;
+        int64_t duration = (result.duration + 500000) / 1000000;
         printf(
             "Time usage: %" PRId64 ":%02" PRId64 ".%03" PRId64 ".\n",
-            duration / (60 * (int64_t)1000000000),
-            duration / 1000000000 % 60,
-            duration % 1000000000 / 1000000
+            duration / (60 * 1000),
+            duration / 1000 % 60,
+            duration % 1000
         );
     } else {
-        int64_t duration = (result.duration % 1000000000 + 500000) / 1000000;
+        int64_t duration = (result.duration + 500000) / 1000000;
         printf(
             "Time usage: %" PRId64 ":%02" PRId64
             ":%02" PRId64 ".%03" PRId64 ".\n",
-            result.duration / (60 * 60 * (int64_t)1000000000),
-            result.duration / (60 * (int64_t)1000000000) % 60,
-            result.duration / 1000000000 % 60,
-            result.duration % 1000000000 / 1000000
+            result.duration / (60 * 60 * 1000),
+            result.duration / (60 * 1000) % 60,
+            result.duration / 1000 % 60,
+            result.duration % 1000
+        );
+    }
+    if (result.cpu_time < 1000) {
+        printf("CPU time: %" PRId64 " nanoseconds.\n", result.cpu_time);
+    } else if (result.cpu_time < 1000000) {
+        printf("CPU time: %.3f microseconds.\n", result.cpu_time / 1e3);
+    } else if (result.cpu_time < 1000000000) {
+        printf("CPU time: %.3f milliseconds.\n", result.cpu_time / 1e6);
+    } else if (result.cpu_time < 60 * (int64_t)1000000000) {
+        printf("CPU time: %.3f seconds.\n", result.cpu_time / 1e9);
+    } else if (result.cpu_time < 60 * 60 * (int64_t)1000000000) {
+        int64_t cpu_time = (result.cpu_time + 500000) / 1000000;
+        printf(
+            "CPU time: %" PRId64 ":%02" PRId64 ".%03" PRId64 ".\n",
+            cpu_time / (60 * 1000),
+            cpu_time / 1000 % 60,
+            cpu_time % 1000
+        );
+    } else {
+        int64_t cpu_time = (result.cpu_time + 500000) / 1000000;
+        printf(
+            "CPU time: %" PRId64 ":%02" PRId64
+            ":%02" PRId64 ".%03" PRId64 ".\n",
+            result.cpu_time / (60 * 60 * 1000),
+            result.cpu_time / (60 * 1000) % 60,
+            result.cpu_time / 1000 % 60,
+            result.cpu_time % 1000
         );
     }
 }
@@ -401,6 +428,7 @@ void json_output(
     }
     json_object_set_array_member(object, "solution", solution_array);
     json_object_set_int_member(object, "duration", result.duration);
+    json_object_set_int_member(object, "cpu_time", result.cpu_time);
 
     JsonNode* json = json_node_alloc();
     json_node_init_object(json, object);
