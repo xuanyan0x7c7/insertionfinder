@@ -12,7 +12,11 @@ AC_PROG_LN_S
 AC_CHECK_HEADERS([getopt.h pthread.h regex.h unistd.h])
 AC_CHECK_FUNCS([open_memstream clock_gettime])
 
-PKG_CHECK_MODULES([json], [json-glib-1.0 >= 1.1.2])
+PKG_CHECK_MODULES(
+    [json], [json-glib-1.0 >= 1.1.2],
+    [AC_DEFINE([HAVE_JSON], [1], [Use JSON])],
+    [AC_DEFINE([HAVE_JSON], [0], [Use JSON])]
+)
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([

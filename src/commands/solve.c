@@ -2,8 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <json-glib/json-glib.h>
 #include <config.h>
+#if HAVE_JSON
+#include <json-glib/json-glib.h>
+#endif
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
 #include "../data-structure/hash-map.h"
@@ -50,6 +52,7 @@ static void standard_output(
     SolvingFunction* solve, SolvingFunctionArgs* args
 );
 
+#if HAVE_JSON
 static void json_output(
     const Formula* scramble, const Formula* skeleton,
     bool parity,
@@ -59,6 +62,7 @@ static void json_output(
 );
 
 static void solution_to_json(const Worker* solution, JsonArray* solution_array);
+#endif
 
 
 bool solve(const CliParser* parsed_args) {
@@ -176,7 +180,11 @@ bool solve(const CliParser* parsed_args) {
             .max_threads = parsed_args->max_threads
         };
         OutputFunction* print =
+        #if HAVE_JSON
             parsed_args->json ? json_output : standard_output;
+        #else
+            standard_output;
+        #endif
         print(
             &scramble, &skeleton,
             parity, corner_cycles, edge_cycles,
@@ -385,6 +393,7 @@ void standard_output(
 }
 
 
+#if HAVE_JSON
 void json_output(
     const Formula* scramble, const Formula* skeleton,
     bool parity,
@@ -496,3 +505,4 @@ void solution_to_json(const Worker* solution, JsonArray* solution_array) {
     json_object_set_array_member(object, "insertions", solving_step_array);
     json_array_add_object_element(solution_array, object);
 }
+#endif

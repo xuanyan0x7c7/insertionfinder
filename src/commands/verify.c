@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <config.h>
+#if HAVE_JSON
 #include <json-glib/json-glib.h>
+#endif
 #include "../cube/cube.h"
 #include "../formula/formula.h"
 #include "utils.h"
@@ -15,10 +18,12 @@ static void standard_output(
     bool parity, int corner_cycles, int edge_cycles
 );
 
+#if HAVE_JSON
 static void json_output(
     const Formula* scramble, const Formula* skeleton,
     bool parity, int corner_cycles, int edge_cycles
 );
+#endif
 
 
 bool verify(const CliParser* parsed_args) {
@@ -70,7 +75,11 @@ bool verify(const CliParser* parsed_args) {
         int edge_cycles = cube_edge_cycles(&cube);
 
         OutputFunction* print =
+        #if HAVE_JSON
             parsed_args->json ? json_output : standard_output;
+        #else
+            standard_output;
+        #endif
         print(&scramble, &skeleton, parity, corner_cycles, edge_cycles);
 
         if (input != stdin) {
@@ -124,6 +133,7 @@ void standard_output(
 }
 
 
+#if HAVE_JSON
 void json_output(
     const Formula* scramble, const Formula* skeleton,
     bool parity, int corner_cycles, int edge_cycles
@@ -149,3 +159,4 @@ void json_output(
     print_json(json, stdout);
     json_node_unref(json);
 }
+#endif

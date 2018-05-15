@@ -2,7 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <config.h>
+#if HAVE_JSON
 #include <json-glib/json-glib.h>
+#endif
 #include "../algorithm/algorithm.h"
 #include "../cube/cube.h"
 #include "../utils/memory.h"
@@ -82,6 +85,7 @@ void algorithm_free_generic(void* p) {
 }
 
 
+#if HAVE_JSON
 void print_json(JsonNode* json, FILE* stream) {
     JsonGenerator* generator = json_generator_new();
     json_generator_set_root(generator, json);
@@ -91,3 +95,4 @@ void print_json(JsonNode* json, FILE* stream) {
     g_object_unref(generator);
     g_free(string);
 }
+#endif
