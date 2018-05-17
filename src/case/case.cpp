@@ -51,12 +51,27 @@ void Case::read_from(istream& in) {
 
 
 int Case::compare(const Case& lhs, const Case& rhs) noexcept {
+    int lhs_center = lhs.center_rotation();
+    int rhs_center = rhs.center_rotation();
+    int lhs_center_parity = Cube::center_parity(lhs_center);
+    int rhs_center_parity = Cube::center_parity(rhs_center);
     if (
         int cycles_diff =
-            (lhs._has_parity + lhs._corner_cycles + lhs._edge_cycles)
-            - (rhs._has_parity + rhs._corner_cycles + rhs._edge_cycles)
+            (lhs_center
+                + (lhs_center_parity | lhs._has_parity)
+                + lhs._corner_cycles + lhs._edge_cycles)
+            - (rhs_center
+                + (rhs_center_parity | rhs._has_parity)
+                + rhs._corner_cycles + rhs._edge_cycles)
     ) {
         return cycles_diff;
+    }
+    if (lhs_center != rhs_center) {
+        if (lhs_center_parity != rhs_center_parity) {
+            return lhs_center_parity - rhs_center_parity;
+        } else {
+            return lhs_center - rhs_center;
+        }
     }
     if (lhs._has_parity != rhs._has_parity) {
         return lhs._has_parity - rhs._has_parity;

@@ -46,6 +46,7 @@ namespace InsertionFinder {
         };
     private:
         std::vector<int> twists;
+        int rotation;
     private:
         std::uint32_t begin_mask;
         std::uint32_t end_mask;
@@ -64,6 +65,9 @@ namespace InsertionFinder {
         }
         int operator[](std::size_t index) const {
             return this->twists[index];
+        }
+        int cube_rotation() const noexcept {
+            return this->rotation;
         }
     public:
         static int compare(const Algorithm& lhs, const Algorithm& rhs) noexcept;
@@ -84,6 +88,7 @@ namespace InsertionFinder {
     private:
         std::size_t cancel_moves();
     public:
+        int detect_rotation() const noexcept;
         std::pair<std::uint32_t, std::uint32_t>
         get_insert_place_mask(std::size_t insert_place) const;
         std::pair<Algorithm, std::size_t>

@@ -1,6 +1,7 @@
 #include <array>
 #include <algorithm.hpp>
 #include <cube.hpp>
+#include <iostream>
 using namespace std;
 using namespace InsertionFinder;
 

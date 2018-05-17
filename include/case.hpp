@@ -38,22 +38,25 @@ namespace InsertionFinder {
             return this->compare(*this, rhs) < 0;
         }
     public:
-        const Cube& state() const {
+        const Cube& state() const noexcept {
             return this->_state;
         }
-        std::uint32_t mask() const {
+        std::uint32_t mask() const noexcept {
             return this->_mask;
         }
-        bool has_parity() const {
+        bool has_parity() const noexcept {
             return this->_has_parity;
         }
-        int corner_cycles() const {
+        int corner_cycles() const noexcept {
             return this->_corner_cycles;
         }
-        int edge_cycles() const {
+        int edge_cycles() const noexcept {
             return this->_edge_cycles;
         }
-        const std::vector<Algorithm>& algorithm_list() const {
+        int rotation() const noexcept {
+            return this->_state.center_rotation();
+        }
+        const std::vector<Algorithm>& algorithm_list() const noexcept {
             return this->list;
         }
     private:

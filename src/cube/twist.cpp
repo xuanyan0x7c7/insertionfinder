@@ -77,7 +77,7 @@ array<Cube, 24> Cube::generate_twist_cube_table() noexcept {
 
 
 void Cube::twist(int twist, uint8_t flags) {
-    this->twist(this->twist_cube[twist], flags);
+    this->twist(twist_cube[twist], flags);
 }
 
 void Cube::twist(const Algorithm& algorithm, uint8_t flags) noexcept {
@@ -119,11 +119,14 @@ void Cube::twist(const Cube& cube, uint8_t flags) noexcept {
             *item = cube.edge[*item >> 1] ^ (*item & 1);
         }
     }
+    if (flags & CubeTwist::centers) {
+        this->center = Cube::center_transform[this->center][cube.center];
+    }
 }
 
 
 void Cube::twist_before(int twist, uint8_t flags) {
-    this->twist_before(this->twist_cube[twist], flags);
+    this->twist_before(twist_cube[twist], flags);
 }
 
 void Cube::twist_before(const Cube& cube, uint8_t flags) noexcept {
@@ -143,6 +146,9 @@ void Cube::twist_before(const Cube& cube, uint8_t flags) noexcept {
             edge[i] = this->edge[item >> 1] ^ (item & 1);
         }
         memcpy(this->edge, edge, 12 * sizeof(int));
+    }
+    if (flags & CubeTwist::centers) {
+        this->center = Cube::center_transform[cube.center][this->center];
     }
 }
 
@@ -171,6 +177,12 @@ optional<Cube> Cube::twist_effectively(
             }
             result.edge[i] = new_edge;
         }
+    }
+    if (flags & CubeTwist::centers) {
+        if (flags == CubeTwist::centers && this->center == 0) {
+            return nullopt;
+        }
+        result.center = Cube::center_transform[this->center][cube.center];
     }
     return result;
 }

@@ -8,8 +8,10 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 #include <algorithm.hpp>
+#include <cube.hpp>
 #include "./utils.hpp"
 using namespace std;
 using namespace InsertionFinder;
@@ -78,10 +80,6 @@ namespace {
         {"Bw2", {{1, 3, 4}, 18}},
         {"Bw'", {{3, 0, 4}, 19}}
     });
-
-    int transform_twist(const array<int, 3>& transform, int twist) {
-        return transform[twist >> 3] << 2 ^ (twist & 7);
-    }
 };
 
 
@@ -103,7 +101,7 @@ Algorithm::Algorithm(const string& algorithm_string) {
         ) {
             const auto& [pattern_transform, twist] = find_result->second;
             if (twist != -1) {
-                this->twists.push_back(transform_twist(transform, twist));
+                this->twists.push_back(transform_twist(transform.data(), twist));
             }
             array<int, 3> new_transform;
             for (int i = 0; i < 3; ++i) {
@@ -116,19 +114,23 @@ Algorithm::Algorithm(const string& algorithm_string) {
                 twist_string, twist_string + 24,
                 string(match_result[1])
             ) - twist_string;
-            this->twists.push_back(transform_twist(transform, twist));
+            this->twists.push_back(transform_twist(transform.data(), twist));
         }
         temp_string = match_result.suffix();
     }
     if (!temp_string.empty()) {
         throw AlgorithmError(algorithm_string);
     }
+    this->rotation = 0;
 
     this->cancel_moves();
 }
 
 
 int Algorithm::compare(const Algorithm& lhs, const Algorithm& rhs) noexcept {
+    if (lhs.rotation != rhs.rotation) {
+        return lhs.rotation - rhs.rotation;
+    }
     const auto& t1 = lhs.twists;
     const auto& t2 = rhs.twists;
     if (int x = static_cast<int>(t1.size()) - static_cast<int>(t2.size())) {
@@ -144,7 +146,19 @@ int Algorithm::compare(const Algorithm& lhs, const Algorithm& rhs) noexcept {
 
 
 ostream& operator<<(ostream& out, const Algorithm& algorithm) {
+    static const char* rotation_string[24] = {
+        "", "y", "y2", "y'",
+        "x", "x y", "x y2", "x y'",
+        "x2", "x2 y", "x2 y2", "x2 y'",
+        "x'", "x' y", "x' y2", "x' y'",
+        "z", "z y", "z y2", "z y'",
+        "z'", "z' y", "z' y2", "z' y'"
+    };
     algorithm.print(out, 0, algorithm.twists.size());
+    if (algorithm.rotation && !algorithm.twists.empty()) {
+        out << ' ';
+    }
+    out << rotation_string[algorithm.rotation];
     return out;
 }
 
@@ -168,11 +182,13 @@ string Algorithm::str() const {
 void Algorithm::save_to(ostream& out) const {
     size_t length = this->twists.size();
     out.write(reinterpret_cast<char*>(&length), sizeof(size_t));
-    auto data = make_unique<int8_t[]>(length);
+    auto data = make_unique<char[]>(length);
     for (size_t i = 0; i < length; ++i) {
         data[i] = this->twists[i];
     }
-    out.write(reinterpret_cast<char*>(data.get()), length);
+    out.write(data.get(), length);
+    char rotation_data = this->rotation;
+    out.write(&rotation_data, 1);
 }
 
 void Algorithm::read_from(istream& in) {
@@ -181,21 +197,32 @@ void Algorithm::read_from(istream& in) {
     if (in.gcount() != sizeof(size_t)) {
         throw AlgorithmStreamError();
     }
-    auto data = make_unique<int8_t[]>(length);
-    in.read(reinterpret_cast<char*>(data.get()), length);
+    auto data = make_unique<char[]>(length);
+    in.read(data.get(), length);
     if (static_cast<size_t>(in.gcount()) != length) {
         throw AlgorithmStreamError();
     }
     this->twists = vector<int>(data.get(), data.get() + length);
+    char rotation_data;
+    in.read(data.get(), 1);
+    if (static_cast<size_t>(in.gcount()) != length) {
+        throw AlgorithmStreamError();
+    }
+    this->rotation = rotation_data;
 
+    const int* transform = rotation_permutation[this->rotation];
     auto& twists = this->twists;
     this->begin_mask = twist_mask(this->inverse_twist[twists[0]]);
     if (length > 1 && twists[0] >> 3 == twists[1] >> 3) {
         this->begin_mask |= this->inverse_twist[twists[1]];
     }
-    this->end_mask = twist_mask(this->inverse_twist[twists[length - 1]]);
+    this->end_mask = twist_mask(this->inverse_twist[
+        transform_twist(transform, twists[length - 1])
+    ]);
     if (length > 1 && twists[length - 1] >> 3 == twists[length - 2] >> 3) {
-        this->end_mask |= this->inverse_twist[twists[length - 2]];
+        this->end_mask |= this->inverse_twist[
+            transform_twist(transform, twists[length - 2])
+        ];
     }
     this->set_up_mask = 0;
     if (length > 2) {
@@ -207,4 +234,11 @@ void Algorithm::read_from(istream& in) {
         }
         this->set_up_mask &= this->end_mask;
     }
+}
+
+
+int Algorithm::detect_rotation() const noexcept {
+    Cube cube;
+    cube.twist(*this);
+    return cube.best_placement().first;
 }

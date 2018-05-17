@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <utility>
 #include <algorithm.hpp>
@@ -84,6 +85,7 @@ Algorithm::get_insert_place_mask(size_t insert_place) const {
 
 pair<Algorithm, size_t>
 Algorithm::insert(const Algorithm& insertion, size_t insert_place) const {
+    using namespace placeholders;
     Algorithm result;
     result.twists.reserve(this->twists.size() + insertion.twists.size());
     result.twists.insert(
@@ -94,12 +96,13 @@ Algorithm::insert(const Algorithm& insertion, size_t insert_place) const {
         result.twists.end(),
         insertion.twists.cbegin(), insertion.twists.cend()
     );
-    result.twists.insert(
-        result.twists.end(),
-        this->twists.cbegin() + insert_place, this->twists.cend()
+    transform(
+        this->twists.cbegin() + insert_place, this->twists.cend(),
+        back_inserter(result.twists),
+        bind(transform_twist, rotation_permutation[insertion.rotation], _1)
     );
     size_t place = result.cancel_moves();
-    return make_pair(move(result), min(place, insert_place + 1));
+    return {result, min(place, insert_place + 1)};
 }
 
 

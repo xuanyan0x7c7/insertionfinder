@@ -16,24 +16,26 @@ Cube::Cube() noexcept {
     for (int i = 0; i < 12; ++i) {
         this->edge[i] = i << 1;
     }
+    this->center = 0;
 }
 
 
 void Cube::save_to(ostream& out) const {
-    int8_t data[20];
+    char data[21];
     for (int i = 0; i < 8; ++i) {
         data[i] = this->corner[i];
     }
     for (int i = 0; i < 12; ++i) {
         data[i + 8] = this->edge[i];
     }
-    out.write(reinterpret_cast<char*>(data), 20);
+    data[20] = this->center;
+    out.write(reinterpret_cast<char*>(data), 21);
 }
 
 void Cube::read_from(istream& in) {
-    int8_t data[20];
-    in.read(reinterpret_cast<char*>(data), 20);
-    if (in.gcount() != 20) {
+    char data[21];
+    in.read(reinterpret_cast<char*>(data), 21);
+    if (in.gcount() != 21) {
         throw CubeStreamError();
     }
     for (int i = 0; i < 8; ++i) {
@@ -42,10 +44,14 @@ void Cube::read_from(istream& in) {
     for (int i = 0; i < 12; ++i) {
         this->edge[i] = data[i + 8];
     }
+    this->center = data[20];
 }
 
 
 int Cube::compare(const Cube& lhs, const Cube& rhs) noexcept {
+    if (lhs.center != rhs.center) {
+        return lhs.center - rhs.center;
+    }
     for (int i = 0; i < 8; ++i) {
         if (lhs.corner[i] != rhs.corner[i]) {
             return lhs.corner[i] - rhs.corner[i];
@@ -57,20 +63,6 @@ int Cube::compare(const Cube& lhs, const Cube& rhs) noexcept {
         }
     }
     return 0;
-}
-
-
-Cube Cube::inverse() const noexcept {
-    Cube result(nullopt);
-    for (int i = 0; i < 8; ++i) {
-        int item = this->corner[i];
-        result.corner[item / 3] = i * 3 + (24 - item) % 3;
-    }
-    for (int i = 0; i < 12; ++i) {
-        int item = this->edge[i];
-        result.edge[item >> 1] = i << 1 | (item & 1);
-    }
-    return result;
 }
 
 
@@ -86,6 +78,9 @@ uint32_t Cube::mask() const noexcept {
             mask |= 1 << (i + 8);
         }
     }
+    if (this->center) {
+        mask |= 1 << 20;
+    }
     return mask;
 }
 
@@ -98,5 +93,6 @@ size_t hash<Cube>::operator()(const Cube& cube) const noexcept {
     for (int i = 0; i < 12; ++i) {
         result = result * 31 + cube.edge[i];
     }
+    result = result * 31 + cube.center;
     return result;
 }
