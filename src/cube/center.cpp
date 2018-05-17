@@ -71,15 +71,12 @@ namespace {
         array<array<int, 24>, 24> center_transform;
         for (int i = 0; i < 24; ++i) {
             for (int j = 0; j < 24; ++j) {
-                int center[6];
-                memcpy(center, rotation_permutation[i], 6 * sizeof(int));
-                for (int k = 0; k < 6; ++k) {
-                    center[k] = rotation_permutation[j][center[k]];
-                }
+                int center0 = rotation_permutation[j][rotation_permutation[i][0]];
+                int center2 = rotation_permutation[j][rotation_permutation[i][2]];
                 for (int k = 0; k < 24; ++k) {
                     if (
-                        center[0] == rotation_permutation[k][0]
-                        && center[2] == rotation_permutation[k][2]
+                        center0 == rotation_permutation[k][0]
+                        && center2 == rotation_permutation[k][2]
                     ) {
                         center_transform[i][j] = k;
                         break;
