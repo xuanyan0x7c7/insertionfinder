@@ -51,26 +51,26 @@ void Case::read_from(istream& in) {
 
 
 int Case::compare(const Case& lhs, const Case& rhs) noexcept {
-    int lhs_center = lhs.center_rotation();
-    int rhs_center = rhs.center_rotation();
-    int lhs_center_parity = Cube::center_parity(lhs_center);
-    int rhs_center_parity = Cube::center_parity(rhs_center);
+    int lhs_rotation = lhs.rotation();
+    int rhs_rotation = rhs.rotation();
+    int lhs_placement_parity = Cube::placement_parity(lhs_rotation);
+    int rhs_rotation_parity = Cube::placement_parity(rhs_rotation);
     if (
         int cycles_diff =
-            (lhs_center
-                + (lhs_center_parity | lhs._has_parity)
+            (lhs_rotation
+                + (lhs_placement_parity | lhs._has_parity)
                 + lhs._corner_cycles + lhs._edge_cycles)
-            - (rhs_center
-                + (rhs_center_parity | rhs._has_parity)
+            - (rhs_rotation
+                + (rhs_rotation_parity | rhs._has_parity)
                 + rhs._corner_cycles + rhs._edge_cycles)
     ) {
         return cycles_diff;
     }
-    if (lhs_center != rhs_center) {
-        if (lhs_center_parity != rhs_center_parity) {
-            return lhs_center_parity - rhs_center_parity;
+    if (lhs_rotation != rhs_rotation) {
+        if (lhs_placement_parity != rhs_rotation_parity) {
+            return lhs_placement_parity - rhs_rotation_parity;
         } else {
-            return lhs_center - rhs_center;
+            return lhs_rotation - rhs_rotation;
         }
     }
     if (lhs._has_parity != rhs._has_parity) {

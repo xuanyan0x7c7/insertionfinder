@@ -120,7 +120,7 @@ void Cube::twist(const Cube& cube, uint8_t flags) noexcept {
         }
     }
     if (flags & CubeTwist::centers) {
-        this->center = Cube::center_transform[this->center][cube.center];
+        this->_placement = Cube::center_transform[this->_placement][cube._placement];
     }
 }
 
@@ -148,7 +148,7 @@ void Cube::twist_before(const Cube& cube, uint8_t flags) noexcept {
         memcpy(this->edge, edge, 12 * sizeof(int));
     }
     if (flags & CubeTwist::centers) {
-        this->center = Cube::center_transform[cube.center][this->center];
+        this->_placement = Cube::center_transform[cube._placement][this->_placement];
     }
 }
 
@@ -179,10 +179,10 @@ optional<Cube> Cube::twist_effectively(
         }
     }
     if (flags & CubeTwist::centers) {
-        if (flags == CubeTwist::centers && this->center == 0) {
+        if (flags == CubeTwist::centers && this->_placement == 0) {
             return nullopt;
         }
-        result.center = Cube::center_transform[this->center][cube.center];
+        result._placement = Cube::center_transform[this->_placement][cube._placement];
     }
     return result;
 }

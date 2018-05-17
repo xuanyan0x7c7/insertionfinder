@@ -49,7 +49,7 @@ namespace {
         {4, 5, 0, 1, 2, 3}
     };
 
-    constexpr bool center_parity_table[24] = {
+    constexpr bool rotation_parity_table[24] = {
         false, true, false, true,
         true, false, true, false,
         false, true, false, true,
@@ -148,21 +148,21 @@ Cube Cube::inverse() const noexcept {
         int item = this->edge[i];
         result.edge[item >> 1] = i << 1 | (item & 1);
     }
-    result.center = inverse_center[this->center];
+    result._placement = inverse_center[this->_placement];
     return result;
 }
 
 void Cube::rotate(int rotation) {
     this->twist(Cube::rotation_cube[rotation]);
-    this->center = Cube::center_transform[this->center][rotation];
+    this->_placement = Cube::center_transform[this->_placement][rotation];
 }
 
 
-bool Cube::center_parity(int rotation) {
-    return center_parity_table[rotation];
+bool Cube::placement_parity(int rotation) {
+    return rotation_parity_table[rotation];
 }
 
-pair<int, Cube> Cube::best_center_rotation() const noexcept {
+pair<int, Cube> Cube::best_placement() const noexcept {
     int best_rotation = 0;
     Cube best_cube = *this;
     int best_cycles = this->has_parity() + this->corner_cycles() + this->edge_cycles();
@@ -170,7 +170,7 @@ pair<int, Cube> Cube::best_center_rotation() const noexcept {
         Cube cube(*this);
         cube.twist(Cube::rotation_cube[inverse_center[i]]);
         int cycles = cube.corner_cycles() + cube.edge_cycles() + 1;
-        if (center_parity_table[i]) {
+        if (rotation_parity_table[i]) {
             ++cycles;
         } else {
             cycles += cube.has_parity();

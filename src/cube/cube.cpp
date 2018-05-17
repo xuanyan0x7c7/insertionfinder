@@ -16,7 +16,7 @@ Cube::Cube() noexcept {
     for (int i = 0; i < 12; ++i) {
         this->edge[i] = i << 1;
     }
-    this->center = 0;
+    this->_placement = 0;
 }
 
 
@@ -28,7 +28,7 @@ void Cube::save_to(ostream& out) const {
     for (int i = 0; i < 12; ++i) {
         data[i + 8] = this->edge[i];
     }
-    data[20] = this->center;
+    data[20] = this->_placement;
     out.write(reinterpret_cast<char*>(data), 21);
 }
 
@@ -44,13 +44,13 @@ void Cube::read_from(istream& in) {
     for (int i = 0; i < 12; ++i) {
         this->edge[i] = data[i + 8];
     }
-    this->center = data[20];
+    this->_placement = data[20];
 }
 
 
 int Cube::compare(const Cube& lhs, const Cube& rhs) noexcept {
-    if (lhs.center != rhs.center) {
-        return lhs.center - rhs.center;
+    if (lhs._placement != rhs._placement) {
+        return lhs._placement - rhs._placement;
     }
     for (int i = 0; i < 8; ++i) {
         if (lhs.corner[i] != rhs.corner[i]) {
@@ -78,7 +78,7 @@ uint32_t Cube::mask() const noexcept {
             mask |= 1 << (i + 8);
         }
     }
-    if (this->center) {
+    if (this->_placement) {
         mask |= 1 << 20;
     }
     return mask;
@@ -93,6 +93,6 @@ size_t hash<Cube>::operator()(const Cube& cube) const noexcept {
     for (int i = 0; i < 12; ++i) {
         result = result * 31 + cube.edge[i];
     }
-    result = result * 31 + cube.center;
+    result = result * 31 + cube._placement;
     return result;
 }

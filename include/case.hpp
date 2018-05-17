@@ -54,7 +54,7 @@ namespace InsertionFinder {
             return this->_edge_cycles;
         }
         int rotation() const noexcept {
-            return this->_state.center_rotation();
+            return this->_state.placement();
         }
         const std::vector<Algorithm>& algorithm_list() const noexcept {
             return this->list;

@@ -33,7 +33,7 @@ namespace InsertionFinder {
     private:
         int corner[8];
         int edge[12];
-        int center;
+        int _placement;
     public:
         Cube() noexcept;
         Cube(const Cube&) = default;
@@ -118,8 +118,8 @@ namespace InsertionFinder {
         bool has_parity() const noexcept;
         int corner_cycles() const noexcept;
         int edge_cycles() const noexcept;
-        int center_rotation() const noexcept {
-            return this->center;
+        int placement() const noexcept {
+            return this->_placement;
         }
     private:
         static Cube parity_cube(int index);
@@ -129,8 +129,8 @@ namespace InsertionFinder {
         int parity_index() const noexcept;
         int corner_cycle_index() const noexcept;
         int edge_cycle_index() const noexcept;
-        static bool center_parity(int rotation);
-        std::pair<int, Cube> best_center_rotation() const noexcept;
+        static bool placement_parity(int rotation);
+        std::pair<int, Cube> best_placement() const noexcept;
     public:
         static int next_parity_index(int index, int twist) {
             return Cube::parity_transform[index][twist];

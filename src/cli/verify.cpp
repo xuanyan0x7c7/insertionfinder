@@ -28,11 +28,11 @@ namespace {
         Cube cube;
         cube.twist(scramble);
         cube.twist(skeleton);
-        const auto [center_rotation, rotated_cube] = cube.best_center_rotation();
+        const auto [cube_placement, rotated_cube] = cube.best_placement();
         return {
             scramble, skeleton,
-            center_rotation != 0,
-            Cube::center_parity(center_rotation),
+            cube_placement != 0,
+            Cube::placement_parity(cube_placement),
             rotated_cube.has_parity(),
             rotated_cube.corner_cycles(),
             rotated_cube.edge_cycles()
