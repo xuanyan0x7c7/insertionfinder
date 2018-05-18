@@ -3,8 +3,10 @@
 #include <fallbacks/optional.hpp>
 #include <algorithm.hpp>
 #include <cube.hpp>
+#include "utils.hpp"
 using namespace std;
 using namespace InsertionFinder;
+using namespace Details;
 
 
 namespace {
@@ -90,6 +92,7 @@ void Cube::twist(
     uint8_t flags
 ) noexcept {
     if (flags & CubeTwist::reversed) {
+        this->rotate(inverse_center[algorithm.cube_rotation()]);
         for (size_t i = end; i > begin; --i) {
             this->twist(
                 Algorithm::inverse_twist[algorithm[i]],
@@ -100,6 +103,7 @@ void Cube::twist(
         for (size_t i = begin; i < end; ++i) {
             this->twist(algorithm[i], flags);
         }
+        this->rotate(algorithm.cube_rotation());
     }
 }
 

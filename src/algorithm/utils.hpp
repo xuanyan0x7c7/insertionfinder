@@ -1,5 +1,5 @@
+#pragma once
 #include <cstdint>
-#include <array>
 
 namespace InsertionFinder::Details {
     inline std::uint32_t twist_mask(int twist) {

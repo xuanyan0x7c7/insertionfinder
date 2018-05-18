@@ -12,7 +12,7 @@
 #include <vector>
 #include <algorithm.hpp>
 #include <cube.hpp>
-#include "./utils.hpp"
+#include "utils.hpp"
 using namespace std;
 using namespace InsertionFinder;
 using namespace Details;

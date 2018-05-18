@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <iostream>
+#include <string>
 #include <boost/program_options.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <config.h>
@@ -18,7 +19,6 @@ namespace {
 
 void CLI::parse(int argc, char** argv) try {
     po::options_description cli_options;
-    bool json_output = false;
 
     po::options_description general_options("General options");
     general_options.add_options()
@@ -26,11 +26,15 @@ void CLI::parse(int argc, char** argv) try {
         ("help,h", "produce help message");
     cli_options.add(general_options);
 
-    po::options_description allowed_options("Allowed options");
-    allowed_options.add_options()
+    po::options_description command_options("Commands");
+    command_options.add_options()
         ("verify,v", "verify cube state")
+    cli_options.add(command_options);
+
+    po::options_description configuration_options("Configurations");
+    configuration_options.add_options()
         ("json", "use JSON output");
-    cli_options.add(allowed_options);
+    cli_options.add(configuration_options);
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, cli_options), vm);
@@ -44,15 +48,8 @@ void CLI::parse(int argc, char** argv) try {
         cout << version_string << endl;
         return;
     }
-    if (vm.count("json")) {
-        json_output = true;
-    }
     if (vm.count("verify")) {
-        if (json_output) {
-            CLI::verify_cube<pt::ptree>();
-        } else {
-            CLI::verify_cube<ostream>();
-        }
+        CLI::verify_cube(vm);
         return;
     }
     cout << version_string << endl << cli_options << endl;

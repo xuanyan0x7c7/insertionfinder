@@ -3,8 +3,10 @@
 #include <utility>
 #include <fallbacks/optional.hpp>
 #include <cube.hpp>
+#include "utils.hpp"
 using namespace std;
 using namespace InsertionFinder;
+using namespace Details;
 
 
 namespace {
@@ -56,15 +58,6 @@ namespace {
         true, false, true, false,
         true, false, true, false,
         true, false, true, false
-    };
-
-    constexpr int inverse_center[24] = {
-        0, 3, 2, 1,
-        12, 23, 6, 17,
-        8, 9, 10, 11,
-        4, 19, 14, 21,
-        20, 7, 18, 13,
-        16, 15, 22, 5
     };
 
     array<array<int, 24>, 24> generate_center_transform_table() noexcept {
@@ -137,20 +130,6 @@ array<Cube, 24> Cube::generate_rotation_cube_table() noexcept {
     return rotation_cube;
 }
 
-
-Cube Cube::inverse() const noexcept {
-    Cube result(nullopt);
-    for (int i = 0; i < 8; ++i) {
-        int item = this->corner[i];
-        result.corner[item / 3] = i * 3 + (24 - item) % 3;
-    }
-    for (int i = 0; i < 12; ++i) {
-        int item = this->edge[i];
-        result.edge[item >> 1] = i << 1 | (item & 1);
-    }
-    result._placement = inverse_center[this->_placement];
-    return result;
-}
 
 void Cube::rotate(int rotation) {
     this->twist(Cube::rotation_cube[rotation]);

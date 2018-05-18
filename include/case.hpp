@@ -25,7 +25,7 @@ namespace InsertionFinder {
         int _corner_cycles;
         int _edge_cycles;
     public:
-        Case(const Cube& state);
+        explicit Case(const Cube& state);
     public:
         void save_to(std::ostream& out) const;
         void read_from(std::istream& in);
@@ -59,14 +59,13 @@ namespace InsertionFinder {
         const std::vector<Algorithm>& algorithm_list() const noexcept {
             return this->list;
         }
-    private:
+    public:
         bool contains_algorithm(const Algorithm& algorithm) const {
             return std::find(
                 this->list.cbegin(), this->list.cend(),
                 algorithm
             ) != this->list.cend();
         }
-    public:
         void add_algorithm(const Algorithm& algorithm) {
             if (!this->contains_algorithm(algorithm)) {
                 this->list.push_back(algorithm);

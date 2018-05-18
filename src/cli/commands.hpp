@@ -1,6 +1,7 @@
 #pragma once
 #include <exception>
 #include <string>
+#include <boost/program_options.hpp>
 
 namespace InsertionFinder::CLI {
     class CommandExecutionError: std::exception {
@@ -13,5 +14,5 @@ namespace InsertionFinder::CLI {
         }
     };
 
-    template<class T> void verify_cube();
+    void verify_cube(const boost::program_options::variables_map& vm);
 };

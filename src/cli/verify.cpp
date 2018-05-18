@@ -1,11 +1,13 @@
 #include <iostream>
 #include <string>
+#include <boost/program_options.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <algorithm.hpp>
 #include <cube.hpp>
-#include "./commands.hpp"
+#include "commands.hpp"
 using namespace std;
+namespace po = boost::program_options;
 namespace pt = boost::property_tree;
 using namespace InsertionFinder;
 
@@ -43,71 +45,84 @@ namespace {
 };
 
 
-template<> void CLI::verify_cube<ostream>() {
-    string scramble_string;
-    string skeleton_string;
-    getline(cin, scramble_string);
-    getline(cin, skeleton_string);
-    auto status = verify(scramble_string, skeleton_string);
-    cout << "Scramble: " << status.scramble << endl;
-    cout << "Skeleton: " << status.skeleton << endl;
-    cout << "The cube ";
-    if (
-        !status.center_rotated && !status.has_parity
-        && status.corner_cycles == 0 && status.edge_cycles == 0
-    ) {
-        cout << "is already solved";
-    } else {
-        cout << "has ";
-        if (status.center_rotated) {
-            if (status.center_parity) {
-                cout << "parity center rotation";
-            } else {
-                cout << "center rotation";
-            }
-            if (status.corner_cycles || status.edge_cycles) {
-                cout << " with ";
-            }
-        }
-        if (status.corner_cycles == 1) {
-            cout << "1 corner-3-cycle";
-        } else if (status.corner_cycles > 1) {
-            cout << status.corner_cycles << " corner-3-cycles";
-        }
-        if (status.corner_cycles && status.edge_cycles) {
-            cout << " and ";
-        }
-        if (status.edge_cycles == 1) {
-            cout << "1 edge-3-cycle";
-        } else if (status.edge_cycles > 1) {
-            cout << status.edge_cycles << " edge-3-cycles";
-        }
-        if (!status.center_parity && status.has_parity) {
-            if (status.corner_cycles || status.edge_cycles) {
-                cout << " with parity";
-            } else {
-                cout << "parity";
-            }
-        }
-    }
-    cout << endl;
-}
+namespace {
+    template<class T> void verify_cube();
 
-template<> void CLI::verify_cube<pt::ptree>() {
-    string scramble_string;
-    string skeleton_string;
-    getline(cin, scramble_string);
-    getline(cin, skeleton_string);
-    auto status = verify(scramble_string, skeleton_string);
-    pt::ptree result;
-    result.put("scramble", status.scramble.str());
-    result.put("skeleton", status.skeleton.str());
-    result.put("center_rotated", status.center_rotated);
-    if (status.center_rotated) {
-        result.put("center_parity", status.center_parity);
+    template<> void verify_cube<ostream>() {
+        string scramble_string;
+        string skeleton_string;
+        getline(cin, scramble_string);
+        getline(cin, skeleton_string);
+        auto status = verify(scramble_string, skeleton_string);
+        cout << "Scramble: " << status.scramble << endl;
+        cout << "Skeleton: " << status.skeleton << endl;
+        cout << "The cube ";
+        if (
+            !status.center_rotated && !status.has_parity
+            && status.corner_cycles == 0 && status.edge_cycles == 0
+        ) {
+            cout << "is already solved";
+        } else {
+            cout << "has ";
+            if (status.center_rotated) {
+                if (status.center_parity) {
+                    cout << "parity center rotation";
+                } else {
+                    cout << "center rotation";
+                }
+                if (status.corner_cycles || status.edge_cycles) {
+                    cout << " with ";
+                }
+            }
+            if (status.corner_cycles == 1) {
+                cout << "1 corner-3-cycle";
+            } else if (status.corner_cycles > 1) {
+                cout << status.corner_cycles << " corner-3-cycles";
+            }
+            if (status.corner_cycles && status.edge_cycles) {
+                cout << " and ";
+            }
+            if (status.edge_cycles == 1) {
+                cout << "1 edge-3-cycle";
+            } else if (status.edge_cycles > 1) {
+                cout << status.edge_cycles << " edge-3-cycles";
+            }
+            if (!status.center_parity && status.has_parity) {
+                if (status.corner_cycles || status.edge_cycles) {
+                    cout << " with parity";
+                } else {
+                    cout << "parity";
+                }
+            }
+        }
+        cout << endl;
     }
-    result.put("parity", status.has_parity);
-    result.put("corner_cycle_num", status.corner_cycles);
-    result.put("edge_cycle_num", status.edge_cycles);
-    pt::write_json(cout, result);
+
+    template<> void verify_cube<pt::ptree>() {
+        string scramble_string;
+        string skeleton_string;
+        getline(cin, scramble_string);
+        getline(cin, skeleton_string);
+        auto status = verify(scramble_string, skeleton_string);
+        pt::ptree result;
+        result.put("scramble", status.scramble.str());
+        result.put("skeleton", status.skeleton.str());
+        result.put("center_rotated", status.center_rotated);
+        if (status.center_rotated) {
+            result.put("center_parity", status.center_parity);
+        }
+        result.put("parity", status.has_parity);
+        result.put("corner_cycle_num", status.corner_cycles);
+        result.put("edge_cycle_num", status.edge_cycles);
+        pt::write_json(cout, result);
+    }
+};
+
+
+void CLI::verify_cube(const po::variables_map& vm) {
+    if (vm.count("json")) {
+        ::verify_cube<pt::ptree>();
+    } else {
+        ::verify_cube<ostream>();
+    }
 }

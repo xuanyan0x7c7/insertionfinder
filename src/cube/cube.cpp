@@ -5,8 +5,10 @@
 #include <ostream>
 #include <fallbacks/optional.hpp>
 #include <cube.hpp>
+#include "utils.hpp"
 using namespace std;
 using namespace InsertionFinder;
+using namespace Details;
 
 
 Cube::Cube() noexcept {
@@ -63,6 +65,21 @@ int Cube::compare(const Cube& lhs, const Cube& rhs) noexcept {
         }
     }
     return 0;
+}
+
+
+Cube Cube::inverse() const noexcept {
+    Cube result(nullopt);
+    for (int i = 0; i < 8; ++i) {
+        int item = this->corner[i];
+        result.corner[item / 3] = i * 3 + (24 - item) % 3;
+    }
+    for (int i = 0; i < 12; ++i) {
+        int item = this->edge[i];
+        result.edge[item >> 1] = i << 1 | (item & 1);
+    }
+    result._placement = inverse_center[this->_placement];
+    return result;
 }
 
 
