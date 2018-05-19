@@ -1,11 +1,12 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
+#include <vector>
 #include <boost/program_options.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <config.h>
-#include "./parser.hpp"
-#include "./commands.hpp"
+#include "parser.hpp"
+#include "commands.hpp"
 using namespace std;
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;
@@ -29,10 +30,13 @@ void CLI::parse(int argc, char** argv) try {
     po::options_description command_options("Commands");
     command_options.add_options()
         ("verify,v", "verify cube state")
+        ("generate,g", "generate algorithm files");
     cli_options.add(command_options);
 
     po::options_description configuration_options("Configurations");
     configuration_options.add_options()
+        ("algfile,a", po::value<vector<string>>(), "algorithm file")
+        ("file,f", po::value<vector<string>>(), "input file")
         ("json", "use JSON output");
     cli_options.add(configuration_options);
 
@@ -50,6 +54,10 @@ void CLI::parse(int argc, char** argv) try {
     }
     if (vm.count("verify")) {
         CLI::verify_cube(vm);
+        return;
+    }
+    if (vm.count("generate")) {
+        CLI::generate_algorithms(vm);
         return;
     }
     cout << version_string << endl << cli_options << endl;

@@ -15,4 +15,5 @@ namespace InsertionFinder::CLI {
     };
 
     void verify_cube(const boost::program_options::variables_map& vm);
+    void generate_algorithms(const boost::program_options::variables_map& vm);
 };
