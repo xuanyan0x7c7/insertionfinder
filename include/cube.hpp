@@ -5,7 +5,6 @@
 #include <functional>
 #include <istream>
 #include <ostream>
-#include <utility>
 #include <fallbacks/optional.hpp>
 #include <algorithm.hpp>
 
@@ -130,7 +129,7 @@ namespace InsertionFinder {
         int corner_cycle_index() const noexcept;
         int edge_cycle_index() const noexcept;
         static bool placement_parity(int rotation);
-        std::pair<int, Cube> best_placement() const noexcept;
+        Cube best_placement() const noexcept;
     public:
         static int next_parity_index(int index, int twist) {
             return Cube::parity_transform[index][twist];

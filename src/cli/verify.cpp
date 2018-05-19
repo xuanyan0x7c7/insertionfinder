@@ -30,14 +30,14 @@ namespace {
         Cube cube;
         cube.twist(scramble);
         cube.twist(skeleton);
-        const auto [cube_placement, rotated_cube] = cube.best_placement();
+        const Cube placed_cube = cube.best_placement();
         return {
             scramble, skeleton,
-            cube_placement != 0,
-            Cube::placement_parity(cube_placement),
-            rotated_cube.has_parity(),
-            rotated_cube.corner_cycles(),
-            rotated_cube.edge_cycles()
+            placed_cube.placement() != 0,
+            Cube::placement_parity(placed_cube.placement()),
+            placed_cube.has_parity(),
+            placed_cube.corner_cycles(),
+            placed_cube.edge_cycles()
         };
     } catch (const AlgorithmError& e) {
         throw CLI::CommandExecutionError(e.what());

@@ -56,7 +56,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
             if (cube.mask() == 0) {
                 continue;
             }
-            cube.rotate(cube.best_placement().first);
+            cube.rotate(algorithm.detect_rotation());
 
             auto node = map.find(cube);
             if (node != map.end() && node->second.contains_algorithm(algorithm)) {

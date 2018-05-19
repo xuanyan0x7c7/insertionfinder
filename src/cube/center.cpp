@@ -1,6 +1,5 @@
 #include <cstring>
 #include <array>
-#include <utility>
 #include <fallbacks/optional.hpp>
 #include <cube.hpp>
 #include "utils.hpp"
@@ -58,6 +57,15 @@ namespace {
         true, false, true, false,
         true, false, true, false,
         true, false, true, false
+    };
+
+    constexpr int center_cycles[24] = {
+        0, 2, 1, 2,
+        2, 1, 3, 1,
+        1, 3, 1, 3,
+        2, 1, 3, 1,
+        2, 1, 3, 1,
+        2, 1, 3, 1
     };
 
     array<array<int, 24>, 24> generate_center_transform_table() noexcept {
@@ -131,34 +139,36 @@ array<Cube, 24> Cube::generate_rotation_cube_table() noexcept {
 }
 
 
-void Cube::rotate(int rotation) {
-    this->twist(Cube::rotation_cube[rotation]);
-    this->_placement = Cube::center_transform[this->_placement][rotation];
-}
-
-
 bool Cube::placement_parity(int rotation) {
     return rotation_parity_table[rotation];
 }
 
-pair<int, Cube> Cube::best_placement() const noexcept {
-    int best_rotation = 0;
+Cube Cube::best_placement() const noexcept {
     Cube best_cube = *this;
     int best_cycles = this->has_parity() + this->corner_cycles() + this->edge_cycles();
-    for (int i = 1; i < 24; ++i) {
+    if (best_cycles <= 4) {
+        return best_cube;
+    }
+
+    for (int index: {
+        2, 8, 10,
+        5, 7, 13, 15, 17, 19, 21, 23,
+        1, 3, 4, 12, 16, 20,
+        6, 9, 11, 14, 18, 22
+    }) {
         Cube cube(*this);
-        cube.twist(Cube::rotation_cube[inverse_center[i]]);
-        int cycles = cube.corner_cycles() + cube.edge_cycles() + 1;
-        if (rotation_parity_table[i]) {
-            ++cycles;
-        } else {
+        cube.twist(Cube::rotation_cube[inverse_center[index]]);
+        int cycles = cube.corner_cycles() + cube.edge_cycles();
+        if (!rotation_parity_table[index]) {
             cycles += cube.has_parity();
         }
-        if (cycles < best_cycles) {
-            best_rotation = i;
+        if (cycles + center_cycles[index] < best_cycles) {
             best_cube = cube;
-            best_cycles = cycles;
+            best_cycles = cycles + center_cycles[index];
+            if (cycles <= 4) {
+                return best_cube;
+            }
         }
     }
-    return {best_rotation, best_cube};
+    return best_cube;
 }

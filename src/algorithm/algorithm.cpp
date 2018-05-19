@@ -240,5 +240,5 @@ void Algorithm::read_from(istream& in) {
 int Algorithm::detect_rotation() const noexcept {
     Cube cube;
     cube.twist(*this);
-    return cube.best_placement().first;
+    return cube.best_placement().placement();
 }

@@ -190,3 +190,9 @@ optional<Cube> Cube::twist_effectively(
     }
     return result;
 }
+
+
+void Cube::rotate(int rotation) {
+    this->twist(Cube::rotation_cube[rotation]);
+    this->_placement = Cube::center_transform[this->_placement][rotation];
+}
