@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <cstdint>
 #include <array>
 #include <exception>
@@ -21,10 +22,10 @@ namespace InsertionFinder {
     };
 
     namespace CubeTwist {
-        constexpr std::uint8_t corners = 1;
-        constexpr std::uint8_t edges = 2;
-        constexpr std::uint8_t centers = 4;
-        constexpr std::uint8_t reversed = 8;
+        constexpr std::byte corners {1};
+        constexpr std::byte edges {2};
+        constexpr std::byte centers {4};
+        constexpr std::byte reversed {8};
     };
 
     class Cube {
@@ -75,38 +76,38 @@ namespace InsertionFinder {
     public:
         void twist(
             int twist,
-            std::uint8_t flags =
+            std::byte flags =
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
         );
         void twist(
             const Algorithm& algorithm,
-            std::uint8_t flags =
+            std::byte flags =
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
         ) noexcept;
         void twist(
             const Algorithm& algorithm,
             std::size_t begin, std::size_t end,
-            std::uint8_t flags =
+            std::byte flags =
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
         ) noexcept;
         void twist(
             const Cube& cube,
-            std::uint8_t flags =
+            std::byte flags =
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
         ) noexcept;
         void twist_before(
             int twist,
-            std::uint8_t flags =
+            std::byte flags =
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
         );
         void twist_before(
             const Cube& cube,
-            std::uint8_t flags =
+            std::byte flags =
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
         ) noexcept;
         std::optional<Cube> twist_effectively(
             const Cube& cube,
-            std::uint8_t flags =
+            std::byte flags =
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
         ) const noexcept;
         void rotate(int rotation);

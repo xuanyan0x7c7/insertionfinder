@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstring>
 #include <array>
 #include <fallbacks/optional.hpp>
@@ -78,20 +79,20 @@ array<Cube, 24> Cube::generate_twist_cube_table() noexcept {
 }
 
 
-void Cube::twist(int twist, uint8_t flags) {
+void Cube::twist(int twist, byte flags) {
     this->twist(twist_cube[twist], flags);
 }
 
-void Cube::twist(const Algorithm& algorithm, uint8_t flags) noexcept {
+void Cube::twist(const Algorithm& algorithm, byte flags) noexcept {
     this->twist(algorithm, 0, algorithm.length(), flags);
 }
 
 void Cube::twist(
     const Algorithm& algorithm,
     size_t begin, size_t end,
-    uint8_t flags
+    byte flags
 ) noexcept {
-    if (flags & CubeTwist::reversed) {
+    if (static_cast<bool>(flags & CubeTwist::reversed)) {
         this->rotate(inverse_center[algorithm.cube_rotation()]);
         for (size_t i = end; i > begin; --i) {
             this->twist(
@@ -107,8 +108,8 @@ void Cube::twist(
     }
 }
 
-void Cube::twist(const Cube& cube, uint8_t flags) noexcept {
-    if (flags & CubeTwist::corners) {
+void Cube::twist(const Cube& cube, byte flags) noexcept {
+    if (static_cast<bool>(flags & CubeTwist::corners)) {
         int* begin = this->corner;
         int* end = begin + 8;
         for (int* item = begin; item < end; ++item) {
@@ -116,25 +117,25 @@ void Cube::twist(const Cube& cube, uint8_t flags) noexcept {
             *item = transform - transform % 3 + (*item + transform) % 3;
         }
     }
-    if (flags & CubeTwist::edges) {
+    if (static_cast<bool>(flags & CubeTwist::edges)) {
         int* begin = this->edge;
         int* end = begin + 12;
         for (int* item = begin; item < end; ++item) {
             *item = cube.edge[*item >> 1] ^ (*item & 1);
         }
     }
-    if (flags & CubeTwist::centers) {
+    if (static_cast<bool>(flags & CubeTwist::centers)) {
         this->_placement = Cube::center_transform[this->_placement][cube._placement];
     }
 }
 
 
-void Cube::twist_before(int twist, uint8_t flags) {
+void Cube::twist_before(int twist, byte flags) {
     this->twist_before(twist_cube[twist], flags);
 }
 
-void Cube::twist_before(const Cube& cube, uint8_t flags) noexcept {
-    if (flags & CubeTwist::corners) {
+void Cube::twist_before(const Cube& cube, byte flags) noexcept {
+    if (static_cast<bool>(flags & CubeTwist::corners)) {
         int corner[8];
         for (int i = 0; i < 8; ++i) {
             int item = cube.corner[i];
@@ -143,7 +144,7 @@ void Cube::twist_before(const Cube& cube, uint8_t flags) noexcept {
         }
         memcpy(this->corner, corner, 8 * sizeof(int));
     }
-    if (flags & CubeTwist::edges) {
+    if (static_cast<bool>(flags & CubeTwist::edges)) {
         int edge[12];
         for (int i = 0; i < 12; ++i) {
             int item = cube.edge[i];
@@ -151,17 +152,17 @@ void Cube::twist_before(const Cube& cube, uint8_t flags) noexcept {
         }
         memcpy(this->edge, edge, 12 * sizeof(int));
     }
-    if (flags & CubeTwist::centers) {
+    if (static_cast<bool>(flags & CubeTwist::centers)) {
         this->_placement = Cube::center_transform[cube._placement][this->_placement];
     }
 }
 
 
 optional<Cube> Cube::twist_effectively(
-    const Cube& cube, uint8_t flags
+    const Cube& cube, byte flags
 ) const noexcept {
     Cube result = *this;
-    if (flags & CubeTwist::corners) {
+    if (static_cast<bool>(flags & CubeTwist::corners)) {
         for (int i = 0; i < 8; ++i) {
             int item = this->corner[i];
             int transform = cube.corner[item / 3];
@@ -172,7 +173,7 @@ optional<Cube> Cube::twist_effectively(
             result.corner[i] = new_corner;
         }
     }
-    if (flags & CubeTwist::edges) {
+    if (static_cast<bool>(flags & CubeTwist::edges)) {
         for (int i = 0; i < 12; ++i) {
             int item = this->edge[i];
             int new_edge = cube.edge[item >> 1] ^ (item & 1);
@@ -182,7 +183,7 @@ optional<Cube> Cube::twist_effectively(
             result.edge[i] = new_edge;
         }
     }
-    if (flags & CubeTwist::centers) {
+    if (static_cast<bool>(flags & CubeTwist::centers)) {
         if (flags == CubeTwist::centers && this->_placement == 0) {
             return nullopt;
         }
