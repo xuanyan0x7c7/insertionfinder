@@ -59,15 +59,6 @@ namespace {
         true, false, true, false
     };
 
-    constexpr int center_cycles[24] = {
-        0, 2, 1, 2,
-        2, 1, 3, 1,
-        1, 3, 1, 3,
-        2, 1, 3, 1,
-        2, 1, 3, 1,
-        2, 1, 3, 1
-    };
-
     array<array<int, 24>, 24> generate_center_transform_table() noexcept {
         array<array<int, 24>, 24> center_transform;
         for (int i = 0; i < 24; ++i) {

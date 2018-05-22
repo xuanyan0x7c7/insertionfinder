@@ -16,6 +16,14 @@ void Algorithm::normalize() noexcept {
 }
 
 
+void Algorithm::rotate(int rotation) {
+    const int* table = rotation_permutation[rotation];
+    for (int& twist: twists) {
+        twist = transform_twist(table, twist);
+    }
+}
+
+
 vector<Algorithm> Algorithm::generate_isomorphisms() const {
     vector<Algorithm> result(96);
     size_t length = this->twists.size();

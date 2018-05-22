@@ -95,9 +95,7 @@ uint32_t Cube::mask() const noexcept {
             mask |= 1 << (i + 8);
         }
     }
-    if (this->_placement) {
-        mask |= 1 << 20;
-    }
+    mask |= center_cycles[this->_placement] << 20;
     return mask;
 }
 

@@ -111,6 +111,9 @@ namespace InsertionFinder {
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
         ) const noexcept;
         void rotate(int rotation);
+        static int placement_twist(int placement, int rotation) {
+            return Cube::center_transform[placement][rotation];
+        }
     public:
         Cube inverse() const noexcept;
         std::uint32_t mask() const noexcept;

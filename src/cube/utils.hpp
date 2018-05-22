@@ -9,4 +9,13 @@ namespace InsertionFinder::Details {
         20, 7, 18, 13,
         16, 15, 22, 5
     };
+
+    constexpr int center_cycles[24] = {
+        0, 2, 1, 2,
+        2, 1, 3, 1,
+        1, 3, 1, 3,
+        2, 1, 3, 1,
+        2, 1, 3, 1,
+        2, 1, 3, 1
+    };
 };

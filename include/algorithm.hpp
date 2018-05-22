@@ -108,6 +108,7 @@ namespace InsertionFinder {
         }
     public:
         void normalize() noexcept;
+        void rotate(int rotation);
         std::vector<Algorithm> generate_isomorphisms() const;
     };
 };
