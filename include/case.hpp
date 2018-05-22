@@ -25,6 +25,7 @@ namespace InsertionFinder {
         int _corner_cycles;
         int _edge_cycles;
     public:
+        Case() {}
         explicit Case(const Cube& state);
     public:
         void save_to(std::ostream& out) const;

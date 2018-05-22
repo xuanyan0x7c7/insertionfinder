@@ -52,7 +52,7 @@ namespace InsertionFinder {
         std::uint32_t end_mask;
         std::uint32_t set_up_mask;
     public:
-        Algorithm() {}
+        Algorithm(): rotation(0) {}
         Algorithm(const Algorithm&) = default;
         Algorithm(Algorithm&&) = default;
         Algorithm& operator=(const Algorithm&) = default;

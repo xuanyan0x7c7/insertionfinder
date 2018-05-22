@@ -89,7 +89,7 @@ namespace InsertionFinder {
             std::size_t begin, std::size_t end,
             std::byte flags =
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
-        ) noexcept;
+        );
         void twist(
             const Cube& cube,
             std::byte flags =

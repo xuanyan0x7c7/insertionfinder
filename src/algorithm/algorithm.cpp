@@ -205,7 +205,7 @@ void Algorithm::read_from(istream& in) {
     this->twists = vector<int>(data.get(), data.get() + length);
     char rotation_data;
     in.read(data.get(), 1);
-    if (static_cast<size_t>(in.gcount()) != length) {
+    if (static_cast<size_t>(in.gcount()) != 1) {
         throw AlgorithmStreamError();
     }
     this->rotation = rotation_data;

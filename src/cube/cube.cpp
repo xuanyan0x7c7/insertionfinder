@@ -31,12 +31,12 @@ void Cube::save_to(ostream& out) const {
         data[i + 8] = this->edge[i];
     }
     data[20] = this->_placement;
-    out.write(reinterpret_cast<char*>(data), 21);
+    out.write(data, 21);
 }
 
 void Cube::read_from(istream& in) {
     char data[21];
-    in.read(reinterpret_cast<char*>(data), 21);
+    in.read(data, 21);
     if (in.gcount() != 21) {
         throw CubeStreamError();
     }
