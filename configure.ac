@@ -20,6 +20,7 @@ AC_CONFIG_FILES([
     src/case/Makefile
     src/cli/Makefile
     src/cube/Makefile
+    src/finder/Makefile
 ])
 
 AC_OUTPUT

@@ -1,5 +1,5 @@
 AM_CPPFLAGS = -I$(top_srcdir)/include
-SUBDIRS = algorithm case cli cube
+SUBDIRS = algorithm case cli cube finder
 bin_PROGRAMS = insertionfinder
 insertionfinder_SOURCES = main.cpp
 insertionfinder_LDADD = \
@@ -7,4 +7,5 @@ insertionfinder_LDADD = \
     case/libcase.la \
     cli/libcli.la \
     cube/libcube.la \
+    finder/libfinder.la \
     -lboost_program_options
