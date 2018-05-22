@@ -79,7 +79,6 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
     }
 
     const size_t size = map.size();
-    cerr << size << endl;
     vector<Case> cases;
     cases.reserve(size);
     for (auto& node: map) {
@@ -90,9 +89,6 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
     for (auto& _case: cases) {
         _case.sort_algorithms();
         _case.save_to(*out);
-        for (const Algorithm& algorithm: _case.algorithm_list()) {
-            cerr << algorithm << endl;
-        }
     }
 
     if (out != &cout) {
