@@ -1,7 +1,6 @@
 #include <cmath>
 #include <algorithm>
 #include <functional>
-#include <iostream>
 #include <thread>
 #include <vector>
 #include <cube.hpp>
