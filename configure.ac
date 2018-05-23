@@ -21,6 +21,7 @@ AC_CONFIG_FILES([
     src/cli/Makefile
     src/cube/Makefile
     src/finder/Makefile
+    data/algorithms/Makefile
 ])
 
 AC_OUTPUT
