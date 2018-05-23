@@ -29,6 +29,7 @@ void CLI::parse(int argc, char** argv) try {
 
     po::options_description command_options("Commands");
     command_options.add_options()
+        ("solve,s", "find insertions!")
         ("verify,v", "verify cube state")
         ("generate,g", "generate algorithm files");
     cli_options.add(command_options);
@@ -37,6 +38,11 @@ void CLI::parse(int argc, char** argv) try {
     configuration_options.add_options()
         ("algfile,a", po::value<vector<string>>(), "algorithm file")
         ("file,f", po::value<vector<string>>(), "input file")
+        (
+            "jobs,j",
+            po::value<size_t>()->default_value(1)->implicit_value(0),
+            "multiple threads"
+        )
         ("json", "use JSON output");
     cli_options.add(configuration_options);
 
@@ -50,6 +56,10 @@ void CLI::parse(int argc, char** argv) try {
     }
     if (vm.count("version")) {
         cout << version_string << endl;
+        return;
+    }
+    if (vm.count("solve")) {
+        CLI::find_insertions(vm);
         return;
     }
     if (vm.count("verify")) {

@@ -51,12 +51,12 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
                 continue;
             }
             algorithm.normalize();
+            algorithm.detect_rotation();
             Cube cube;
             cube.twist(algorithm);
             if (cube.mask() == 0) {
                 continue;
             }
-            cube.rotate(algorithm.detect_rotation());
 
             auto node = map.find(cube);
             if (node != map.end() && node->second.contains_algorithm(algorithm)) {
@@ -72,7 +72,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
                 } else {
                     Case _case(cube);
                     _case.add_algorithm(algorithm);
-                    map.insert({cube, _case});
+                    map.insert({cube, move(_case)});
                 }
             }
         }
