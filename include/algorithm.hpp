@@ -72,10 +72,10 @@ namespace InsertionFinder {
     public:
         static int compare(const Algorithm& lhs, const Algorithm& rhs) noexcept;
         bool operator==(const Algorithm& rhs) const noexcept {
-            return this->compare(*this, rhs) == 0;
+            return Algorithm::compare(*this, rhs) == 0;
         }
         bool operator<(const Algorithm& rhs) const noexcept {
-            return this->compare(*this, rhs) < 0;
+            return Algorithm::compare(*this, rhs) < 0;
         }
     public:
         friend std::ostream&

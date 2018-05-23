@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <iostream>
 #include <utility>
 #include <algorithm.hpp>
 #include <case.hpp>
@@ -27,7 +28,7 @@ namespace {
 
 BruteForceFinder::Worker::Worker(BruteForceFinder& finder):
     finder(finder),
-    solving_step({{finder.skeleton, 0, nullptr}}) {}
+    solving_step({{finder.skeleton}}) {}
 
 
 void BruteForceFinder::Worker::search(
@@ -57,7 +58,7 @@ void BruteForceFinder::Worker::search(
 
     Algorithm skeleton = this->solving_step.back().skeleton;
     const int* transform = rotation_permutation[placement];
-    byte twist_flag;
+    byte twist_flag{0};
     if (this->finder.change_corner) {
         twist_flag |= CubeTwist::corners;
     }
@@ -68,13 +69,8 @@ void BruteForceFinder::Worker::search(
     Cube state;
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
         if (insert_place == begin) {
+            state.twist(skeleton, insert_place, skeleton.length(), twist_flag);
             state.rotate(placement);
-            for (size_t k = insert_place; k < skeleton.length(); ++k) {
-                state.twist(
-                    transform_twist(transform, skeleton[insert_place]),
-                    twist_flag
-                );
-            }
             state.twist(this->finder.scramble_cube, twist_flag);
             state.twist(skeleton, 0, insert_place, twist_flag);
         } else {
@@ -278,17 +274,35 @@ void BruteForceFinder::Worker::try_insertion(
                 auto [new_skeleton, new_begin] = insertion.skeleton.insert(algorithm, insert_place);
                 if (
                     not_searched(insertion.skeleton, insert_place, new_begin, swapped)
-                    && this->continue_searching(algorithm)
+                    && new_skeleton.length() <= this->finder.fewest_moves
                 ) {
-                    this->solving_step.push_back({move(new_skeleton), 0, nullptr});
+                    size_t new_end = new_skeleton.length();
+                    this->solving_step.push_back({move(new_skeleton)});
                     this->search(
                         {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
-                        new_begin, new_skeleton.length()
+                        new_begin, new_end
                     );
                     this->solving_step.pop_back();
                 }
             }
         }
+    }
+}
+
+void BruteForceFinder::Worker::try_last_insertion(
+    std::size_t insert_place,
+    int case_index,
+    bool swapped
+) {
+    if (case_index == -1) {
+        return;
+    }
+    if (swapped) {
+        this->solving_step.back().skeleton.swap_adjacent(insert_place);
+    }
+    this->solution_found(insert_place, this->finder.cases[case_index]);
+    if (swapped) {
+        this->solving_step.back().skeleton.swap_adjacent(insert_place);
     }
 }
 
@@ -309,7 +323,6 @@ void BruteForceFinder::Worker::solution_found(size_t insert_place, const Case& _
         }
         this->solving_step.push_back({
             insertion.skeleton.insert(algorithm, insert_place).first,
-            0, nullptr
         });
         this->update_fewest_moves();
         this->solving_step.pop_back();
@@ -328,6 +341,7 @@ void BruteForceFinder::Worker::update_fewest_moves() {
         return;
     }
     if (twists < finder.fewest_moves) {
+        finder.solutions.clear();
         finder.fewest_moves = twists;
     }
     finder.solutions.push_back({this->solving_step});

@@ -212,20 +212,20 @@ void Algorithm::read_from(istream& in) {
 
     const int* transform = rotation_permutation[this->rotation];
     auto& twists = this->twists;
-    this->begin_mask = twist_mask(this->inverse_twist[twists[0]]);
+    this->begin_mask = twist_mask(Algorithm::inverse_twist[twists[0]]);
     if (length > 1 && twists[0] >> 3 == twists[1] >> 3) {
-        this->begin_mask |= this->inverse_twist[twists[1]];
+        this->begin_mask |= twist_mask(Algorithm::inverse_twist[twists[1]]);
     }
-    this->end_mask = twist_mask(this->inverse_twist[
+    this->end_mask = twist_mask(Algorithm::inverse_twist[
         transform_twist(transform, twists[length - 1])
     ]);
     if (length > 1 && twists[length - 1] >> 3 == twists[length - 2] >> 3) {
-        this->end_mask |= this->inverse_twist[
+        this->end_mask |= twist_mask(Algorithm::inverse_twist[
             transform_twist(transform, twists[length - 2])
-        ];
+        ]);
     }
-    this->set_up_mask = 0;
     if (length > 2) {
+        this->set_up_mask = 0;
         uint32_t set_up_mask = (this->begin_mask & this->end_mask) >> 24;
         for (size_t i = 0; i < 6; ++i) {
             if (set_up_mask & 1 << i) {
@@ -233,6 +233,8 @@ void Algorithm::read_from(istream& in) {
             }
         }
         this->set_up_mask &= this->end_mask;
+    } else {
+        this->set_up_mask = 0;
     }
 }
 
