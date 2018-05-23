@@ -48,7 +48,7 @@ vector<Algorithm> Algorithm::generate_isomorphisms() const {
     }
     for (Algorithm& algorithm: result) {
         algorithm.normalize();
-        algorithm.rotation = algorithm.detect_rotation();
+        algorithm.detect_rotation();
     }
     sort(result.begin(), result.end());
     result.erase(unique(result.begin(), result.end()), result.end());

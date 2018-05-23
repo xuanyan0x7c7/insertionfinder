@@ -47,6 +47,8 @@ namespace InsertionFinder {
         void save_to(std::ostream& out) const;
         void read_from(std::istream& in);
     public:
+        static void init();
+    public:
         static int compare(const Cube& lhs, const Cube& rhs) noexcept;
         bool operator==(const Cube& rhs) const noexcept {
             return this->compare(*this, rhs) == 0;
@@ -56,12 +58,12 @@ namespace InsertionFinder {
         }
     private:
         static const std::array<Cube, 24> twist_cube;
-        static const std::array<Cube, 24> rotation_cube;
-        static const std::array<std::array<int, 24>, 7 * 24 * 11 * 24>
+        static std::array<Cube, 24> rotation_cube;
+        static std::array<std::array<int, 24>, 7 * 24 * 11 * 24>
             parity_transform;
-        static const std::array<std::array<int, 24>, 6 * 24 * 24>
+        static std::array<std::array<int, 24>, 6 * 24 * 24>
             corner_cycle_transform;
-        static const std::array<std::array<int, 24>, 10 * 24 * 24>
+        static std::array<std::array<int, 24>, 10 * 24 * 24>
             edge_cycle_transform;
         static const std::array<std::array<int, 24>, 24> center_transform;
     private:

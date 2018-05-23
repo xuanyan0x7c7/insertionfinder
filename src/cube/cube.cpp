@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <array>
 #include <istream>
 #include <functional>
 #include <memory>
@@ -9,6 +10,24 @@
 using namespace std;
 using namespace InsertionFinder;
 using namespace Details;
+
+
+array<Cube, 24>
+Cube::rotation_cube = Cube::generate_rotation_cube_table();
+array<array<int, 24>, 7 * 24 * 11 * 24>
+Cube::parity_transform = Cube::generate_parity_transform_table();
+array<array<int, 24>, 6 * 24 * 24>
+Cube::corner_cycle_transform = Cube::generate_corner_cycle_transform_table();
+array<array<int, 24>, 10 * 24 * 24>
+Cube::edge_cycle_transform = Cube::generate_edge_cycle_transform_table();
+
+
+void Cube::init() {
+    Cube::rotation_cube = Cube::generate_rotation_cube_table();
+    Cube::parity_transform = Cube::generate_parity_transform_table();
+    Cube::corner_cycle_transform = Cube::generate_corner_cycle_transform_table();
+    Cube::edge_cycle_transform = Cube::generate_edge_cycle_transform_table();
+}
 
 
 Cube::Cube() noexcept {

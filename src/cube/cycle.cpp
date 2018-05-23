@@ -1,7 +1,6 @@
 #include <array>
 #include <algorithm.hpp>
 #include <cube.hpp>
-#include <iostream>
 using namespace std;
 using namespace InsertionFinder;
 
@@ -222,13 +221,6 @@ int Cube::edge_cycle_index() const noexcept {
     return -1;
 }
 
-
-const array<array<int, 24>, 7 * 24 * 11 * 24>
-Cube::parity_transform = Cube::generate_parity_transform_table();
-const array<array<int, 24>, 6 * 24 * 24>
-Cube::corner_cycle_transform = Cube::generate_corner_cycle_transform_table();
-const array<array<int, 24>, 10 * 24 * 24>
-Cube::edge_cycle_transform = Cube::generate_edge_cycle_transform_table();
 
 array<array<int, 24>, 7 * 24 * 11 * 24>
 Cube::generate_parity_transform_table() noexcept {

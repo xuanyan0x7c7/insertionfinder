@@ -1,13 +1,25 @@
-#include <algorithm>
 #include <cstdint>
+#include <algorithm>
 #include <functional>
 #include <limits>
 #include <utility>
 #include <algorithm.hpp>
-#include "./utils.hpp"
+#include "utils.hpp"
 using namespace std;
 using namespace InsertionFinder;
 using namespace Details;
+
+
+namespace {
+    constexpr int inverse_center[24] = {
+        0, 3, 2, 1,
+        12, 23, 6, 17,
+        8, 9, 10, 11,
+        4, 19, 14, 21,
+        20, 7, 18, 13,
+        16, 15, 22, 5
+    };
+};
 
 
 size_t Algorithm::cancel_moves() {
@@ -99,7 +111,11 @@ Algorithm::insert(const Algorithm& insertion, size_t insert_place) const {
     transform(
         this->twists.cbegin() + insert_place, this->twists.cend(),
         back_inserter(result.twists),
-        bind(transform_twist, rotation_permutation[insertion.rotation], _1)
+        bind(
+            transform_twist,
+            rotation_permutation[inverse_center[insertion.rotation]],
+            _1
+        )
     );
     size_t place = result.cancel_moves();
     return {result, min(place, insert_place + 1)};

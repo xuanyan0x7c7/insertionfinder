@@ -94,7 +94,7 @@ void Cube::twist(
 ) {
     if (static_cast<bool>(flags & CubeTwist::reversed)) {
         this->rotate(inverse_center[algorithm.cube_rotation()]);
-        for (size_t i = end; i > begin; --i) {
+        for (size_t i = end; i-- != begin;) {
             this->twist(
                 Algorithm::inverse_twist[algorithm[i]],
                 flags
@@ -110,18 +110,14 @@ void Cube::twist(
 
 void Cube::twist(const Cube& cube, byte flags) noexcept {
     if (static_cast<bool>(flags & CubeTwist::corners)) {
-        int* begin = this->corner;
-        int* end = begin + 8;
-        for (int* item = begin; item < end; ++item) {
-            int transform = cube.corner[*item / 3];
-            *item = transform - transform % 3 + (*item + transform) % 3;
+        for (int& item: this->corner) {
+            int transform = cube.corner[item / 3];
+            item = transform - transform % 3 + (item + transform) % 3;
         }
     }
     if (static_cast<bool>(flags & CubeTwist::edges)) {
-        int* begin = this->edge;
-        int* end = begin + 12;
-        for (int* item = begin; item < end; ++item) {
-            *item = cube.edge[*item >> 1] ^ (*item & 1);
+        for (int& item: this->edge) {
+            item = cube.edge[item >> 1] ^ (item & 1);
         }
     }
     if (static_cast<bool>(flags & CubeTwist::centers)) {

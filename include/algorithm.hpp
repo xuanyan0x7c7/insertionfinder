@@ -88,7 +88,7 @@ namespace InsertionFinder {
     private:
         std::size_t cancel_moves();
     public:
-        int detect_rotation() const noexcept;
+        void detect_rotation() noexcept;
         std::pair<std::uint32_t, std::uint32_t>
         get_insert_place_mask(std::size_t insert_place) const;
         std::pair<Algorithm, std::size_t>

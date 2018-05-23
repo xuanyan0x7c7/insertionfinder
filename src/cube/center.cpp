@@ -81,7 +81,6 @@ namespace {
 }
 
 
-const array<Cube, 24> Cube::rotation_cube = Cube::generate_rotation_cube_table();
 const array<array<int, 24>, 24> Cube::center_transform = generate_center_transform_table();
 
 array<Cube, 24> Cube::generate_rotation_cube_table() noexcept {
@@ -100,29 +99,29 @@ array<Cube, 24> Cube::generate_rotation_cube_table() noexcept {
     }
     array<Cube, 24> rotation_cube;
     for (int front = 0; front < 4; ++front) {
-        rotation_cube[inverse_center[front | 4]].twist(basic_rotation_cube[1]);
+        rotation_cube[front | 4].twist(basic_rotation_cube[1]);
     }
     for (int front = 0; front < 4; ++front) {
-        rotation_cube[inverse_center[front | 8]].twist(basic_rotation_cube[1]);
-        rotation_cube[inverse_center[front | 8]].twist(basic_rotation_cube[1]);
+        rotation_cube[front | 8].twist(basic_rotation_cube[1]);
+        rotation_cube[front | 8].twist(basic_rotation_cube[1]);
     }
     for (int front = 0; front < 4; ++front) {
-        rotation_cube[inverse_center[front | 12]].twist(basic_rotation_cube[1]);
-        rotation_cube[inverse_center[front | 12]].twist(basic_rotation_cube[1]);
-        rotation_cube[inverse_center[front | 12]].twist(basic_rotation_cube[1]);
+        rotation_cube[front | 12].twist(basic_rotation_cube[1]);
+        rotation_cube[front | 12].twist(basic_rotation_cube[1]);
+        rotation_cube[front | 12].twist(basic_rotation_cube[1]);
     }
     for (int front = 0; front < 4; ++front) {
-        rotation_cube[inverse_center[front | 16]].twist(basic_rotation_cube[3]);
+        rotation_cube[front | 16].twist(basic_rotation_cube[3]);
     }
     for (int front = 0; front < 4; ++front) {
-        rotation_cube[inverse_center[front | 20]].twist(basic_rotation_cube[3]);
-        rotation_cube[inverse_center[front | 20]].twist(basic_rotation_cube[3]);
-        rotation_cube[inverse_center[front | 20]].twist(basic_rotation_cube[3]);
+        rotation_cube[front | 20].twist(basic_rotation_cube[3]);
+        rotation_cube[front | 20].twist(basic_rotation_cube[3]);
+        rotation_cube[front | 20].twist(basic_rotation_cube[3]);
     }
     for (int top = 0; top < 6; ++top) {
         for (int front = 1; front < 4; ++front) {
             for (int i = 0; i < front; ++i) {
-                rotation_cube[inverse_center[top << 2 | front]].twist(basic_rotation_cube[2]);
+                rotation_cube[top << 2 | front].twist(basic_rotation_cube[2]);
             }
         }
     }
@@ -148,7 +147,7 @@ Cube Cube::best_placement() const noexcept {
         6, 9, 11, 14, 18, 22
     }) {
         Cube cube(*this);
-        cube.twist(Cube::rotation_cube[inverse_center[index]]);
+        cube.rotate(index);
         int cycles = cube.corner_cycles() + cube.edge_cycles();
         if (!rotation_parity_table[index]) {
             cycles += cube.has_parity();

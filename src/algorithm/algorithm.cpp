@@ -204,7 +204,7 @@ void Algorithm::read_from(istream& in) {
     }
     this->twists = vector<int>(data.get(), data.get() + length);
     char rotation_data;
-    in.read(data.get(), 1);
+    in.read(&rotation_data, 1);
     if (static_cast<size_t>(in.gcount()) != 1) {
         throw AlgorithmStreamError();
     }
@@ -237,8 +237,8 @@ void Algorithm::read_from(istream& in) {
 }
 
 
-int Algorithm::detect_rotation() const noexcept {
+void Algorithm::detect_rotation() noexcept {
     Cube cube;
     cube.twist(*this);
-    return cube.best_placement().placement();
+    this->rotation = cube.best_placement().placement();
 }
