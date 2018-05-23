@@ -16,6 +16,7 @@ namespace InsertionFinder {
             int edge_cycles;
             int placement;
         };
+    public:
         struct Insertion {
             Algorithm skeleton;
             std::size_t insert_place;
@@ -38,7 +39,7 @@ namespace InsertionFinder {
             std::int64_t duration;
         };
     protected:
-        const std::vector<Case> cases;
+        const std::vector<Case>& cases;
         const Algorithm scramble;
         const Algorithm skeleton;
         std::size_t fewest_moves;
@@ -63,5 +64,15 @@ namespace InsertionFinder {
     public:
         void search(std::size_t max_threads);
         virtual Status search_core(std::size_t max_threads) = 0;
+    public:
+        std::size_t get_fewest_moves() const noexcept {
+            return this->fewest_moves;
+        }
+        std::vector<Solution> get_solutions() const noexcept {
+            return this->solutions;
+        }
+        Result get_result() const noexcept {
+            return this->result;
+        }
     };
 };

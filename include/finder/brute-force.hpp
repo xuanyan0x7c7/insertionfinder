@@ -40,25 +40,16 @@ namespace InsertionFinder {
                 std::size_t insert_place,
                 int case_index,
                 bool swapped = false
-            ) {
-                if (case_index == -1) {
-                    return;
-                }
-                this->solution_found(
-                    insert_place,
-                    this->finder.cases[case_index]
-                );
-            }
+            );
             void solution_found(std::size_t insert_place, const Case& _case);
             void update_fewest_moves();
-            bool continue_searching(const Algorithm& algorithm) noexcept {
-                return algorithm.length() <= this->finder.fewest_moves;
-            }
         };
     private:
         std::mutex fewest_moves_mutex;
     public:
+        using Finder::Finder;
         Finder::Status search_core(std::size_t max_threads) override;
+    private:
         void run_worker(
             const CycleStatus& cycle_status,
             std::size_t begin, std::size_t end

@@ -1,6 +1,7 @@
 #include <cmath>
 #include <algorithm>
 #include <functional>
+#include <iostream>
 #include <thread>
 #include <vector>
 #include <cube.hpp>
@@ -37,7 +38,7 @@ Finder::Status BruteForceFinder::search_core(size_t max_threads) {
     });
     vector<size_t> split_points(thread_count + 1);
     for (size_t i = 1; i <= thread_count; ++i) {
-        split_points[i] = min(
+        split_points[i] = max(
             static_cast<size_t>(
                 (this->skeleton.length() + 1) * (
                     1 - sqrt(1 - static_cast<double>(i) / thread_count)
@@ -48,13 +49,14 @@ Finder::Status BruteForceFinder::search_core(size_t max_threads) {
     }
 
     vector<thread> worker_threads;
+    CycleStatus cycle_status = {parity, corner_cycles, edge_cycles, placement};
     for (size_t i = 0; i < thread_count; ++i) {
-        worker_threads.emplace_back([&]() {
-            this->run_worker(
-                {parity, corner_cycles, edge_cycles, placement},
-                split_points[i], split_points[i + 1] - 1
-            );
-        });
+        worker_threads.emplace_back(
+            mem_fn(&BruteForceFinder::run_worker),
+            ref(*this),
+            cycle_status,
+            split_points[i], split_points[i + 1] - 1
+        );
     }
     for (thread& thread: worker_threads) {
         thread.join();
