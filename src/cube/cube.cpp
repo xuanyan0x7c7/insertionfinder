@@ -6,10 +6,8 @@
 #include <ostream>
 #include <fallbacks/optional.hpp>
 #include <cube.hpp>
-#include "utils.hpp"
 using namespace std;
 using namespace InsertionFinder;
-using namespace Details;
 
 
 array<Cube, 24>
@@ -97,7 +95,7 @@ Cube Cube::inverse() const noexcept {
         int item = this->edge[i];
         result.edge[item >> 1] = i << 1 | (item & 1);
     }
-    result._placement = inverse_center[this->_placement];
+    result._placement = Cube::inverse_center[this->_placement];
     return result;
 }
 
@@ -114,7 +112,7 @@ uint32_t Cube::mask() const noexcept {
             mask |= 1 << (i + 8);
         }
     }
-    mask |= center_cycles[this->_placement] << 20;
+    mask |= Cube::center_cycles[this->_placement] << 20;
     return mask;
 }
 

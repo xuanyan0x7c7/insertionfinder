@@ -2,10 +2,8 @@
 #include <array>
 #include <fallbacks/optional.hpp>
 #include <cube.hpp>
-#include "utils.hpp"
 using namespace std;
 using namespace InsertionFinder;
-using namespace Details;
 
 
 namespace {
@@ -152,9 +150,9 @@ Cube Cube::best_placement() const noexcept {
         if (!rotation_parity_table[index]) {
             cycles += cube.has_parity();
         }
-        if (cycles + center_cycles[index] < best_cycles) {
+        if (cycles + Cube::center_cycles[index] < best_cycles) {
             best_cube = cube;
-            best_cycles = cycles + center_cycles[index];
+            best_cycles = cycles + Cube::center_cycles[index];
             if (cycles <= 4) {
                 return best_cube;
             }

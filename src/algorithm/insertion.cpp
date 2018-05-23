@@ -4,22 +4,11 @@
 #include <limits>
 #include <utility>
 #include <algorithm.hpp>
+#include <cube.hpp>
 #include "utils.hpp"
 using namespace std;
 using namespace InsertionFinder;
 using namespace Details;
-
-
-namespace {
-    constexpr int inverse_center[24] = {
-        0, 3, 2, 1,
-        12, 23, 6, 17,
-        8, 9, 10, 11,
-        4, 19, 14, 21,
-        20, 7, 18, 13,
-        16, 15, 22, 5
-    };
-};
 
 
 size_t Algorithm::cancel_moves() {
@@ -113,7 +102,7 @@ Algorithm::insert(const Algorithm& insertion, size_t insert_place) const {
         back_inserter(result.twists),
         bind(
             transform_twist,
-            rotation_permutation[inverse_center[insertion.rotation]],
+            rotation_permutation[Cube::inverse_center[insertion.rotation]],
             _1
         )
     );

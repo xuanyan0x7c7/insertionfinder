@@ -202,7 +202,7 @@ void BruteForceFinder::Worker::search_last_placement(
     size_t begin, size_t end
 ) {
     Algorithm skeleton = this->solving_step.back().skeleton;
-    int case_index = this->finder.center_index[inverse_center[placement]];
+    int case_index = this->finder.center_index[Cube::inverse_center[placement]];
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
         this->try_last_insertion(insert_place, case_index);
         if (skeleton.swappable(insert_place)) {
@@ -257,8 +257,8 @@ void BruteForceFinder::Worker::try_insertion(
         ) {
             this->solution_found(insert_place, _case);
         } else if (
-            new_parity + new_corner_cycles + new_edge_cycles + center_cycles[new_placement]
-            < parity + corner_cycles + edge_cycles + center_cycles[placement]
+            new_parity + new_corner_cycles + new_edge_cycles + Cube::center_cycles[new_placement]
+            < parity + corner_cycles + edge_cycles + Cube::center_cycles[placement]
         ) {
             for (const Algorithm& algorithm: _case.algorithm_list()) {
                 Insertion& insertion = this->solving_step.back();

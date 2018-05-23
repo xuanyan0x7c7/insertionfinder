@@ -16,11 +16,10 @@ namespace {
     struct CubeCycleStatus {
         Algorithm scramble;
         Algorithm skeleton;
-        bool center_rotated;
-        bool center_parity;
         bool has_parity;
         int corner_cycles;
         int edge_cycles;
+        int center_cycles;
     };
 
     CubeCycleStatus
@@ -33,11 +32,10 @@ namespace {
         const Cube placed_cube = cube.best_placement();
         return {
             scramble, skeleton,
-            placed_cube.placement() != 0,
-            Cube::placement_parity(placed_cube.placement()),
             placed_cube.has_parity(),
             placed_cube.corner_cycles(),
-            placed_cube.edge_cycles()
+            placed_cube.edge_cycles(),
+            Cube::center_cycles[placed_cube.placement()]
         };
     } catch (const AlgorithmError& e) {
         throw CLI::CommandExecutionError(e.what());
@@ -58,14 +56,15 @@ namespace {
         cout << "Skeleton: " << status.skeleton << endl;
         cout << "The cube ";
         if (
-            !status.center_rotated && !status.has_parity
+            !status.has_parity
             && status.corner_cycles == 0 && status.edge_cycles == 0
+            && status.center_cycles == 0
         ) {
             cout << "is already solved";
         } else {
             cout << "has ";
-            if (status.center_rotated) {
-                if (status.center_parity) {
+            if (status.center_cycles) {
+                if (status.center_cycles > 1) {
                     cout << "parity center rotation";
                 } else {
                     cout << "center rotation";
@@ -87,7 +86,7 @@ namespace {
             } else if (status.edge_cycles > 1) {
                 cout << status.edge_cycles << " edge-3-cycles";
             }
-            if (!status.center_parity && status.has_parity) {
+            if (status.center_cycles <= 1 && status.has_parity) {
                 if (status.corner_cycles || status.edge_cycles) {
                     cout << " with parity";
                 } else {
@@ -95,7 +94,7 @@ namespace {
                 }
             }
         }
-        cout << endl;
+        cout << '.' << endl;
     }
 
     template<> void verify_cube<pt::ptree>() {
@@ -107,10 +106,7 @@ namespace {
         pt::ptree result;
         result.put("scramble", status.scramble.str());
         result.put("skeleton", status.skeleton.str());
-        result.put("center_rotated", status.center_rotated);
-        if (status.center_rotated) {
-            result.put("center_parity", status.center_parity);
-        }
+        result.put("center_cycles", status.center_cycles);
         result.put("parity", status.has_parity);
         result.put("corner_cycle_num", status.corner_cycles);
         result.put("edge_cycle_num", status.edge_cycles);
