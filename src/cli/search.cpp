@@ -320,6 +320,9 @@ void CLI::find_insertions(const po::variables_map& vm) {
     );
 
     BruteForceFinder finder(scramble, skeleton, cases);
+    if (vm.count("verbose")) {
+        finder.set_verbose();
+    }
     finder.search(max_threads);
     printer->print_result(
         scramble, skeleton,

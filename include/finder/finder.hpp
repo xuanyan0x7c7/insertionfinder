@@ -45,6 +45,7 @@ namespace InsertionFinder {
         std::size_t fewest_moves;
         std::vector<Solution> solutions;
         Result result;
+        bool verbose;
     protected:
         std::array<int, 7 * 24 * 11 * 24> parity_index;
         std::array<int, 6 * 24 * 24> corner_cycle_index;
@@ -73,6 +74,10 @@ namespace InsertionFinder {
         }
         Result get_result() const noexcept {
             return this->result;
+        }
+    public:
+        void set_verbose(bool verbose = true) noexcept {
+            this->verbose = verbose;
         }
     };
 };

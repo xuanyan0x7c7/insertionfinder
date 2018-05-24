@@ -19,7 +19,8 @@ Finder::Finder(
     fewest_moves(numeric_limits<size_t>::max()),
     change_parity(false),
     change_corner(false), change_edge(false),
-    change_center(false) {
+    change_center(false),
+    verbose(false) {
     this->parity_index.fill(-1);
     this->corner_cycle_index.fill(-1);
     this->edge_cycle_index.fill(-1);

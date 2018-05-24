@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <iostream>
 #include <utility>
 #include <algorithm.hpp>
 #include <case.hpp>
@@ -342,6 +343,10 @@ void BruteForceFinder::Worker::update_fewest_moves() {
     if (twists < finder.fewest_moves) {
         finder.solutions.clear();
         finder.fewest_moves = twists;
+        if (this->finder.verbose) {
+            cerr << this->solving_step.back().skeleton
+                << " (" << twists << "f)" << endl;
+        }
     }
     finder.solutions.push_back({this->solving_step});
 }

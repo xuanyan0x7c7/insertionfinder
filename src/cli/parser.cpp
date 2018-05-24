@@ -43,7 +43,8 @@ void CLI::parse(int argc, char** argv) try {
             po::value<size_t>()->default_value(1)->implicit_value(0),
             "multiple threads"
         )
-        ("json", "use JSON output");
+        ("json", "use JSON output")
+        ("verbose", "verbose");
     cli_options.add(configuration_options);
 
     po::variables_map vm;
