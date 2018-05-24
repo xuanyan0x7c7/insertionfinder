@@ -19,6 +19,7 @@ AC_CONFIG_FILES([
     src/algorithm/Makefile
     src/case/Makefile
     src/cli/Makefile
+    src/cli/univalue/Makefile
     src/cube/Makefile
     src/finder/Makefile
     data/algorithms/Makefile

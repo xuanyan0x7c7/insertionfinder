@@ -1,14 +1,12 @@
 #include <iostream>
 #include <string>
 #include <boost/program_options.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 #include <algorithm.hpp>
 #include <cube.hpp>
 #include "commands.hpp"
+#include "univalue/univalue.h"
 using namespace std;
 namespace po = boost::program_options;
-namespace pt = boost::property_tree;
 using namespace InsertionFinder;
 
 
@@ -44,14 +42,9 @@ namespace {
 
 
 namespace {
-    template<class T> void verify_cube();
+    template<class T> void print_result(const CubeCycleStatus& status);
 
-    template<> void verify_cube<ostream>() {
-        string scramble_string;
-        string skeleton_string;
-        getline(cin, scramble_string);
-        getline(cin, skeleton_string);
-        auto status = verify(scramble_string, skeleton_string);
+    template<> void print_result<ostream>(const CubeCycleStatus& status) {
         cout << "Scramble: " << status.scramble << endl;
         cout << "Skeleton: " << status.skeleton << endl;
         cout << "The cube ";
@@ -97,28 +90,28 @@ namespace {
         cout << '.' << endl;
     }
 
-    template<> void verify_cube<pt::ptree>() {
-        string scramble_string;
-        string skeleton_string;
-        getline(cin, scramble_string);
-        getline(cin, skeleton_string);
-        auto status = verify(scramble_string, skeleton_string);
-        pt::ptree result;
-        result.put("scramble", status.scramble.str());
-        result.put("skeleton", status.skeleton.str());
-        result.put("center_cycles", status.center_cycles);
-        result.put("parity", status.has_parity);
-        result.put("corner_cycle_num", status.corner_cycles);
-        result.put("edge_cycle_num", status.edge_cycles);
-        pt::write_json(cout, result);
+    template<> void print_result<UniValue>(const CubeCycleStatus& status) {
+        UniValue map(UniValue::VOBJ);
+        map.pushKV("scramble", status.scramble.str());
+        map.pushKV("skeleton", status.skeleton.str());
+        map.pushKV("parity", status.has_parity);
+        map.pushKV("corner_cycles", status.corner_cycles);
+        map.pushKV("edge_cycles", status.edge_cycles);
+        map.pushKV("center_cycles", status.center_cycles);
+        cout << map.write() << flush;
     }
 };
 
 
 void CLI::verify_cube(const po::variables_map& vm) {
+    string scramble_string;
+    string skeleton_string;
+    getline(cin, scramble_string);
+    getline(cin, skeleton_string);
+    auto status = verify(scramble_string, skeleton_string);
     if (vm.count("json")) {
-        ::verify_cube<pt::ptree>();
+        ::print_result<UniValue>(status);
     } else {
-        ::verify_cube<ostream>();
+        ::print_result<ostream>(status);
     }
 }

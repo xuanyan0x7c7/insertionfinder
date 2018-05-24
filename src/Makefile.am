@@ -6,6 +6,7 @@ insertionfinder_LDADD = \
     algorithm/libalgorithm.la \
     case/libcase.la \
     cli/libcli.la \
+    cli/univalue/libunivalue.la \
     cube/libcube.la \
     finder/libfinder.la \
     -lboost_program_options
