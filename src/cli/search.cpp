@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -15,9 +16,202 @@
 #include <finder/brute-force.hpp>
 #include <finder/finder.hpp>
 #include "commands.hpp"
+#include "univalue/univalue.h"
 using namespace std;
 namespace po = boost::program_options;
 using namespace InsertionFinder;
+
+
+namespace {
+    struct CycleStatus {
+        bool parity;
+        int corner_cycles;
+        int edge_cycles;
+        int center_cycles;
+    };
+
+    struct Printer {
+        virtual void print_case_information(
+            const Algorithm& scramble, const Algorithm& skeleton,
+            const CycleStatus& status
+        ) {}
+        virtual void print_result(
+            const Algorithm& scramble, const Algorithm& skeleton,
+            const CycleStatus& status,
+            const Finder& finder, const Finder::Result& result
+        ) = 0;
+    };
+
+    struct StandardPrinter: Printer {
+        void print_case_information(
+            const Algorithm& scramble, const Algorithm& skeleton,
+            const CycleStatus& status
+        ) override {
+            cout << "Scramble: " << scramble << endl;
+            cout << "Skeleton: " << skeleton << endl;
+            cout << "The cube ";
+            if (
+                !status.parity
+                && status.corner_cycles == 0 && status.edge_cycles == 0
+                && status.center_cycles == 0
+            ) {
+                cout << "is already solved";
+            } else {
+                cout << "has ";
+                if (status.center_cycles) {
+                    if (status.center_cycles > 1) {
+                        cout << "parity center rotation";
+                    } else {
+                        cout << "center rotation";
+                    }
+                    if (status.corner_cycles || status.edge_cycles) {
+                        cout << " with ";
+                    }
+                }
+                if (status.corner_cycles == 1) {
+                    cout << "1 corner-3-cycle";
+                } else if (status.corner_cycles > 1) {
+                    cout << status.corner_cycles << " corner-3-cycles";
+                }
+                if (status.corner_cycles && status.edge_cycles) {
+                    cout << " and ";
+                }
+                if (status.edge_cycles == 1) {
+                    cout << "1 edge-3-cycle";
+                } else if (status.edge_cycles > 1) {
+                    cout << status.edge_cycles << " edge-3-cycles";
+                }
+                if (status.center_cycles <= 1 && status.parity) {
+                    if (status.corner_cycles || status.edge_cycles) {
+                        cout << " with parity";
+                    } else {
+                        cout << "parity";
+                    }
+                }
+            }
+            cout << '.' << endl;
+        }
+
+        void print_result(
+            const Algorithm& scramble, const Algorithm& skeleton,
+            const CycleStatus& status,
+            const Finder& finder, const Finder::Result& result
+        ) override {
+            if (result.status == Finder::Status::SUCCESS) {
+                const auto& solutions = finder.get_solutions();
+                if (solutions.empty()) {
+                    cout << "No solution found." << endl;
+                }
+                for (size_t index = 0; index < solutions.size(); ++index) {
+                    const auto& solution = solutions[index];
+                    cout << endl << "Solution #" << index + 1 << endl;
+                    for (size_t i = 0; i < solution.insertions.size() - 1; ++i) {
+                        const auto& insertion = solution.insertions[i];
+                        const Algorithm& skeleton = insertion.skeleton;
+                        size_t insert_place = insertion.insert_place;
+                        if (insert_place > 0) {
+                            skeleton.print(cout, 0, insert_place);
+                            cout << ' ';
+                        }
+                        cout << "[@" << i + 1 << ']';
+                        if (insert_place < skeleton.length()) {
+                            cout << ' ';
+                            skeleton.print(cout, insert_place, skeleton.length());
+                        }
+                        cout << endl;
+                        cout << "Insert at @" << i + 1 << ": " << *insertion.insertion << endl;
+                    }
+                    cout
+                        << "Total moves: " << finder.get_fewest_moves() << ", "
+                        << solution.cancellation << " move" << (solution.cancellation == 1 ? "" : "s")
+                        << " cancelled." << endl
+                        << "Full solution: " << solution.insertions.back().skeleton << endl;
+                }
+            } else if (result.status == Finder::Status::FAILURE_PARITY_ALGORITHMS_NEEDED) {
+                cout << "Parity algorithms needed." << endl;
+            } else if (result.status == Finder::Status::FAILURE_CORNER_CYCLE_ALGORITHMS_NEEDED) {
+                cout << "Corner cycle algorithms needed." << endl;
+            } else if (result.status == Finder::Status::FAILURE_EDGE_CYCLE_ALGORITHMS_NEEDED) {
+                cout << "Edge cycle algorithms needed." << endl;
+            } else if (result.status == Finder::Status::FAILURE_CENTER_ALGORITHMS_NEEDED) {
+                cout << "Center algorithms needed." << endl;
+            }
+            cout << "Time usage: " << fixed << setprecision(3);
+            if (result.duration < 1000) {
+                cout << result.duration << " nanoseconds." << endl;
+            } else if (result.duration < 1000000) {
+                cout << result.duration / 1e3 << " microseconds." << endl;
+            } else if (result.duration < 1000000000) {
+                cout << result.duration / 1e6 << " milliseconds." << endl;
+            } else if (result.duration < 60 * static_cast<int64_t>(1000000000)) {
+                cout << result.duration / 1e9 << " seconds." << endl;
+            } else if (result.duration < 60 * 60 * static_cast<int64_t>(1000000000)) {
+                int64_t duration = (result.duration + 500000) / 1000000;
+                cout << duration / (60 * 1000)
+                    << right << setfill('0')
+                    << ':' << setw(2) << duration / 1000 % 60
+                     << '.'<< setw(3) << duration % 1000 << endl;
+            } else {
+                int64_t duration = (result.duration + 500000) / 1000000;
+                cout << duration / (60 * 60 * 1000)
+                    << right << setfill('0')
+                    << ':' << setw(2) << duration / (60 * 1000) % 60
+                    << ':' << setw(2) << duration / 1000 % 60
+                    << ':' << setw(3) << duration % 1000 << '.' << endl;
+            }
+        }
+    };
+
+    struct JSONPrinter: Printer {
+        void print_result(
+            const Algorithm& scramble, const Algorithm& skeleton,
+            const CycleStatus& status,
+            const Finder& finder, const Finder::Result& result
+        ) override {
+            UniValue map(UniValue::VOBJ);
+            map.pushKV("scramble", scramble.str());
+            map.pushKV("skeleton", skeleton.str());
+            map.pushKV("parity", status.parity);
+            map.pushKV("corner_cycles", status.corner_cycles);
+            map.pushKV("edge_cycles", status.edge_cycles);
+            map.pushKV("center_cycles", status.center_cycles);
+            const auto& solutions = finder.get_solutions();
+            if (
+                !status.parity
+                && status.corner_cycles == 0 && status.edge_cycles == 0
+                && status.center_cycles == 0
+            ) {
+                map.pushKV("fewest_moves", static_cast<int>(skeleton.length()));
+            } else if (solutions.empty()) {
+                map.pushKV("fewest_moves", UniValue());
+            } else {
+                map.pushKV("fewest_moves", static_cast<int>(finder.get_fewest_moves()));
+            }
+
+            UniValue solution_list(UniValue::VARR);
+            for (const auto& solution: solutions) {
+                UniValue solution_map(UniValue::VOBJ);
+                solution_map.pushKV("final_solution", solution.insertions.back().skeleton.str());
+                solution_map.pushKV("cancellation", static_cast<int>(solution.cancellation));
+                UniValue insertion_list(UniValue::VARR);
+                for (size_t depth = 0; depth < solution.insertions.size() - 1; ++depth) {
+                    const auto& insertion = solution.insertions[depth];
+                    UniValue insertion_map(UniValue::VOBJ);
+                    insertion_map.pushKV("skeleton", insertion.skeleton.str());
+                    insertion_map.pushKV("insert_place", static_cast<int>(insertion.insert_place));
+                    insertion_map.pushKV("insertion", insertion.insertion->str());
+                    insertion_list.push_back(insertion_map);
+                }
+                solution_map.pushKV("insertions", insertion_list);
+                solution_list.push_back(solution_map);
+            }
+            map.pushKV("solutions", solution_list);
+
+            map.pushKV("duration", result.duration);
+            cout << map.write() << flush;
+        }
+    };
+};
 
 
 void CLI::find_insertions(const po::variables_map& vm) {
@@ -30,7 +224,10 @@ void CLI::find_insertions(const po::variables_map& vm) {
     for (const string& name: algfilenames) {
         ifstream fin(name, ios::in | ios::binary);
         if (fin.fail()) {
-            fin = ifstream(string(ALGORITHMSDIR) + "/" + name + ".algs", ios::in | ios::binary);
+            fin = ifstream(
+                string(ALGORITHMSDIR) + "/" + name + ".algs",
+                ios::in | ios::binary
+            );
             if (fin.fail()) {
                 cerr << "Failed to open algorithm file " << name << endl;
                 continue;
@@ -78,6 +275,13 @@ void CLI::find_insertions(const po::variables_map& vm) {
         in = fin;
     }
 
+    unique_ptr<Printer> printer;
+    if (vm.count("json")) {
+        printer = make_unique<JSONPrinter>();
+    } else {
+        printer = make_unique<StandardPrinter>();
+    }
+
     string line;
     getline(*in, line);
     Algorithm scramble;
@@ -109,115 +313,17 @@ void CLI::find_insertions(const po::variables_map& vm) {
     bool parity = cube.has_parity();
     int corner_cycles = cube.corner_cycles();
     int edge_cycles = cube.edge_cycles();
-    int placement = cube.placement();
-    int placement_parity = Cube::placement_parity(placement);
+    int center_cycles = Cube::center_cycles[cube.placement()];
+    printer->print_case_information(
+        scramble, skeleton,
+        {parity, corner_cycles, edge_cycles, center_cycles}
+    );
+
     BruteForceFinder finder(scramble, skeleton, cases);
-
-    cout << "Scramble: " << scramble << endl;
-    cout << "Skeleton: " << skeleton << endl;
-    cout << "The cube ";
-    if (
-        !placement && !parity
-        && corner_cycles == 0 && edge_cycles == 0
-    ) {
-        cout << "is already solved";
-    } else {
-        cout << "has ";
-        if (placement) {
-            if (placement_parity) {
-                cout << "parity center rotation";
-            } else {
-                cout << "center rotation";
-            }
-            if (corner_cycles || edge_cycles) {
-                cout << " with ";
-            }
-        }
-        if (corner_cycles == 1) {
-            cout << "1 corner-3-cycle";
-        } else if (corner_cycles > 1) {
-            cout << corner_cycles << " corner-3-cycles";
-        }
-        if (corner_cycles && edge_cycles) {
-            cout << " and ";
-        }
-        if (edge_cycles == 1) {
-            cout << "1 edge-3-cycle";
-        } else if (edge_cycles > 1) {
-            cout << edge_cycles << " edge-3-cycles";
-        }
-        if (!placement_parity && parity) {
-            if (corner_cycles || edge_cycles) {
-                cout << " with parity";
-            } else {
-                cout << "parity";
-            }
-        }
-    }
-    cout << '.' << endl;
-
     finder.search(max_threads);
-    auto result = finder.get_result();
-    if (result.status == Finder::Status::SUCCESS) {
-        const auto& solutions = finder.get_solutions();
-        if (solutions.empty()) {
-            cout << "No solution found." << endl;
-        }
-        for (size_t index = 0; index < solutions.size(); ++index) {
-            const auto& solution = solutions[index];
-            cout << endl << "Solution #" << index + 1 << endl;
-            for (size_t i = 0; i < solution.insertions.size() - 1; ++i) {
-                const auto& insertion = solution.insertions[i];
-                const Algorithm& skeleton = insertion.skeleton;
-                size_t insert_place = insertion.insert_place;
-                if (insert_place > 0) {
-                    skeleton.print(cout, 0, insert_place);
-                    cout << ' ';
-                }
-                cout << "[@" << i + 1 << ']';
-                if (insert_place < skeleton.length()) {
-                    cout << ' ';
-                    skeleton.print(cout, insert_place, skeleton.length());
-                }
-                cout << endl;
-                cout << "Insert at @" << i + 1 << ": " << *insertion.insertion << endl;
-            }
-            cout
-                << "Total moves: " << finder.get_fewest_moves() << ", "
-                << solution.cancellation << " move" << (solution.cancellation == 1 ? "" : "s")
-                << " cancelled." << endl
-                << "Full solution: " << solution.insertions.back().skeleton << endl;
-        }
-    } else if (result.status == Finder::Status::FAILURE_PARITY_ALGORITHMS_NEEDED) {
-        cout << "Parity algorithms needed." << endl;
-    } else if (result.status == Finder::Status::FAILURE_CORNER_CYCLE_ALGORITHMS_NEEDED) {
-        cout << "Corner cycle algorithms needed." << endl;
-    } else if (result.status == Finder::Status::FAILURE_EDGE_CYCLE_ALGORITHMS_NEEDED) {
-        cout << "Edge cycle algorithms needed." << endl;
-    } else if (result.status == Finder::Status::FAILURE_CENTER_ALGORITHMS_NEEDED) {
-        cout << "Center algorithms needed." << endl;
-    }
-    cout << "Time usage: " << fixed << setprecision(3);
-    if (result.duration < 1000) {
-        cout << result.duration << " nanoseconds." << endl;
-    } else if (result.duration < 1000000) {
-        cout << result.duration / 1e3 << " microseconds." << endl;
-    } else if (result.duration < 1000000000) {
-        cout << result.duration / 1e6 << " milliseconds." << endl;
-    } else if (result.duration < 60 * static_cast<int64_t>(1000000000)) {
-        cout << result.duration / 1e9 << " seconds." << endl;
-    } else if (result.duration < 60 * 60 * static_cast<int64_t>(1000000000)) {
-        int64_t duration = (result.duration + 500000) / 1000000;
-        cout << duration / (60 * 1000)
-            << right << setfill('0')
-            << ':' << setw(2) << duration / 1000 % 60
-             << '.'<< setw(3) << duration % 1000 << endl;
-    } else {
-        int64_t duration = (result.duration + 500000) / 1000000;
-        cout << duration / (60 * 60 * 1000)
-            << right << setfill('0')
-            << ':' << setw(2) << duration / (60 * 1000) % 60
-            << ':' << setw(2) << duration / 1000 % 60
-            << ':' << setw(3) << duration % 1000 << '.' << endl;
-    }
+    printer->print_result(
+        scramble, skeleton,
+        {parity, corner_cycles, edge_cycles, center_cycles},
+        finder, finder.get_result()
+    );
 }

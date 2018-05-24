@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <string>
 #include <boost/program_options.hpp>
 #include <algorithm.hpp>
@@ -11,16 +12,16 @@ using namespace InsertionFinder;
 
 
 namespace {
-    struct CubeCycleStatus {
+    struct CycleStatus {
         Algorithm scramble;
         Algorithm skeleton;
-        bool has_parity;
+        bool parity;
         int corner_cycles;
         int edge_cycles;
         int center_cycles;
     };
 
-    CubeCycleStatus
+    CycleStatus
     verify(const string& scramble_string, const string& skeleton_string) try {
         Algorithm scramble(scramble_string);
         Algorithm skeleton(skeleton_string);
@@ -42,76 +43,84 @@ namespace {
 
 
 namespace {
-    template<class T> void print_result(const CubeCycleStatus& status);
+    struct Printer {
+        virtual void print_result(const CycleStatus& status) = 0;
+    };
 
-    template<> void print_result<ostream>(const CubeCycleStatus& status) {
-        cout << "Scramble: " << status.scramble << endl;
-        cout << "Skeleton: " << status.skeleton << endl;
-        cout << "The cube ";
-        if (
-            !status.has_parity
-            && status.corner_cycles == 0 && status.edge_cycles == 0
-            && status.center_cycles == 0
-        ) {
-            cout << "is already solved";
-        } else {
-            cout << "has ";
-            if (status.center_cycles) {
-                if (status.center_cycles > 1) {
-                    cout << "parity center rotation";
-                } else {
-                    cout << "center rotation";
+    struct StandardPrinter: Printer {
+        void print_result(const CycleStatus& status) override {
+            cout << "Scramble: " << status.scramble << endl;
+            cout << "Skeleton: " << status.skeleton << endl;
+            cout << "The cube ";
+            if (
+                !status.parity
+                && status.corner_cycles == 0 && status.edge_cycles == 0
+                && status.center_cycles == 0
+            ) {
+                cout << "is already solved";
+            } else {
+                cout << "has ";
+                if (status.center_cycles) {
+                    if (status.center_cycles > 1) {
+                        cout << "parity center rotation";
+                    } else {
+                        cout << "center rotation";
+                    }
+                    if (status.corner_cycles || status.edge_cycles) {
+                        cout << " with ";
+                    }
                 }
-                if (status.corner_cycles || status.edge_cycles) {
-                    cout << " with ";
+                if (status.corner_cycles == 1) {
+                    cout << "1 corner-3-cycle";
+                } else if (status.corner_cycles > 1) {
+                    cout << status.corner_cycles << " corner-3-cycles";
+                }
+                if (status.corner_cycles && status.edge_cycles) {
+                    cout << " and ";
+                }
+                if (status.edge_cycles == 1) {
+                    cout << "1 edge-3-cycle";
+                } else if (status.edge_cycles > 1) {
+                    cout << status.edge_cycles << " edge-3-cycles";
+                }
+                if (status.center_cycles <= 1 && status.parity) {
+                    if (status.corner_cycles || status.edge_cycles) {
+                        cout << " with parity";
+                    } else {
+                        cout << "parity";
+                    }
                 }
             }
-            if (status.corner_cycles == 1) {
-                cout << "1 corner-3-cycle";
-            } else if (status.corner_cycles > 1) {
-                cout << status.corner_cycles << " corner-3-cycles";
-            }
-            if (status.corner_cycles && status.edge_cycles) {
-                cout << " and ";
-            }
-            if (status.edge_cycles == 1) {
-                cout << "1 edge-3-cycle";
-            } else if (status.edge_cycles > 1) {
-                cout << status.edge_cycles << " edge-3-cycles";
-            }
-            if (status.center_cycles <= 1 && status.has_parity) {
-                if (status.corner_cycles || status.edge_cycles) {
-                    cout << " with parity";
-                } else {
-                    cout << "parity";
-                }
-            }
+            cout << '.' << endl;
         }
-        cout << '.' << endl;
-    }
+    };
 
-    template<> void print_result<UniValue>(const CubeCycleStatus& status) {
-        UniValue map(UniValue::VOBJ);
-        map.pushKV("scramble", status.scramble.str());
-        map.pushKV("skeleton", status.skeleton.str());
-        map.pushKV("parity", status.has_parity);
-        map.pushKV("corner_cycles", status.corner_cycles);
-        map.pushKV("edge_cycles", status.edge_cycles);
-        map.pushKV("center_cycles", status.center_cycles);
-        cout << map.write() << flush;
-    }
+    struct JSONPrinter: Printer {
+        void print_result(const CycleStatus& status) override {
+            UniValue map(UniValue::VOBJ);
+            map.pushKV("scramble", status.scramble.str());
+            map.pushKV("skeleton", status.skeleton.str());
+            map.pushKV("parity", status.parity);
+            map.pushKV("corner_cycles", status.corner_cycles);
+            map.pushKV("edge_cycles", status.edge_cycles);
+            map.pushKV("center_cycles", status.center_cycles);
+            cout << map.write() << flush;
+        }
+    };
 };
 
 
 void CLI::verify_cube(const po::variables_map& vm) {
+    unique_ptr<Printer> printer;
+    if (vm.count("json")) {
+        printer = make_unique<JSONPrinter>();
+    } else {
+        printer = make_unique<StandardPrinter>();
+    }
     string scramble_string;
     string skeleton_string;
     getline(cin, scramble_string);
     getline(cin, skeleton_string);
     auto status = verify(scramble_string, skeleton_string);
-    if (vm.count("json")) {
-        ::print_result<UniValue>(status);
-    } else {
-        ::print_result<ostream>(status);
-    }
+    printer->print_result(status);
 }
