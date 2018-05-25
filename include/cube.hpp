@@ -151,7 +151,6 @@ namespace InsertionFinder {
         int parity_index() const noexcept;
         int corner_cycle_index() const noexcept;
         int edge_cycle_index() const noexcept;
-        static bool placement_parity(int rotation);
         Cube best_placement() const noexcept;
     public:
         static int next_parity_index(int index, int twist) {

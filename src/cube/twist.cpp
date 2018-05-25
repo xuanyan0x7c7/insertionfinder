@@ -178,7 +178,7 @@ optional<Cube> Cube::twist_effectively(
         }
     }
     if (static_cast<bool>(flags & CubeTwist::centers)) {
-        if (flags == CubeTwist::centers && this->_placement == 0) {
+        if (this->_placement == 0) {
             return nullopt;
         }
         result._placement = Cube::center_transform[this->_placement][cube._placement];
@@ -188,6 +188,8 @@ optional<Cube> Cube::twist_effectively(
 
 
 void Cube::rotate(int rotation) {
+    if (rotation == 0) {
+        return;
+    }
     this->twist(Cube::rotation_cube[rotation]);
-    this->_placement = Cube::center_transform[this->_placement][rotation];
 }

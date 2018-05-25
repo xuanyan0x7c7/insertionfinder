@@ -20,7 +20,7 @@ Finder::Status BruteForceFinder::search_core(size_t max_threads) {
     int placement = cube.placement();
     if (!parity && corner_cycles == 0 && edge_cycles == 0 && placement == 0) {
         return Finder::Status::SUCCESS_SOLVED;
-    } else if ((parity || Cube::placement_parity(placement)) && !this->change_parity) {
+    } else if ((parity || Cube::center_cycles[placement] > 1) && !this->change_parity) {
         return Finder::Status::FAILURE_PARITY_ALGORITHMS_NEEDED;
     } else if (corner_cycles && !this->change_corner) {
         return Finder::Status::FAILURE_CORNER_CYCLE_ALGORITHMS_NEEDED;

@@ -48,15 +48,6 @@ namespace {
         {4, 5, 0, 1, 2, 3}
     };
 
-    constexpr bool rotation_parity_table[24] = {
-        false, true, false, true,
-        true, false, true, false,
-        false, true, false, true,
-        true, false, true, false,
-        true, false, true, false,
-        true, false, true, false
-    };
-
     array<array<int, 24>, 24> generate_center_transform_table() noexcept {
         array<array<int, 24>, 24> center_transform;
         for (int i = 0; i < 24; ++i) {
@@ -123,13 +114,12 @@ array<Cube, 24> Cube::generate_rotation_cube_table() noexcept {
             }
         }
     }
+    for (int placement = 0; placement < 24; ++placement) {
+        rotation_cube[placement]._placement = placement;
+    }
     return rotation_cube;
 }
 
-
-bool Cube::placement_parity(int rotation) {
-    return rotation_parity_table[rotation];
-}
 
 Cube Cube::best_placement() const noexcept {
     Cube best_cube = *this;
@@ -147,7 +137,7 @@ Cube Cube::best_placement() const noexcept {
         Cube cube(*this);
         cube.rotate(index);
         int cycles = cube.corner_cycles() + cube.edge_cycles();
-        if (!rotation_parity_table[index]) {
+        if (Cube::center_cycles[index] <= 1) {
             cycles += cube.has_parity();
         }
         if (cycles + Cube::center_cycles[index] < best_cycles) {

@@ -40,7 +40,7 @@ Finder::Finder(
         bool corner_changed = _case.mask() & 0xff;
         bool edge_changed = _case.mask() & 0xfff00;
         bool center_chaged = _case.mask() & 0x300000;
-        if (parity || Cube::placement_parity(rotation)) {
+        if (parity || Cube::center_cycles[rotation] > 1) {
             this->change_parity = true;
         }
         if (corner_changed) {
@@ -61,7 +61,7 @@ Finder::Finder(
         if (!parity && corner_cycles == 0 && edge_cycles == 1 && rotation == 0) {
             this->edge_cycle_index[state.edge_cycle_index()] = index;
         }
-        if (!parity && corner_cycles == 0 && edge_cycles == 0 && !Cube::placement_parity(rotation)) {
+        if (!parity && corner_cycles == 0 && edge_cycles == 0 && Cube::center_cycles[rotation] == 1) {
             this->center_index[rotation] = index;
         }
     }
