@@ -155,7 +155,10 @@ void Cube::twist_before(const Cube& cube, byte flags) noexcept {
 optional<Cube> Cube::twist_effectively(
     const Cube& cube, byte flags
 ) const noexcept {
-    Cube result = *this;
+    bool corners_filled = false;
+    bool edges_filled = false;
+    bool centers_filled = false;
+    Cube result(nullopt);
     if (static_cast<bool>(flags & CubeTwist::corners)) {
         for (int i = 0; i < 8; ++i) {
             int item = this->corner[i];
@@ -166,6 +169,7 @@ optional<Cube> Cube::twist_effectively(
             }
             result.corner[i] = new_corner;
         }
+        corners_filled = true;
     }
     if (static_cast<bool>(flags & CubeTwist::edges)) {
         for (int i = 0; i < 12; ++i) {
@@ -176,12 +180,23 @@ optional<Cube> Cube::twist_effectively(
             }
             result.edge[i] = new_edge;
         }
+        edges_filled = true;
     }
     if (static_cast<bool>(flags & CubeTwist::centers)) {
         if (this->_placement == 0) {
             return nullopt;
         }
         result._placement = Cube::center_transform[this->_placement][cube._placement];
+        centers_filled = true;
+    }
+    if (!corners_filled) {
+        memcpy(result.corner, this->corner, 8 * sizeof(int));
+    }
+    if (!edges_filled) {
+        memcpy(result.edge, this->edge, 12 * sizeof(int));
+    }
+    if (!centers_filled) {
+        result._placement = this->_placement;
     }
     return result;
 }
