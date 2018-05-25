@@ -93,16 +93,20 @@ namespace InsertionFinder {
         static std::array<std::array<int, 24>, 10 * 24 * 24>
         generate_edge_cycle_transform_table() noexcept;
     public:
-        void twist(
+        inline void twist(
             int twist,
             std::byte flags =
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
-        );
-        void twist(
+        ) {
+            this->twist(Cube::twist_cube[twist], flags);
+        }
+        inline void twist(
             const Algorithm& algorithm,
             std::byte flags =
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
-        ) noexcept;
+        ) noexcept {
+            this->twist(algorithm, 0, algorithm.length(), flags);
+        }
         void twist(
             const Algorithm& algorithm,
             std::size_t begin, std::size_t end,
@@ -114,11 +118,13 @@ namespace InsertionFinder {
             std::byte flags =
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
         ) noexcept;
-        void twist_before(
+        inline void twist_before(
             int twist,
             std::byte flags =
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
-        );
+        ) {
+            this->twist_before(Cube::twist_cube[twist], flags);
+        }
         void twist_before(
             const Cube& cube,
             std::byte flags =
@@ -129,7 +135,12 @@ namespace InsertionFinder {
             std::byte flags =
                 CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
         ) const noexcept;
-        void rotate(int rotation);
+        void rotate(int rotation) {
+            if (rotation == 0) {
+                return;
+            }
+            this->twist(Cube::rotation_cube[rotation]);
+        }
         static int placement_twist(int placement, int rotation) {
             return Cube::center_transform[placement][rotation];
         }

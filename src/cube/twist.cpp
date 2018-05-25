@@ -77,14 +77,6 @@ array<Cube, 24> Cube::generate_twist_cube_table() noexcept {
 }
 
 
-void Cube::twist(int twist, byte flags) {
-    this->twist(twist_cube[twist], flags);
-}
-
-void Cube::twist(const Algorithm& algorithm, byte flags) noexcept {
-    this->twist(algorithm, 0, algorithm.length(), flags);
-}
-
 void Cube::twist(
     const Algorithm& algorithm,
     size_t begin, size_t end,
@@ -123,10 +115,6 @@ void Cube::twist(const Cube& cube, byte flags) noexcept {
     }
 }
 
-
-void Cube::twist_before(int twist, byte flags) {
-    this->twist_before(twist_cube[twist], flags);
-}
 
 void Cube::twist_before(const Cube& cube, byte flags) noexcept {
     if (static_cast<bool>(flags & CubeTwist::corners)) {
@@ -199,12 +187,4 @@ optional<Cube> Cube::twist_effectively(
         result._placement = this->_placement;
     }
     return result;
-}
-
-
-void Cube::rotate(int rotation) {
-    if (rotation == 0) {
-        return;
-    }
-    this->twist(Cube::rotation_cube[rotation]);
 }

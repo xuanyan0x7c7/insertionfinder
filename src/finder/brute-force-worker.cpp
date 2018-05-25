@@ -26,11 +26,6 @@ namespace {
 };
 
 
-BruteForceFinder::Worker::Worker(BruteForceFinder& finder):
-    finder(finder),
-    solving_step({{finder.skeleton}}) {}
-
-
 void BruteForceFinder::Worker::search(
     const BruteForceFinder::CycleStatus& cycle_status,
     size_t begin, size_t end

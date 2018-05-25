@@ -16,7 +16,9 @@ namespace InsertionFinder {
             std::vector<Insertion> solving_step;
             std::size_t cancellation;
         public:
-            explicit Worker(BruteForceFinder& finder);
+            explicit Worker(BruteForceFinder& finder):
+                finder(finder),
+                solving_step({{finder.skeleton}}) {}
         public:
             void search(
                 const CycleStatus& cycle_status,
@@ -53,6 +55,8 @@ namespace InsertionFinder {
         void run_worker(
             const CycleStatus& cycle_status,
             std::size_t begin, std::size_t end
-        );
+        ) {
+            Worker(*this).search(cycle_status, begin, end);
+        }
     };
 };

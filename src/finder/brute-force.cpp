@@ -30,11 +30,7 @@ Finder::Status BruteForceFinder::search_core(size_t max_threads) {
         return Finder::Status::FAILURE_CENTER_ALGORITHMS_NEEDED;
     }
 
-    size_t thread_count = min({
-        static_cast<size_t>(thread::hardware_concurrency()),
-        this->skeleton.length() + 1,
-        max_threads
-    });
+    size_t thread_count = min(this->skeleton.length() + 1, max_threads);
     vector<size_t> split_points(thread_count + 1);
     for (size_t i = 1; i <= thread_count; ++i) {
         split_points[i] = max(
@@ -75,13 +71,4 @@ Finder::Status BruteForceFinder::search_core(size_t max_threads) {
     );
 
     return Finder::Status::SUCCESS;
-}
-
-
-void BruteForceFinder::run_worker(
-    const CycleStatus& cycle_status,
-    size_t begin, size_t end
-) {
-    BruteForceFinder::Worker worker(*this);
-    worker.search(cycle_status, begin, end);
 }
