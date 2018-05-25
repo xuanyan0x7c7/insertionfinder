@@ -287,6 +287,9 @@ void BruteForceFinder::Worker::try_insertion(
             }
         }
     }
+    if (swapped) {
+        this->solving_step.back().skeleton.swap_adjacent(insert_place);
+    }
 }
 
 void BruteForceFinder::Worker::try_last_insertion(
