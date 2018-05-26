@@ -79,26 +79,20 @@ void BruteForceFinder::Worker::search(
         this->try_insertion(insert_place, state, cycle_status);
 
         if (skeleton.swappable(insert_place)) {
-            skeleton.swap_adjacent(insert_place);
-            const int twists[2] = {
-                skeleton[insert_place - 1],
-                skeleton[insert_place]
-            };
             Cube swapped_state;
+            swapped_state.twist(skeleton[insert_place - 1], twist_flag);
+            swapped_state.twist(
+                Algorithm::inverse_twist[skeleton[insert_place]],
+                twist_flag
+            );
             swapped_state.rotate(placement);
-            swapped_state.twist(
-                transform_twist(transform, twists[1]),
-                twist_flag
-            );
-            swapped_state.twist(
-                transform_twist(transform, Algorithm::inverse_twist[twists[0]]),
-                twist_flag
-            );
             swapped_state.twist(state, twist_flag);
-            swapped_state.twist(twists[0], twist_flag);
-            swapped_state.twist(Algorithm::inverse_twist[twists[1]], twist_flag);
+            swapped_state.twist(skeleton[insert_place], twist_flag);
+            swapped_state.twist(
+                Algorithm::inverse_twist[skeleton[insert_place - 1]],
+                twist_flag
+            );
             this->try_insertion(insert_place, swapped_state, cycle_status, true);
-            skeleton.swap_adjacent(insert_place);
         }
     }
 }
@@ -122,13 +116,11 @@ void BruteForceFinder::Worker::search_last_parity(size_t begin, size_t end) {
         this->try_last_insertion(insert_place, parity_index[index]);
 
         if (skeleton.swappable(insert_place)) {
-            skeleton.swap_adjacent(insert_place);
             int swapped_index = Cube::next_parity_index(
-                Cube::next_parity_index(index, skeleton[insert_place - 1]),
-                Algorithm::inverse_twist[skeleton[insert_place]]
+                Cube::next_parity_index(index, skeleton[insert_place]),
+                Algorithm::inverse_twist[skeleton[insert_place - 1]]
             );
             this->try_last_insertion(insert_place, parity_index[swapped_index], true);
-            skeleton.swap_adjacent(insert_place);
         }
     }
 }
@@ -152,13 +144,11 @@ void BruteForceFinder::Worker::search_last_corner_cycle(size_t begin, size_t end
         this->try_last_insertion(insert_place, corner_cycle_index[index]);
 
         if (skeleton.swappable(insert_place)) {
-            skeleton.swap_adjacent(insert_place);
             int swapped_index = Cube::next_corner_cycle_index(
-                Cube::next_corner_cycle_index(index, skeleton[insert_place - 1]),
-                Algorithm::inverse_twist[skeleton[insert_place]]
+                Cube::next_corner_cycle_index(index, skeleton[insert_place]),
+                Algorithm::inverse_twist[skeleton[insert_place - 1]]
             );
             this->try_last_insertion(insert_place, corner_cycle_index[swapped_index], true);
-            skeleton.swap_adjacent(insert_place);
         }
     }
 }
@@ -182,13 +172,11 @@ void BruteForceFinder::Worker::search_last_edge_cycle(size_t begin, size_t end) 
         this->try_last_insertion(insert_place, edge_cycle_index[index]);
 
         if (skeleton.swappable(insert_place)) {
-            skeleton.swap_adjacent(insert_place);
             int swapped_index = Cube::next_edge_cycle_index(
-                Cube::next_edge_cycle_index(index, skeleton[insert_place - 1]),
-                Algorithm::inverse_twist[skeleton[insert_place]]
+                Cube::next_edge_cycle_index(index, skeleton[insert_place]),
+                Algorithm::inverse_twist[skeleton[insert_place - 1]]
             );
             this->try_last_insertion(insert_place, edge_cycle_index[swapped_index], true);
-            skeleton.swap_adjacent(insert_place);
         }
     }
 }
@@ -253,8 +241,12 @@ void BruteForceFinder::Worker::try_insertion(
         ) {
             this->solution_found(insert_place, _case);
         } else if (
-            new_parity + new_corner_cycles + new_edge_cycles + Cube::center_cycles[new_placement]
-            < parity + corner_cycles + edge_cycles + Cube::center_cycles[placement]
+            (Cube::center_cycles[new_placement] > 1 ? 0 : new_parity)
+                + new_corner_cycles + new_edge_cycles
+                + Cube::center_cycles[new_placement]
+            < (Cube::center_cycles[placement] > 1 ? 0 : parity)
+                + corner_cycles + edge_cycles
+                + Cube::center_cycles[placement]
         ) {
             for (const Algorithm& algorithm: _case.algorithm_list()) {
                 Insertion& insertion = this->solving_step.back();

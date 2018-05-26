@@ -58,10 +58,10 @@ int Case::compare(const Case& lhs, const Case& rhs) noexcept {
     if (
         int cycles_diff =
             (lhs_center_cycles
-                + (lhs_center_cycles >> 1 | lhs._has_parity)
+                + (lhs_center_cycles > 1 ? 0 : lhs._has_parity)
                 + lhs._corner_cycles + lhs._edge_cycles)
             - (rhs_center_cycles
-                + (rhs_center_cycles >> 1 | rhs._has_parity)
+                + (rhs_center_cycles > 1 ? 0 : rhs._has_parity)
                 + rhs._corner_cycles + rhs._edge_cycles)
     ) {
         return cycles_diff;
@@ -71,7 +71,7 @@ int Case::compare(const Case& lhs, const Case& rhs) noexcept {
     }
     if (lhs_rotation != rhs_rotation) {
         return lhs_rotation - rhs_rotation;
-        }
+    }
     if (lhs._has_parity != rhs._has_parity) {
         return lhs._has_parity - rhs._has_parity;
     }
