@@ -14,7 +14,6 @@ namespace InsertionFinder {
         private:
             BruteForceFinder& finder;
             std::vector<Insertion> solving_step;
-            std::size_t cancellation;
         public:
             explicit Worker(BruteForceFinder& finder):
                 finder(finder),

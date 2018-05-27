@@ -17,10 +17,10 @@ Finder::Finder(
 ):
     scramble(scramble), skeleton(skeleton), cases(cases),
     fewest_moves(numeric_limits<size_t>::max()),
+    verbose(false),
     change_parity(false),
     change_corner(false), change_edge(false),
-    change_center(false),
-    verbose(false) {
+    change_center(false) {
     this->parity_index.fill(-1);
     this->corner_cycle_index.fill(-1);
     this->edge_cycle_index.fill(-1);
@@ -39,7 +39,6 @@ Finder::Finder(
         int rotation = _case.rotation();
         bool corner_changed = _case.mask() & 0xff;
         bool edge_changed = _case.mask() & 0xfff00;
-        bool center_chaged = _case.mask() & 0x300000;
         if (parity || Cube::center_cycles[rotation] > 1) {
             this->change_parity = true;
         }

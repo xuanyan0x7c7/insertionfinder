@@ -39,9 +39,9 @@ namespace InsertionFinder {
             std::int64_t duration;
         };
     protected:
-        const std::vector<Case>& cases;
         const Algorithm scramble;
         const Algorithm skeleton;
+        const std::vector<Case>& cases;
         std::size_t fewest_moves;
         std::vector<Solution> solutions;
         Result result;
