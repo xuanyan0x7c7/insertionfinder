@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <array>
+#include <atomic>
 #include <vector>
 #include <utility>
 #include <algorithm.hpp>
@@ -42,7 +43,7 @@ namespace InsertionFinder {
         const Algorithm scramble;
         const Algorithm skeleton;
         const std::vector<Case>& cases;
-        std::size_t fewest_moves;
+        std::atomic<std::size_t> fewest_moves;
         std::vector<Solution> solutions;
         Result result;
         bool verbose;
