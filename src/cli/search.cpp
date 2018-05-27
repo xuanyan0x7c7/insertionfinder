@@ -139,20 +139,20 @@ namespace {
             cout << "Time usage: " << fixed << setprecision(3);
             if (result.duration < 1000) {
                 cout << result.duration << " nanoseconds." << endl;
-            } else if (result.duration < 1000000) {
+            } else if (result.duration < 1'000'000) {
                 cout << result.duration / 1e3 << " microseconds." << endl;
-            } else if (result.duration < 1000000000) {
+            } else if (result.duration < 1'000'000'000) {
                 cout << result.duration / 1e6 << " milliseconds." << endl;
-            } else if (result.duration < 60 * static_cast<int64_t>(1000000000)) {
+            } else if (result.duration < 60 * static_cast<int64_t>(1'000'000'000)) {
                 cout << result.duration / 1e9 << " seconds." << endl;
-            } else if (result.duration < 60 * 60 * static_cast<int64_t>(1000000000)) {
-                int64_t duration = (result.duration + 500000) / 1000000;
+            } else if (result.duration < 60 * 60 * static_cast<int64_t>(1'000'000'000)) {
+                int64_t duration = (result.duration + 500'000) / 1'000'000;
                 cout << duration / (60 * 1000)
                     << right << setfill('0')
                     << ':' << setw(2) << duration / 1000 % 60
                      << '.'<< setw(3) << duration % 1000 << endl;
             } else {
-                int64_t duration = (result.duration + 500000) / 1000000;
+                int64_t duration = (result.duration + 500'000) / 1'000'000;
                 cout << duration / (60 * 60 * 1000)
                     << right << setfill('0')
                     << ':' << setw(2) << duration / (60 * 1000) % 60
