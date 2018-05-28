@@ -224,12 +224,12 @@ void Algorithm::read_from(istream& in) {
             transform_twist(transform, twists[length - 2])
         ]);
     }
-    if (length > 2) {
+    if (length > 2 && this->begin_mask & this->end_mask) {
         this->set_up_mask = 0;
         uint32_t set_up_mask = (this->begin_mask & this->end_mask) >> 24;
         for (size_t i = 0; i < 6; ++i) {
             if (set_up_mask & 1 << i) {
-                this->set_up_mask |= 0xe << (i << 2);
+                this->set_up_mask |= 0xe << (i << 2) | 1 << (i + 24);
             }
         }
         this->set_up_mask &= this->end_mask;

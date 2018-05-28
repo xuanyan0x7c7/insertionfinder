@@ -119,14 +119,14 @@ bool Algorithm::is_worthy_insertion(
     size_t length = this->twists.size();
     size_t cancellation = 0;
     if (uint32_t begin_mask = insert_place_mask.first & insertion.begin_mask) {
-        if (begin_mask & 0xffffff) {
+        if (begin_mask & (insertion.set_up_mask | 0xffffff)) {
             return false;
         }
         uint32_t high_mask = begin_mask >> 24;
         cancellation += high_mask & (high_mask - 1) ? 2 : 1;
     }
     if (uint32_t end_mask = insert_place_mask.second & insertion.end_mask) {
-        if (end_mask & insertion.set_up_mask) {
+        if (end_mask & insertion.set_up_mask & 0xffffff) {
             return false;
         }
         uint32_t low_mask = end_mask & 0xffffff;
