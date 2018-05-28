@@ -3,4 +3,5 @@ U R2 L2 U D' F2 B2 D'
 U2 R L' F2 B2 R L' U2
 U D' R L' F B' U D'
 U R L' F B' U D' L'
-U L2 D' R' L B L2 F2 U' D R U D'
+U D'
+U R L' B'
