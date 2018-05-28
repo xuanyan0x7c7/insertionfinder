@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
+#include <thread>
 #include <vector>
 #include <boost/program_options.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -40,7 +41,9 @@ void CLI::parse(int argc, char** argv) try {
         ("file,f", po::value<vector<string>>(), "input file")
         (
             "jobs,j",
-            po::value<size_t>()->default_value(1)->implicit_value(0),
+            po::value<size_t>()
+                ->default_value(1)
+                ->implicit_value(thread::hardware_concurrency()),
             "multiple threads"
         )
         ("json", "use JSON output")

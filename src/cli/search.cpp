@@ -301,11 +301,6 @@ void CLI::find_insertions(const po::variables_map& vm) {
         delete in;
     }
 
-    size_t max_threads = vm["jobs"].as<size_t>();
-    if (max_threads == 0) {
-        max_threads = static_cast<size_t>(thread::hardware_concurrency());
-    }
-
     Cube original_cube;
     original_cube.twist(scramble);
     original_cube.twist(skeleton);
@@ -323,7 +318,7 @@ void CLI::find_insertions(const po::variables_map& vm) {
     if (vm.count("verbose")) {
         finder.set_verbose();
     }
-    finder.search(max_threads);
+    finder.search(vm["jobs"].as<size_t>());
     printer->print_result(
         scramble, skeleton,
         {parity, corner_cycles, edge_cycles, center_cycles},
