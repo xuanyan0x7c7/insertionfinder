@@ -66,7 +66,11 @@ namespace InsertionFinder {
         virtual ~Finder() {}
     public:
         void search(std::size_t max_threads);
-        virtual Status search_core(std::size_t max_threads) = 0;
+    protected:
+        virtual void search_core(
+            const CycleStatus& cycle_status,
+            std::size_t max_threads
+        ) = 0;
     public:
         std::size_t get_fewest_moves() const noexcept {
             return this->fewest_moves;

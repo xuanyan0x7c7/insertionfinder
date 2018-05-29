@@ -48,7 +48,11 @@ namespace InsertionFinder {
         std::mutex fewest_moves_mutex;
     public:
         using Finder::Finder;
-        Finder::Status search_core(std::size_t max_threads) override;
+    protected:
+        void search_core(
+            const CycleStatus& cycle_status,
+            std::size_t max_threads
+        ) override;
     private:
         void run_worker(
             const CycleStatus& cycle_status,

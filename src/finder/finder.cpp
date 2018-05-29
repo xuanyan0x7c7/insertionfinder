@@ -72,7 +72,49 @@ Finder::Finder(
 
 void Finder::search(size_t max_threads) {
     auto begin = high_resolution_clock::now();
-    this->result.status = this->search_core(max_threads);
+
+    do {
+        Cube original_cube = this->scramble_cube;
+        original_cube.twist(this->skeleton);
+        Cube cube = original_cube.best_placement();
+        bool parity = cube.has_parity();
+        int corner_cycles = cube.corner_cycles();
+        int edge_cycles = cube.edge_cycles();
+        int placement = cube.placement();
+        if (!parity && corner_cycles == 0 && edge_cycles == 0 && placement == 0) {
+            this->result.status = Finder::Status::SUCCESS_SOLVED;
+            break;
+        } else if ((parity || Cube::center_cycles[placement] > 1) && !this->change_parity) {
+            this->result.status = Finder::Status::FAILURE_PARITY_ALGORITHMS_NEEDED;
+            break;
+        } else if (corner_cycles && !this->change_corner) {
+            this->result.status = Finder::Status::FAILURE_CORNER_CYCLE_ALGORITHMS_NEEDED;
+            break;
+        } else if (edge_cycles && !this->change_edge) {
+            this->result.status = Finder::Status::FAILURE_EDGE_CYCLE_ALGORITHMS_NEEDED;
+            break;
+        } else if (placement && !this->change_center) {
+            this->result.status = Finder::Status::FAILURE_CENTER_ALGORITHMS_NEEDED;
+            break;
+        }
+
+        this->search_core({parity, corner_cycles, edge_cycles, placement}, max_threads);
+        this->result.status = Finder::Status::SUCCESS;
+
+        for (auto& solution: this->solutions) {
+            size_t cancellation = solution.insertions.front().skeleton.length();
+            for (size_t i = 0; i < solution.insertions.size() - 1; ++i) {
+                cancellation += solution.insertions[i].insertion->length();
+            }
+            cancellation -= solution.insertions.back().skeleton.length();
+            solution.cancellation = cancellation;
+        }
+        sort(
+            this->solutions.begin(), this->solutions.end(),
+            [](const auto& x, const auto& y) {return x.cancellation < y.cancellation;}
+        );
+    } while (false);
+
     auto end = high_resolution_clock::now();
     this->result.duration = (end - begin).count();
 }

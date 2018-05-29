@@ -54,6 +54,10 @@ namespace InsertionFinder {
         std::vector<std::vector<SolvingStep>> partial_solutions;
     public:
         using Finder::Finder;
-        Finder::Status search_core(std::size_t max_threads) override;
+    protected:
+        void search_core(
+            const CycleStatus& cycle_status,
+            std::size_t max_threads
+        ) override;
     };
 };
