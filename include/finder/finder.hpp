@@ -63,6 +63,7 @@ namespace InsertionFinder {
             const Algorithm& scramble, const Algorithm& skeleton,
             const std::vector<Case>& cases
         );
+        virtual ~Finder() {}
     public:
         void search(std::size_t max_threads);
         virtual Status search_core(std::size_t max_threads) = 0;

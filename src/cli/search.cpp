@@ -14,6 +14,7 @@
 #include <case.hpp>
 #include <cube.hpp>
 #include <finder/brute-force.hpp>
+#include <finder/greedy.hpp>
 #include <finder/finder.hpp>
 #include "commands.hpp"
 #include "univalue/univalue.h"
@@ -314,14 +315,20 @@ void CLI::find_insertions(const po::variables_map& vm) {
         {parity, corner_cycles, edge_cycles, center_cycles}
     );
 
-    BruteForceFinder finder(scramble, skeleton, cases);
-    if (vm.count("verbose")) {
-        finder.set_verbose();
+    unique_ptr<Finder> finder;
+    if (vm.count("greedy")) {
+        finder = make_unique<GreedyFinder>(scramble, skeleton, cases);
+    } else {
+        finder = make_unique<BruteForceFinder>(scramble, skeleton, cases);
     }
-    finder.search(vm["jobs"].as<size_t>());
+
+    if (vm.count("verbose")) {
+        finder->set_verbose();
+    }
+    finder->search(vm["jobs"].as<size_t>());
     printer->print_result(
         scramble, skeleton,
         {parity, corner_cycles, edge_cycles, center_cycles},
-        finder, finder.get_result()
+        *finder, finder->get_result()
     );
 }

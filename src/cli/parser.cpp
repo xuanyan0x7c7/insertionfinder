@@ -46,6 +46,7 @@ void CLI::parse(int argc, char** argv) try {
                 ->implicit_value(thread::hardware_concurrency()),
             "multiple threads"
         )
+        ("greedy", "greedy searching")
         ("json", "use JSON output")
         ("verbose", "verbose");
     cli_options.add(configuration_options);
