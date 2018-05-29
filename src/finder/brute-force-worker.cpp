@@ -45,7 +45,7 @@ void BruteForceFinder::Worker::search(
         return;
     } else if (
         !parity && corner_cycles == 0 && edge_cycles == 0
-        && Cube::center_cycles[placement] <= 1
+        && Cube::center_cycles[placement] == 1
     ) {
         this->search_last_placement(placement, begin, end);
         return;
