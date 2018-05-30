@@ -1,5 +1,7 @@
 #pragma once
+#include <atomic>
 #include <memory>
+#include <mutex>
 #include <vector>
 #include <algorithm.hpp>
 #include <case.hpp>
@@ -17,6 +19,10 @@ namespace InsertionFinder {
         struct SolvingStep {
             std::vector<CheapInsertion> steps;
             CycleStatus cycle_status;
+        };
+        struct PartialState {
+            std::atomic<std::size_t> fewest_moves;
+            std::mutex fewest_moves_mutex;
         };
         class Worker {
         private:
@@ -52,12 +58,21 @@ namespace InsertionFinder {
         };
     private:
         std::vector<std::vector<SolvingStep>> partial_solutions;
+        PartialState* partial_states;
     public:
-        using Finder::Finder;
+        GreedyFinder(
+            const Algorithm& scramble, const Algorithm& skeleton,
+            const std::vector<Case>& cases
+        ): Finder(scramble, skeleton, cases), partial_states(nullptr) {}
+        ~GreedyFinder() {
+            delete[] partial_states;
+        }
     protected:
         void search_core(
             const CycleStatus& cycle_status,
             std::size_t max_threads
         ) override;
+    private:
+        void run_worker(std::size_t start, std::size_t step);
     };
 };

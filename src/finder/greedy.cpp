@@ -1,4 +1,10 @@
 #include <algorithm>
+#include <atomic>
+#include <functional>
+#include <iostream>
+#include <limits>
+#include <mutex>
+#include <thread>
 #include <utility>
 #include <vector>
 #include <cube.hpp>
@@ -23,10 +29,22 @@ void GreedyFinder::search_core(
         {{make_shared<Algorithm>(this->skeleton)}},
         cycle_status
     });
+    this->partial_states = new PartialState[cycles];
+    for (int i = 0; i < cycles; ++i) {
+        this->partial_states[i].fewest_moves = numeric_limits<size_t>::max() - 2;
+    }
 
     for (int depth = cycles; depth > 0; --depth) {
-        for (const auto& solving_step: this->partial_solutions.back()) {
-            Worker(*this, solving_step).search();
+        vector<thread> worker_threads;
+        for (size_t i = 0; i < max_threads; ++i) {
+            worker_threads.emplace_back(
+                mem_fn(&GreedyFinder::run_worker),
+                ref(*this),
+                i, max_threads
+            );
+        }
+        for (thread& thread: worker_threads) {
+            thread.join();
         }
         this->partial_solutions.pop_back();
         sort(
@@ -50,8 +68,15 @@ void GreedyFinder::search_core(
         }
         this->solutions.push_back({move(insertions)});
     }
+}
 
-    if (!this->solutions.empty()) {
-        this->fewest_moves = this->solutions.front().insertions.back().skeleton.length();
+
+void GreedyFinder::run_worker(size_t start, size_t step) {
+    for (
+        size_t index = start;
+        index < this->partial_solutions.back().size();
+        index += step
+    ) {
+        Worker(*this, this->partial_solutions.back()[index]).search();
     }
 }

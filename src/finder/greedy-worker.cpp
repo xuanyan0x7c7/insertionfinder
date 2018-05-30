@@ -1,6 +1,5 @@
 #include <cstdint>
-#include <iostream>
-#include <limits>
+#include <mutex>
 #include <memory>
 #include <utility>
 #include <algorithm.hpp>
@@ -220,57 +219,50 @@ void GreedyFinder::Worker::try_insertion(
         } else if (new_total_cycles < this->finder.partial_solutions.size() - 1) {
             for (const Algorithm& algorithm: _case.algorithm_list()) {
                 auto& partial_solution = this->finder.partial_solutions[new_total_cycles];
-                size_t best_partial_length;
-                size_t fewest_moves;
-                if (partial_solution.empty()) {
-                    best_partial_length = fewest_moves = numeric_limits<size_t>::max();
-                } else {
-                    best_partial_length = partial_solution.front().steps.back().skeleton->length();
-                    fewest_moves = best_partial_length + 2;
-                }
+                auto& partial_state = this->finder.partial_states[new_total_cycles];
+                size_t target = partial_state.fewest_moves + 2;
                 if (!skeleton->is_worthy_insertion(
                     algorithm, insert_place,
                     insert_place_mask,
-                    fewest_moves
+                    target
                 )) {
                     continue;
                 }
                 auto new_skeleton = make_shared<Algorithm>(
                     skeleton->insert(algorithm, insert_place).first
                 );
-                if (new_skeleton->length() > fewest_moves) {
+                if (new_skeleton->length() > target) {
+                    continue;
+                }
+                lock_guard<mutex> lock(partial_state.fewest_moves_mutex);
+                if (new_skeleton->length() > target) {
                     continue;
                 }
                 auto new_steps = this->solving_step.steps;
                 new_steps.back() = {skeleton, insert_place, &algorithm};
                 new_steps.push_back({new_skeleton});
-                if (new_skeleton->length() < best_partial_length) {
-                    partial_solution.insert(
-                        partial_solution.begin(),
-                        {
-                            move(new_steps),
-                            {new_parity, new_corner_cycles, new_edge_cycles, new_placement}
-                        }
-                    );
-                    size_t target_length = fewest_moves;
-                    auto iter = partial_solution.begin() + 1;
-                    auto place = iter;
+                if (new_skeleton->length() < partial_state.fewest_moves) {
+                    target = new_skeleton->length() + 2;
+                    auto place = partial_solution.begin();
                     for (
-                        auto iter = partial_solution.begin() + 1, place = iter;
+                        auto iter = partial_solution.begin();
                         iter != partial_solution.end();
                         ++iter
                     ) {
-                        if (iter->steps.back().skeleton->length() <= target_length) {
-                            *place++ = move(*iter);
+                        if (iter->steps.back().skeleton->length() <= target) {
+                            if (place != iter) {
+                                *place = move(*iter);
+                            }
+                            ++place;
                         }
                     }
                     partial_solution.erase(place, partial_solution.end());
-                } else {
-                    partial_solution.push_back({
-                        move(new_steps),
-                        {new_parity, new_corner_cycles, new_edge_cycles, new_placement}
-                    });
+                    partial_state.fewest_moves = new_skeleton->length();
                 }
+                partial_solution.push_back({
+                    move(new_steps),
+                    {new_parity, new_corner_cycles, new_edge_cycles, new_placement}
+                });
             }
         }
     }
@@ -300,23 +292,27 @@ void GreedyFinder::Worker::solution_found(
     auto insert_place_mask = skeleton->get_insert_place_mask(insert_place);
     for (const Algorithm& algorithm: _case.algorithm_list()) {
         auto& partial_solution = this->finder.partial_solutions.front();
-        size_t fewest_moves = partial_solution.empty()
-            ? numeric_limits<size_t>::max()
-            : partial_solution.front().steps.back().skeleton->length();
         if (!skeleton->is_worthy_insertion(
             algorithm, insert_place,
             insert_place_mask,
-            fewest_moves
+            this->finder.fewest_moves
         )) {
             continue;
         }
-        auto new_skeleton = make_shared<Algorithm>(skeleton->insert(algorithm, insert_place).first);
-        if (new_skeleton->length() <= fewest_moves) {
+        auto new_skeleton = make_shared<Algorithm>(
+            skeleton->insert(algorithm, insert_place).first
+        );
+        if (new_skeleton->length() <= this->finder.fewest_moves) {
+            lock_guard<mutex> lock(this->finder.partial_states[0].fewest_moves_mutex);
+            if (new_skeleton->length() > this->finder.fewest_moves) {
+                continue;
+            }
             auto new_steps = this->solving_step.steps;
             new_steps.back() = {skeleton, insert_place, &algorithm};
             new_steps.push_back({new_skeleton});
-            if (new_skeleton->length() < fewest_moves) {
+            if (new_skeleton->length() < this->finder.fewest_moves) {
                 partial_solution.clear();
+                this->finder.fewest_moves = new_skeleton->length();
             }
             partial_solution.push_back({move(new_steps)});
         }
