@@ -1,4 +1,4 @@
-AC_INIT([insertionfinder], [0.4.1], [xuanyan@xuanyan.ws])
+AC_INIT([insertionfinder], [0.4.2], [xuanyan@xuanyan.ws])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
