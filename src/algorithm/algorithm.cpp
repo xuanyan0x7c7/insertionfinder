@@ -88,7 +88,7 @@ Algorithm::Algorithm(const string& algorithm_string) {
         R"(\s*((?:[UDRLFB]|2?[UDRLFB]w)[2']?|[xyz][2']?|\[[udrlfb][2']?\])\s*)",
         regex_constants::ECMAScript | regex_constants::optimize
     );
-    array<int, 3> transform = {0, 2, 4};
+    array<int, 3> transform = {{0, 2, 4}};
     smatch match_result;
     string temp_string = algorithm_string;
     while (regex_search(temp_string, match_result, twists_regex)) {

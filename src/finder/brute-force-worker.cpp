@@ -52,7 +52,6 @@ void BruteForceFinder::Worker::search(
     }
 
     const Algorithm skeleton = this->solving_step.back().skeleton;
-    const int* transform = rotation_permutation[placement];
     byte twist_flag{0};
     if (this->finder.change_corner) {
         twist_flag |= CubeTwist::corners;
@@ -70,10 +69,7 @@ void BruteForceFinder::Worker::search(
             state.twist(skeleton, 0, insert_place, twist_flag);
         } else {
             int twist = skeleton[insert_place - 1];
-            state.twist_before(
-                transform_twist(transform, Algorithm::inverse_twist[twist]),
-                twist_flag
-            );
+            state.twist_before(Algorithm::inverse_twist[twist], twist_flag);
             state.twist(twist, twist_flag);
         }
         this->try_insertion(insert_place, state, cycle_status);
