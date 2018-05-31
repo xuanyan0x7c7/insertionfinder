@@ -36,7 +36,6 @@ void GreedyFinder::Worker::search() {
     }
 
     const auto& skeleton = this->solving_step.steps.back().skeleton;
-    const int* transform = rotation_permutation[placement];
     byte twist_flag{0};
     if (this->finder.change_corner) {
         twist_flag |= CubeTwist::corners;
@@ -53,10 +52,7 @@ void GreedyFinder::Worker::search() {
             state.twist(this->finder.scramble_cube, twist_flag);
         } else {
             int twist = (*skeleton)[insert_place - 1];
-            state.twist_before(
-                transform_twist(transform, Algorithm::inverse_twist[twist]),
-                twist_flag
-            );
+            state.twist_before(Algorithm::inverse_twist[twist], twist_flag);
             state.twist(twist, twist_flag);
         }
         this->try_insertion(insert_place, state);
@@ -220,7 +216,7 @@ void GreedyFinder::Worker::try_insertion(
             for (const Algorithm& algorithm: _case.algorithm_list()) {
                 auto& partial_solution = this->finder.partial_solutions[new_total_cycles];
                 auto& partial_state = this->finder.partial_states[new_total_cycles];
-                size_t target = partial_state.fewest_moves + 2;
+                size_t target = partial_state.fewest_moves + this->finder.threshold;
                 if (!skeleton->is_worthy_insertion(
                     algorithm, insert_place,
                     insert_place_mask,
@@ -242,7 +238,8 @@ void GreedyFinder::Worker::try_insertion(
                 new_steps.back() = {skeleton, insert_place, &algorithm};
                 new_steps.push_back({new_skeleton});
                 if (new_skeleton->length() < partial_state.fewest_moves) {
-                    target = new_skeleton->length() + 2;
+                    partial_state.fewest_moves = new_skeleton->length();
+                    target = new_skeleton->length() + this->finder.threshold;
                     auto place = partial_solution.begin();
                     for (
                         auto iter = partial_solution.begin();
@@ -257,7 +254,6 @@ void GreedyFinder::Worker::try_insertion(
                         }
                     }
                     partial_solution.erase(place, partial_solution.end());
-                    partial_state.fewest_moves = new_skeleton->length();
                 }
                 partial_solution.push_back({
                     move(new_steps),

@@ -39,6 +39,12 @@ void CLI::parse(int argc, char** argv) try {
     configuration_options.add_options()
         ("algfile,a", po::value<vector<string>>(), "algorithm file")
         ("file,f", po::value<vector<string>>(), "input file")
+        ("optimal,o", "search for optimal solutions")
+        (
+            "greedy-threshold",
+            po::value<size_t>()->default_value(2),
+            "suboptimal moves tolerance"
+        )
         (
             "jobs,j",
             po::value<size_t>()
@@ -46,7 +52,6 @@ void CLI::parse(int argc, char** argv) try {
                 ->implicit_value(thread::hardware_concurrency()),
             "multiple threads"
         )
-        ("greedy", "greedy searching")
         ("json", "use JSON output")
         ("verbose", "verbose");
     cli_options.add(configuration_options);

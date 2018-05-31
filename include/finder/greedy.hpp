@@ -57,13 +57,18 @@ namespace InsertionFinder {
             );
         };
     private:
+        const std::size_t threshold;
         std::vector<std::vector<SolvingStep>> partial_solutions;
         PartialState* partial_states;
     public:
         GreedyFinder(
             const Algorithm& scramble, const Algorithm& skeleton,
-            const std::vector<Case>& cases
-        ): Finder(scramble, skeleton, cases), partial_states(nullptr) {}
+            const std::vector<Case>& cases,
+            std::size_t threshold = 2
+        ):
+            Finder(scramble, skeleton, cases),
+            threshold(threshold),
+            partial_states(nullptr) {}
         ~GreedyFinder() {
             delete[] partial_states;
         }

@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <atomic>
 #include <functional>
-#include <iostream>
 #include <limits>
 #include <mutex>
 #include <thread>
@@ -31,10 +30,19 @@ void GreedyFinder::search_core(
     });
     this->partial_states = new PartialState[cycles];
     for (int i = 0; i < cycles; ++i) {
-        this->partial_states[i].fewest_moves = numeric_limits<size_t>::max() - 2;
+        this->partial_states[i].fewest_moves
+            = numeric_limits<size_t>::max() - this->threshold;
     }
 
     for (int depth = cycles; depth > 0; --depth) {
+        auto& partial_solution = this->partial_solutions.back();
+        sort(
+            partial_solution.begin(), partial_solution.end(),
+            [](const auto& x, const auto& y) {
+                return x.steps.back().skeleton->length()
+                    < y.steps.back().skeleton->length();
+            }
+        );
         vector<thread> worker_threads;
         for (size_t i = 0; i < max_threads; ++i) {
             worker_threads.emplace_back(
@@ -47,14 +55,6 @@ void GreedyFinder::search_core(
             thread.join();
         }
         this->partial_solutions.pop_back();
-        sort(
-            this->partial_solutions.back().begin(),
-            this->partial_solutions.back().end(),
-            [](const auto& x, const auto& y) {
-                return x.steps.back().skeleton->length()
-                    < y.steps.back().skeleton->length();
-            }
-        );
     }
 
     for (const auto& solution: this->partial_solutions.front()) {

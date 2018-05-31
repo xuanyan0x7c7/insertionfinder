@@ -316,10 +316,13 @@ void CLI::find_insertions(const po::variables_map& vm) {
     );
 
     unique_ptr<Finder> finder;
-    if (vm.count("greedy")) {
-        finder = make_unique<GreedyFinder>(scramble, skeleton, cases);
-    } else {
+    if (vm.count("optimal")) {
         finder = make_unique<BruteForceFinder>(scramble, skeleton, cases);
+    } else {
+        finder = make_unique<GreedyFinder>(
+            scramble, skeleton, cases,
+            vm["greedy-threshold"].as<size_t>()
+        );
     }
 
     if (vm.count("verbose")) {
