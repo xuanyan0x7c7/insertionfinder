@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <atomic>
 #include <functional>
+#include <iostream>
 #include <limits>
 #include <mutex>
 #include <thread>
@@ -43,6 +44,12 @@ void GreedyFinder::search_core(
                     < y.steps.back().skeleton->length();
             }
         );
+        if (this->verbose) {
+            cerr << "Searching depth " << depth << ": "
+                << partial_solution.size() << " case"
+                << (partial_solution.size() == 1 ? "" : "s")
+                << '.' << endl;
+        }
         vector<thread> worker_threads;
         for (size_t i = 0; i < max_threads; ++i) {
             worker_threads.emplace_back(
