@@ -7,6 +7,7 @@ AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 LT_INIT
 
 AC_PROG_CXX
+AC_LANG([C++])
 AX_CXX_COMPILE_STDCXX([17])
 
 AC_CHECK_HEADERS([optional])

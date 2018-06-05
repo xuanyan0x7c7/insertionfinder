@@ -1,7 +1,7 @@
 #pragma once
 #include <config.h>
 
-#ifdef HAS_OPTIONAL
+#ifdef HAVE_OPTIONAL
     #include <optional>
 #else
     #include <boost/optional.hpp>

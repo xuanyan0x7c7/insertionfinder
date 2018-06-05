@@ -3,10 +3,10 @@ SUBDIRS = algorithm case cli cube finder
 bin_PROGRAMS = insertionfinder
 insertionfinder_SOURCES = main.cpp
 insertionfinder_LDADD = \
-    algorithm/libalgorithm.la \
-    case/libcase.la \
     cli/libcli.la \
     cli/univalue/libunivalue.la \
-    cube/libcube.la \
     finder/libfinder.la \
+    case/libcase.la \
+    cube/libcube.la \
+    algorithm/libalgorithm.la \
     -lboost_program_options
