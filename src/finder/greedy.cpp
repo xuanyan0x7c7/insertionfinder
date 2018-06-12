@@ -2,7 +2,6 @@
 #include <atomic>
 #include <functional>
 #include <iostream>
-#include <limits>
 #include <mutex>
 #include <thread>
 #include <utility>
@@ -16,8 +15,9 @@ using namespace InsertionFinder;
 
 void GreedyFinder::search_core(
     const CycleStatus& cycle_status,
-    size_t max_threads
+    const SearchParams& params
 ) {
+    this->fewest_moves = params.search_target;
     bool parity = cycle_status.parity;
     int corner_cycles = cycle_status.corner_cycles;
     int edge_cycles = cycle_status.edge_cycles;
@@ -31,10 +31,11 @@ void GreedyFinder::search_core(
     });
     this->partial_states = new PartialState[cycles];
     for (int i = 0; i < cycles; ++i) {
-        this->partial_states[i].fewest_moves
-            = numeric_limits<size_t>::max() - this->threshold;
+        this->partial_states[i].fewest_moves =
+            max<size_t>(this->fewest_moves, this->threshold) - this->threshold;
     }
 
+    size_t max_threads = params.max_threads;
     for (int depth = cycles; depth > 0; --depth) {
         auto& partial_solution = this->partial_solutions.back();
         sort(

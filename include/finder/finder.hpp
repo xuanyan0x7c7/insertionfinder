@@ -39,6 +39,10 @@ namespace InsertionFinder {
             Status status;
             std::int64_t duration;
         };
+        struct SearchParams {
+            std::size_t search_target;
+            std::size_t max_threads;
+        };
     protected:
         const Algorithm scramble;
         const Algorithm skeleton;
@@ -65,11 +69,11 @@ namespace InsertionFinder {
         );
         virtual ~Finder() {}
     public:
-        void search(std::size_t max_threads);
+        void search(const SearchParams& params);
     protected:
         virtual void search_core(
             const CycleStatus& cycle_status,
-            std::size_t max_threads
+            const SearchParams& params
         ) = 0;
     public:
         std::size_t get_fewest_moves() const noexcept {

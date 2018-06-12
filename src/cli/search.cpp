@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <string>
 #include <thread>
@@ -328,7 +329,12 @@ void CLI::find_insertions(const po::variables_map& vm) {
     if (vm.count("verbose")) {
         finder->set_verbose();
     }
-    finder->search(vm["jobs"].as<size_t>());
+    size_t search_target = numeric_limits<size_t>::max();
+    if (vm.count("target")) {
+        search_target = vm["target"].as<size_t>();
+    }
+    size_t max_threads = vm["jobs"].as<size_t>();
+    finder->search({search_target, max_threads});
     printer->print_result(
         scramble, skeleton,
         {parity, corner_cycles, edge_cycles, center_cycles},

@@ -11,8 +11,10 @@ using namespace InsertionFinder;
 
 void BruteForceFinder::search_core(
     const CycleStatus& cycle_status,
-    size_t max_threads
+    const SearchParams& params
 ) {
+    this->fewest_moves = params.search_target;
+    size_t max_threads = params.max_threads;
     size_t thread_count = min(this->skeleton.length() + 1, max_threads);
     vector<size_t> split_points(thread_count + 1);
     for (size_t i = 1; i <= thread_count; ++i) {

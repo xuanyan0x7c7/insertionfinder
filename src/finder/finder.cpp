@@ -70,7 +70,7 @@ Finder::Finder(
 }
 
 
-void Finder::search(size_t max_threads) {
+void Finder::search(const SearchParams& params) {
     auto begin = high_resolution_clock::now();
 
     do {
@@ -98,7 +98,7 @@ void Finder::search(size_t max_threads) {
             break;
         }
 
-        this->search_core({parity, corner_cycles, edge_cycles, placement}, max_threads);
+        this->search_core({parity, corner_cycles, edge_cycles, placement}, params);
         this->result.status = Finder::Status::SUCCESS;
 
         for (auto& solution: this->solutions) {

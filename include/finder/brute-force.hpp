@@ -51,7 +51,7 @@ namespace InsertionFinder {
     protected:
         void search_core(
             const CycleStatus& cycle_status,
-            std::size_t max_threads
+            const SearchParams& params
         ) override;
     private:
         void run_worker(

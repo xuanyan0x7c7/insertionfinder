@@ -40,6 +40,7 @@ void CLI::parse(int argc, char** argv) try {
         ("algfile,a", po::value<vector<string>>(), "algorithm file")
         ("file,f", po::value<vector<string>>(), "input file")
         ("optimal,o", "search for optimal solutions")
+        ("target", po::value<size_t>(), "search target")
         (
             "greedy-threshold",
             po::value<size_t>()->default_value(2),
