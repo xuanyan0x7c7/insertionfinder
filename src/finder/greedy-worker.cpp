@@ -64,7 +64,6 @@ void GreedyFinder::Worker::search() {
                 Algorithm::inverse_twist[(*skeleton)[insert_place]],
                 twist_flag
             );
-            swapped_state.rotate(placement);
             swapped_state.twist(state, twist_flag);
             swapped_state.twist((*skeleton)[insert_place], twist_flag);
             swapped_state.twist(
