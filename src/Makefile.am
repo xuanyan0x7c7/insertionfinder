@@ -10,3 +10,11 @@ insertionfinder_LDADD = \
     cube/libcube.la \
     algorithm/libalgorithm.la \
     -lboost_program_options
+
+install-exec-hook:
+	cd $(DESTDIR)$(bindir) \
+		&& mv -f insertionfinder${EXEEXT} insertionfinder-${VERSION}${EXEEXT} \
+		&& $(LN_S) insertionfinder-${VERSION}${EXEEXT} insertionfinder${EXEEXT}
+
+uninstall-local:
+	cd $(DESTDIR)$(bindir) && rm -f insertionfinder-${VERSION}${EXEEXT}
