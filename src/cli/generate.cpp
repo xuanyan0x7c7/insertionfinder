@@ -60,7 +60,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
 
             auto node = map.find(cube);
             if (node != map.end() && node->second.contains_algorithm(algorithm)) {
-                break;
+                continue;
             }
             const auto isomorphism_list = algorithm.generate_isomorphisms();
             for (const Algorithm& algorithm: isomorphism_list) {
