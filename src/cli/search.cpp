@@ -220,8 +220,22 @@ namespace {
 void CLI::find_insertions(const po::variables_map& vm) {
     const vector<string> filenames = vm.count("file")
         ? vm["file"].as<vector<string>>() : vector<string>();
-    const vector<string> algfilenames = vm.count("algfile")
+    vector<string> algfilenames = vm.count("algfile")
         ? vm["algfile"].as<vector<string>>() : vector<string>();
+    if (vm.count("all-algs")) {
+        algfilenames.push_back("3CP-normal");
+        algfilenames.push_back("3CP-large");
+        algfilenames.push_back("2x2CP");
+        algfilenames.push_back("CO");
+        algfilenames.push_back("C-other");
+        algfilenames.push_back("3EP");
+        algfilenames.push_back("2x2EP");
+        algfilenames.push_back("EO");
+        algfilenames.push_back("E-other");
+        algfilenames.push_back("no-parity-other");
+        algfilenames.push_back("parity");
+        algfilenames.push_back("center");
+    }
 
     unordered_map<Cube, Case> map;
     for (const string& name: algfilenames) {

@@ -38,6 +38,7 @@ void CLI::parse(int argc, char** argv) try {
     po::options_description configuration_options("Configurations");
     configuration_options.add_options()
         ("algfile,a", po::value<vector<string>>(), "algorithm file")
+        ("all-algs", "all algorithms")
         ("file,f", po::value<vector<string>>(), "input file")
         ("optimal,o", "search for optimal solutions")
         ("target", po::value<size_t>(), "search target")
