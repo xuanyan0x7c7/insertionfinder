@@ -45,6 +45,7 @@ namespace {
 namespace {
     struct Printer {
         virtual void print_result(const CycleStatus& status) = 0;
+        virtual ~Printer() = default;
     };
 
     struct StandardPrinter: Printer {

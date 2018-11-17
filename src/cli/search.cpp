@@ -42,6 +42,7 @@ namespace {
             const CycleStatus& status,
             const Finder& finder, const Finder::Result& result
         ) = 0;
+        virtual ~Printer() = default;
     };
 
     struct StandardPrinter: Printer {
