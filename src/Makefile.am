@@ -9,6 +9,7 @@ insertionfinder_LDADD = \
     case/libcase.la \
     cube/libcube.la \
     algorithm/libalgorithm.la \
+    -lboost_filesystem \
     -lboost_program_options
 
 install-exec-hook:

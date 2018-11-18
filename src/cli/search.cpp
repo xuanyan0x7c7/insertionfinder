@@ -10,6 +10,7 @@
 #include <utility>
 #include <vector>
 #include <boost/program_options.hpp>
+#include <fallbacks/filesystem.hpp>
 #include <config.h>
 #include <algorithm.hpp>
 #include <case.hpp>
@@ -20,6 +21,7 @@
 #include "commands.hpp"
 #include "univalue/univalue.h"
 using namespace std;
+namespace fs = std::filesystem;
 namespace po = boost::program_options;
 using namespace InsertionFinder;
 
@@ -223,18 +225,18 @@ void CLI::find_insertions(const po::variables_map& vm) {
     vector<string> algfilenames = vm.count("algfile")
         ? vm["algfile"].as<vector<string>>() : vector<string>();
     if (vm.count("all-algs")) {
-        algfilenames.push_back("3CP-normal");
-        algfilenames.push_back("3CP-large");
-        algfilenames.push_back("2x2CP");
-        algfilenames.push_back("CO");
-        algfilenames.push_back("C-other");
-        algfilenames.push_back("3EP");
-        algfilenames.push_back("2x2EP");
-        algfilenames.push_back("EO");
-        algfilenames.push_back("E-other");
-        algfilenames.push_back("no-parity-other");
-        algfilenames.push_back("parity");
-        algfilenames.push_back("center");
+        try {
+            for (auto& file: fs::directory_iterator(ALGORITHMSDIR)) {
+                if (fs::is_regular_file(file)) {
+                    const auto& path = file.path().string();
+                    if (path.compare(path.length() - 5, string::npos, ".algs") == 0) {
+                        algfilenames.push_back(file.path().string());
+                    }
+                }
+            }
+        } catch (const fs::filesystem_error& e) {
+            cerr << e.what() << endl;
+        }
     }
 
     unordered_map<Cube, Case> map;

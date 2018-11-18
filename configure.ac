@@ -11,6 +11,7 @@ AC_LANG([C++])
 AX_CXX_COMPILE_STDCXX([17])
 
 AC_CHECK_HEADERS([optional])
+AC_CHECK_HEADERS([filesystem])
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
