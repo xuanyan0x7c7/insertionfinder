@@ -26,6 +26,9 @@ namespace po = boost::program_options;
 using namespace InsertionFinder;
 
 
+const fs::path algorithms_directory = ALGORITHMSDIR;
+
+
 namespace {
     struct CycleStatus {
         bool parity;
@@ -226,15 +229,23 @@ void CLI::find_insertions(const po::variables_map& vm) {
         ? vm["algfile"].as<vector<string>>() : vector<string>();
     if (vm.count("all-algs")) {
         try {
-            for (auto& file: fs::directory_iterator(ALGORITHMSDIR)) {
-                if (fs::is_regular_file(file)) {
-                    const auto& path = file.path().string();
-                    if (path.compare(path.length() - 5, string::npos, ".algs") == 0) {
-                        algfilenames.push_back(file.path().string());
-                    }
+            for (auto& file: fs::directory_iterator(algorithms_directory)) {
+                if (fs::is_regular_file(file) && file.path().extension() == ".algs") {
+                    algfilenames.push_back(file.path().string());
                 }
             }
         } catch (const fs::filesystem_error& e) {
+            cerr << e.what() << endl;
+        }
+    }
+    if (vm.count("all-extra-algs")) {
+        try {
+            for (auto &file : fs::directory_iterator(algorithms_directory / "extras")) {
+                if (fs::is_regular_file(file) && file.path().extension() == ".algs") {
+                    algfilenames.push_back(file.path().string());
+                }
+            }
+        } catch (const fs::filesystem_error &e) {
             cerr << e.what() << endl;
         }
     }
@@ -244,7 +255,7 @@ void CLI::find_insertions(const po::variables_map& vm) {
         ifstream fin(name, ios::in | ios::binary);
         if (fin.fail()) {
             fin = ifstream(
-                string(ALGORITHMSDIR) + "/" + name + ".algs",
+                (algorithms_directory / (name + ".algs")).string(),
                 ios::in | ios::binary
             );
             if (fin.fail()) {
