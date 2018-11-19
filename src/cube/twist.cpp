@@ -85,10 +85,7 @@ void Cube::twist(
     if (static_cast<bool>(flags & CubeTwist::reversed)) {
         this->rotate(Cube::inverse_center[algorithm.cube_rotation()]);
         for (size_t i = end; i-- != begin;) {
-            this->twist(
-                Algorithm::inverse_twist[algorithm[i]],
-                flags
-            );
+            this->twist(Algorithm::inverse_twist[algorithm[i]], flags);
         }
     } else {
         for (size_t i = begin; i < end; ++i) {
@@ -147,6 +144,13 @@ optional<Cube> Cube::twist_effectively(
     bool edges_filled = false;
     bool centers_filled = false;
     Cube result(nullopt);
+    if (static_cast<bool>(flags & CubeTwist::centers)) {
+        if (this->_placement == 0) {
+            return nullopt;
+        }
+        result._placement = Cube::center_transform[this->_placement][cube._placement];
+        centers_filled = true;
+    }
     if (static_cast<bool>(flags & CubeTwist::corners)) {
         for (int i = 0; i < 8; ++i) {
             int item = this->corner[i];
@@ -169,13 +173,6 @@ optional<Cube> Cube::twist_effectively(
             result.edge[i] = new_edge;
         }
         edges_filled = true;
-    }
-    if (static_cast<bool>(flags & CubeTwist::centers)) {
-        if (this->_placement == 0) {
-            return nullopt;
-        }
-        result._placement = Cube::center_transform[this->_placement][cube._placement];
-        centers_filled = true;
     }
     if (!corners_filled) {
         memcpy(result.corner, this->corner, 8 * sizeof(int));
