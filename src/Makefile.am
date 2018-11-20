@@ -9,6 +9,8 @@ insertionfinder_LDADD = \
     case/libcase.la \
     cube/libcube.la \
     algorithm/libalgorithm.la \
+    ${PTHREAD_CFLAGS} \
+    -lboost_system \
     -lboost_filesystem \
     -lboost_program_options
 
