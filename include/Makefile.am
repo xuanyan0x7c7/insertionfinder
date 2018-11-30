@@ -1,4 +1,9 @@
 nobase_include_HEADERS = \
-    fallbacks/filesystem.hpp fallbacks/optional.hpp \
-    algorithm.hpp case.hpp cube.hpp \
-    finder/brute-force.hpp finder/finder.hpp finder/greedy.hpp
+    insertionfinder/fallbacks/filesystem.hpp \
+    insertionfinder/fallbacks/optional.hpp \
+    insertionfinder/algorithm.hpp \
+    insertionfinder/case.hpp \
+    insertionfinder/cube.hpp \
+    insertionfinder/finder/brute-force.hpp \
+    insertionfinder/finder/finder.hpp \
+    insertionfinder/finder/greedy.hpp

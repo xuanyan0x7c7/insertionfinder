@@ -10,14 +10,14 @@
 #include <utility>
 #include <vector>
 #include <boost/program_options.hpp>
-#include <fallbacks/filesystem.hpp>
+#include <insertionfinder/fallbacks/filesystem.hpp>
 #include <config.h>
-#include <algorithm.hpp>
-#include <case.hpp>
-#include <cube.hpp>
-#include <finder/brute-force.hpp>
-#include <finder/greedy.hpp>
-#include <finder/finder.hpp>
+#include <insertionfinder/algorithm.hpp>
+#include <insertionfinder/case.hpp>
+#include <insertionfinder/cube.hpp>
+#include <insertionfinder/finder/brute-force.hpp>
+#include <insertionfinder/finder/greedy.hpp>
+#include <insertionfinder/finder/finder.hpp>
 #include "commands.hpp"
 #include "univalue/univalue.h"
 using namespace std;

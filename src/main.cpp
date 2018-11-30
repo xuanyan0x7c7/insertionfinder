@@ -1,4 +1,4 @@
-#include <cube.hpp>
+#include <insertionfinder/cube.hpp>
 #include "./cli/parser.hpp"
 using namespace InsertionFinder;
 

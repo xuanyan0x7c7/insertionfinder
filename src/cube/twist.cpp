@@ -1,9 +1,9 @@
 #include <cstddef>
 #include <cstring>
 #include <array>
-#include <fallbacks/optional.hpp>
-#include <algorithm.hpp>
-#include <cube.hpp>
+#include <insertionfinder/fallbacks/optional.hpp>
+#include <insertionfinder/algorithm.hpp>
+#include <insertionfinder/cube.hpp>
 using namespace std;
 using namespace InsertionFinder;
 

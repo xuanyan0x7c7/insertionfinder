@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <vector>
-#include <algorithm.hpp>
+#include <insertionfinder/algorithm.hpp>
 #include "utils.hpp"
 using namespace std;
 using namespace InsertionFinder;

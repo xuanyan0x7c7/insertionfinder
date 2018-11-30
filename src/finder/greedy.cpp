@@ -6,9 +6,9 @@
 #include <thread>
 #include <utility>
 #include <vector>
-#include <cube.hpp>
-#include <finder/finder.hpp>
-#include <finder/greedy.hpp>
+#include <insertionfinder/cube.hpp>
+#include <insertionfinder/finder/finder.hpp>
+#include <insertionfinder/finder/greedy.hpp>
 using namespace std;
 using namespace InsertionFinder;
 

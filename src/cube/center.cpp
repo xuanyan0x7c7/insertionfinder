@@ -1,7 +1,7 @@
 #include <cstring>
 #include <array>
-#include <fallbacks/optional.hpp>
-#include <cube.hpp>
+#include <insertionfinder/fallbacks/optional.hpp>
+#include <insertionfinder/cube.hpp>
 using namespace std;
 using namespace InsertionFinder;
 

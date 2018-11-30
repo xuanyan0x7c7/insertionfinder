@@ -1,10 +1,10 @@
 #pragma once
 #include <mutex>
 #include <vector>
-#include <algorithm.hpp>
-#include <case.hpp>
-#include <cube.hpp>
-#include <finder/finder.hpp>
+#include <insertionfinder/algorithm.hpp>
+#include <insertionfinder/case.hpp>
+#include <insertionfinder/cube.hpp>
+#include <insertionfinder/finder/finder.hpp>
 
 namespace InsertionFinder {
     class BruteForceFinder: public Finder {

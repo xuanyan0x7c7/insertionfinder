@@ -6,8 +6,9 @@
 #include <functional>
 #include <istream>
 #include <ostream>
-#include <fallbacks/optional.hpp>
-#include <algorithm.hpp>
+#include <vector>
+#include <insertionfinder/fallbacks/optional.hpp>
+#include <insertionfinder/algorithm.hpp>
 
 namespace InsertionFinder {class Cube;};
 template<> struct std::hash<InsertionFinder::Cube> {

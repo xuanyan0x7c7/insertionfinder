@@ -4,9 +4,9 @@
 #include <atomic>
 #include <vector>
 #include <utility>
-#include <algorithm.hpp>
-#include <case.hpp>
-#include <cube.hpp>
+#include <insertionfinder/algorithm.hpp>
+#include <insertionfinder/case.hpp>
+#include <insertionfinder/cube.hpp>
 
 namespace InsertionFinder {
     class Finder {

@@ -1,8 +1,8 @@
 #include <istream>
 #include <ostream>
-#include <algorithm.hpp>
-#include <cube.hpp>
-#include <case.hpp>
+#include <insertionfinder/algorithm.hpp>
+#include <insertionfinder/cube.hpp>
+#include <insertionfinder/case.hpp>
 using namespace std;
 using namespace InsertionFinder;
 

@@ -2,8 +2,8 @@
 #include <memory>
 #include <string>
 #include <boost/program_options.hpp>
-#include <algorithm.hpp>
-#include <cube.hpp>
+#include <insertionfinder/algorithm.hpp>
+#include <insertionfinder/cube.hpp>
 #include "commands.hpp"
 #include "univalue/univalue.h"
 using namespace std;

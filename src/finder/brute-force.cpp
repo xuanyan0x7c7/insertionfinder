@@ -3,8 +3,8 @@
 #include <functional>
 #include <thread>
 #include <vector>
-#include <finder/finder.hpp>
-#include <finder/brute-force.hpp>
+#include <insertionfinder/finder/finder.hpp>
+#include <insertionfinder/finder/brute-force.hpp>
 using namespace std;
 using namespace InsertionFinder;
 

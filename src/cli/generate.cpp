@@ -5,9 +5,9 @@
 #include <utility>
 #include <vector>
 #include <boost/program_options.hpp>
-#include <algorithm.hpp>
-#include <case.hpp>
-#include <cube.hpp>
+#include <insertionfinder/algorithm.hpp>
+#include <insertionfinder/case.hpp>
+#include <insertionfinder/cube.hpp>
 #include "commands.hpp"
 using namespace std;
 namespace po = boost::program_options;

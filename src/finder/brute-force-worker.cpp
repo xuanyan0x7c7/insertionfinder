@@ -1,10 +1,10 @@
 #include <cstdint>
 #include <iostream>
 #include <utility>
-#include <algorithm.hpp>
-#include <case.hpp>
-#include <cube.hpp>
-#include <finder/brute-force.hpp>
+#include <insertionfinder/algorithm.hpp>
+#include <insertionfinder/case.hpp>
+#include <insertionfinder/cube.hpp>
+#include <insertionfinder/finder/brute-force.hpp>
 #include "utils.hpp"
 using namespace std;
 using namespace InsertionFinder;

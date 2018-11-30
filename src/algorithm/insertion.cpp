@@ -3,8 +3,8 @@
 #include <functional>
 #include <limits>
 #include <utility>
-#include <algorithm.hpp>
-#include <cube.hpp>
+#include <insertionfinder/algorithm.hpp>
+#include <insertionfinder/cube.hpp>
 #include "utils.hpp"
 using namespace std;
 using namespace InsertionFinder;

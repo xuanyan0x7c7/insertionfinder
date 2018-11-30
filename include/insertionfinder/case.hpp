@@ -5,8 +5,8 @@
 #include <istream>
 #include <ostream>
 #include <vector>
-#include <algorithm.hpp>
-#include <cube.hpp>
+#include <insertionfinder/algorithm.hpp>
+#include <insertionfinder/cube.hpp>
 
 namespace InsertionFinder {
     struct CaseStreamError: std::exception {
