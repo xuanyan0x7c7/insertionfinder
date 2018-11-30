@@ -4,27 +4,25 @@
 #include <functional>
 #include <memory>
 #include <ostream>
+#include <vector>
 #include <fallbacks/optional.hpp>
 #include <cube.hpp>
 using namespace std;
 using namespace InsertionFinder;
 
 
-array<Cube, 24>
-Cube::rotation_cube = Cube::generate_rotation_cube_table();
-array<array<int, 24>, 7 * 24 * 11 * 24>
-Cube::parity_transform = Cube::generate_parity_transform_table();
-array<array<int, 24>, 6 * 24 * 24>
-Cube::corner_cycle_transform = Cube::generate_corner_cycle_transform_table();
-array<array<int, 24>, 10 * 24 * 24>
-Cube::edge_cycle_transform = Cube::generate_edge_cycle_transform_table();
-
+array<Cube, 24> Cube::twist_cube = {};
+array<Cube, 24> Cube::rotation_cube = {};
+vector<array<int, 24>> Cube::parity_transform(7 * 24 * 11 * 24);
+vector<array<int, 24>> Cube::corner_cycle_transform(6 * 24 * 24);
+vector<array<int, 24>> Cube::edge_cycle_transform(10 * 24 * 24);
 
 void Cube::init() {
-    Cube::rotation_cube = Cube::generate_rotation_cube_table();
-    Cube::parity_transform = Cube::generate_parity_transform_table();
-    Cube::corner_cycle_transform = Cube::generate_corner_cycle_transform_table();
-    Cube::edge_cycle_transform = Cube::generate_edge_cycle_transform_table();
+    Cube::generate_twist_cube_table();
+    Cube::generate_rotation_cube_table();
+    Cube::generate_parity_transform_table();
+    Cube::generate_corner_cycle_transform_table();
+    Cube::generate_edge_cycle_transform_table();
 }
 
 

@@ -65,15 +65,11 @@ namespace {
 };
 
 
-const array<Cube, 24> Cube::twist_cube = Cube::generate_twist_cube_table();
-
-array<Cube, 24> Cube::generate_twist_cube_table() noexcept {
-    array<Cube, 24> twist_cube;
+void Cube::generate_twist_cube_table() noexcept {
     for (int i = 0; i < 24; ++i) {
-        memcpy(twist_cube[i].corner, corner_twist_table[i], 8 * sizeof(int));
-        memcpy(twist_cube[i].edge, edge_twist_table[i], 12 * sizeof(int));
+        memcpy(Cube::twist_cube[i].corner, corner_twist_table[i], 8 * sizeof(int));
+        memcpy(Cube::twist_cube[i].edge, edge_twist_table[i], 12 * sizeof(int));
     }
-    return twist_cube;
 }
 
 

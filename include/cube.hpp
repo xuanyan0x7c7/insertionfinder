@@ -74,24 +74,18 @@ namespace InsertionFinder {
             return this->compare(*this, rhs) < 0;
         }
     private:
-        static const std::array<Cube, 24> twist_cube;
+        static std::array<Cube, 24> twist_cube;
         static std::array<Cube, 24> rotation_cube;
-        static std::array<std::array<int, 24>, 7 * 24 * 11 * 24>
-            parity_transform;
-        static std::array<std::array<int, 24>, 6 * 24 * 24>
-            corner_cycle_transform;
-        static std::array<std::array<int, 24>, 10 * 24 * 24>
-            edge_cycle_transform;
+        static std::vector<std::array<int, 24>> parity_transform;
+        static std::vector<std::array<int, 24>> corner_cycle_transform;
+        static std::vector<std::array<int, 24>> edge_cycle_transform;
         static const std::array<std::array<int, 24>, 24> center_transform;
     private:
-        static std::array<Cube, 24> generate_twist_cube_table() noexcept;
-        static std::array<Cube, 24> generate_rotation_cube_table() noexcept;
-        static std::array<std::array<int, 24>, 7 * 24 * 11 * 24>
-        generate_parity_transform_table() noexcept;
-        static std::array<std::array<int, 24>, 6 * 24 * 24>
-        generate_corner_cycle_transform_table() noexcept;
-        static std::array<std::array<int, 24>, 10 * 24 * 24>
-        generate_edge_cycle_transform_table() noexcept;
+        static void generate_twist_cube_table() noexcept;
+        static void generate_rotation_cube_table() noexcept;
+        static void generate_parity_transform_table() noexcept;
+        static void generate_corner_cycle_transform_table() noexcept;
+        static void generate_edge_cycle_transform_table() noexcept;
     public:
         inline void twist(
             int twist,

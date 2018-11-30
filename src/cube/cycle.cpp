@@ -222,9 +222,8 @@ int Cube::edge_cycle_index() const noexcept {
 }
 
 
-array<array<int, 24>, 7 * 24 * 11 * 24>
-Cube::generate_parity_transform_table() noexcept {
-    array<array<int, 24>, 7 * 24 * 11 * 24> table;
+void Cube::generate_parity_transform_table() noexcept {
+    auto& table = Cube::parity_transform;
     for (int i = 0; i < 7 * 24 * 11 * 24; ++i) {
         Cube cube = Cube::parity_cube(i);
         if (cube.mask() == 0) {
@@ -244,12 +243,10 @@ Cube::generate_parity_transform_table() noexcept {
             }
         }
     }
-    return table;
 }
 
-array<array<int, 24>, 6 * 24 * 24>
-Cube::generate_corner_cycle_transform_table() noexcept {
-    array<array<int, 24>, 6 * 24 * 24> table;
+void Cube::generate_corner_cycle_transform_table() noexcept {
+   auto& table = Cube::corner_cycle_transform;
     for (int i = 0; i < 6 * 24 * 24; ++i) {
         Cube cube = Cube::corner_cycle_cube(i);
         if (cube.mask() == 0) {
@@ -272,12 +269,10 @@ Cube::generate_corner_cycle_transform_table() noexcept {
             }
         }
     }
-    return table;
 }
 
-array<array<int, 24>, 10 * 24 * 24>
-Cube::generate_edge_cycle_transform_table() noexcept {
-    array<array<int, 24>, 10 * 24 * 24> table;
+void Cube::generate_edge_cycle_transform_table() noexcept {
+    auto& table = Cube::edge_cycle_transform;
     for (int i = 0; i < 10 * 24 * 24; ++i) {
         Cube cube = Cube::edge_cycle_cube(i);
         if (cube.mask() == 0) {
@@ -300,5 +295,4 @@ Cube::generate_edge_cycle_transform_table() noexcept {
             }
         }
     }
-    return table;
 }
