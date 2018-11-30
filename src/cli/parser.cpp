@@ -38,6 +38,11 @@ void CLI::parse(int argc, char** argv) try {
     po::options_description configuration_options("Configurations");
     configuration_options.add_options()
         ("algfile,a", po::value<vector<string>>(), "algorithm file")
+        (
+            "algs-dir",
+            po::value<string>()->default_value(ALGORITHMSDIR),
+            "algorithms directory"
+        )
         ("all-algs", "all algorithms")
         ("all-extra-algs", "all extra algorithms")
         ("file,f", po::value<vector<string>>(), "input file")

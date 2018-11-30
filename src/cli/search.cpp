@@ -26,9 +26,6 @@ namespace po = boost::program_options;
 using namespace InsertionFinder;
 
 
-const fs::path algorithms_directory = ALGORITHMSDIR;
-
-
 namespace {
     struct CycleStatus {
         bool parity;
@@ -225,6 +222,7 @@ namespace {
 void CLI::find_insertions(const po::variables_map& vm) {
     const vector<string> filenames = vm.count("file")
         ? vm["file"].as<vector<string>>() : vector<string>();
+    const fs::path algorithms_directory = vm["algs-dir"].as<string>();
     vector<string> algfilenames = vm.count("algfile")
         ? vm["algfile"].as<vector<string>>() : vector<string>();
     if (vm.count("all-algs")) {
