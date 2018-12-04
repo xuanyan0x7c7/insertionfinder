@@ -67,6 +67,15 @@ void GreedyFinder::search_core(
             thread.join();
         }
     }
+
+    const Algorithm* last_skeleton = nullptr;
+    for (const auto& [skeleton, step]: this->partial_solutions[0]) {
+        if (!last_skeleton || skeleton != *last_skeleton) {
+            last_skeleton = &skeleton;
+            vector<Insertion> current_state({{skeleton, 0, nullptr}});
+            this->dump_solutions(current_state, skeleton);
+        }
+    }
 }
 
 
@@ -76,6 +85,36 @@ void GreedyFinder::run_worker(
 ) {
     for (size_t index = start; index < skeletons.size(); index += step) {
         const auto& [skeleton, cycle_status] = skeletons[index];
+        this->cycles_mapping[*skeleton] =
+            cycle_status->parity
+            + cycle_status->corner_cycles + cycle_status->edge_cycles
+            + Cube::center_cycles[cycle_status->placement];
         Worker(*this, *skeleton, *cycle_status).search();
     }
+}
+
+
+void GreedyFinder::dump_solutions(
+    vector<Insertion>& current_state,
+    const Algorithm& current_skeleton
+) {
+    if (this->skeleton == current_skeleton) {
+        this->solutions.push_back({
+            vector<Insertion>(current_state.crbegin(), current_state.crend())
+        });
+        return;
+    }
+    size_t depth = this->cycles_mapping[current_skeleton];
+    auto [begin, end] = this->partial_solutions[depth].equal_range(current_skeleton);
+    current_state.push_back({});
+    for (auto iter = begin; iter != end; ++iter) {
+        const auto& [_skeleton, insert_place, insertion, swapped] = iter->second.insertion;
+        Algorithm skeleton = *_skeleton;
+        if (swapped) {
+            skeleton.swap_adjacent(insert_place);
+        }
+        current_state.back() = {skeleton, insert_place, insertion};
+        this->dump_solutions(current_state, *_skeleton);
+    }
+    current_state.pop_back();
 }
