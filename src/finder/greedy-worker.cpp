@@ -43,6 +43,9 @@ void GreedyFinder::Worker::search() {
     if (this->finder.change_edge) {
         twist_flag |= CubeTwist::edges;
     }
+    if (this->finder.change_center) {
+        twist_flag |= CubeTwist::centers;
+    }
 
     Cube state;
     for (size_t insert_place = 0; insert_place <= skeleton->length(); ++insert_place) {
