@@ -1,6 +1,7 @@
 #include <array>
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <istream>
 #include <memory>
 #include <ostream>
@@ -254,6 +255,15 @@ void Algorithm::read_from(istream& in) {
     } else {
         this->set_up_mask = 0;
     }
+}
+
+
+size_t hash<Algorithm>::operator()(const Algorithm& algorithm) const noexcept {
+    size_t result = algorithm.rotation;
+    for (int twist: algorithm.twists) {
+        result = result * 31 + twist;
+    }
+    return result;
 }
 
 
