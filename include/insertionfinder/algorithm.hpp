@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <exception>
+#include <functional>
 #include <istream>
 #include <limits>
 #include <ostream>
@@ -10,6 +11,9 @@
 
 namespace InsertionFinder {class Algorithm;};
 std::ostream& operator<<(std::ostream&, const InsertionFinder::Algorithm&);
+template<> struct std::hash<InsertionFinder::Algorithm> {
+    std::size_t operator()(const InsertionFinder::Algorithm& algorithm) const noexcept;
+};
 
 namespace InsertionFinder {
     class AlgorithmError: public std::exception {
@@ -35,6 +39,7 @@ namespace InsertionFinder {
     };
 
     class Algorithm {
+        friend struct std::hash<Algorithm>;
     public:
         static constexpr int inverse_twist[24] = {
             0, 3, 2, 1,
@@ -73,6 +78,9 @@ namespace InsertionFinder {
         static int compare(const Algorithm& lhs, const Algorithm& rhs) noexcept;
         bool operator==(const Algorithm& rhs) const noexcept {
             return Algorithm::compare(*this, rhs) == 0;
+        }
+        bool operator!=(const Algorithm& rhs) const noexcept {
+            return Algorithm::compare(*this, rhs) != 0;
         }
         bool operator<(const Algorithm& rhs) const noexcept {
             return Algorithm::compare(*this, rhs) < 0;
