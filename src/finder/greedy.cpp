@@ -25,10 +25,10 @@ void GreedyFinder::search_core(
     int cycles = (Cube::center_cycles[placement] > 1 ? 0 : parity)
         + corner_cycles + edge_cycles + Cube::center_cycles[placement];
     this->partial_solutions.resize(cycles + 1);
-    this->partial_solutions.back().push_back({
-        {{make_shared<Algorithm>(this->skeleton)}},
-        cycle_status
-    });
+    this->partial_solutions.back().emplace(
+        this->skeleton,
+        SolvingStep{{nullptr, 0, nullptr, false}, cycle_status}
+    );
     this->partial_states = new PartialState[cycles];
     for (int i = 0; i < cycles; ++i) {
         this->partial_states[i].fewest_moves =
@@ -37,18 +37,22 @@ void GreedyFinder::search_core(
 
     size_t max_threads = params.max_threads;
     for (int depth = cycles; depth > 0; --depth) {
-        auto& partial_solution = this->partial_solutions.back();
+        vector<Skeleton> skeletons;
+        for (const auto& [skeleton, step]: this->partial_solutions[depth]) {
+            if (skeletons.empty() || skeleton != *(skeletons.back().skeleton)) {
+                skeletons.push_back({&skeleton, &step.cycle_status});
+            }
+        }
         sort(
-            partial_solution.begin(), partial_solution.end(),
+            skeletons.begin(), skeletons.end(),
             [](const auto& x, const auto& y) {
-                return x.steps.back().skeleton->length()
-                    < y.steps.back().skeleton->length();
+                return x.skeleton->length() < y.skeleton->length();
             }
         );
         if (this->verbose) {
             cerr << "Searching depth " << depth << ": "
-                << partial_solution.size() << " case"
-                << (partial_solution.size() == 1 ? "" : "s")
+                << skeletons.size() << " case"
+                << (skeletons.size() == 1 ? "" : "s")
                 << '.' << endl;
         }
         vector<thread> worker_threads;
@@ -56,35 +60,22 @@ void GreedyFinder::search_core(
             worker_threads.emplace_back(
                 mem_fn(&GreedyFinder::run_worker),
                 ref(*this),
-                i, max_threads
+                skeletons, i, max_threads
             );
         }
         for (thread& thread: worker_threads) {
             thread.join();
         }
-        this->partial_solutions.pop_back();
-    }
-
-    for (const auto& solution: this->partial_solutions.front()) {
-        vector<Insertion> insertions;
-        for (const auto& step: solution.steps) {
-            insertions.push_back({
-                *step.skeleton,
-                step.insert_place,
-                step.insertion
-            });
-        }
-        this->solutions.push_back({move(insertions)});
     }
 }
 
 
-void GreedyFinder::run_worker(size_t start, size_t step) {
-    for (
-        size_t index = start;
-        index < this->partial_solutions.back().size();
-        index += step
-    ) {
-        Worker(*this, this->partial_solutions.back()[index]).search();
+void GreedyFinder::run_worker(
+    const vector<GreedyFinder::Skeleton>& skeletons,
+    size_t start, size_t step
+) {
+    for (size_t index = start; index < skeletons.size(); index += step) {
+        const auto& [skeleton, cycle_status] = skeletons[index];
+        Worker(*this, *skeleton, *cycle_status).search();
     }
 }

@@ -1,7 +1,8 @@
 #pragma once
 #include <atomic>
-#include <memory>
 #include <mutex>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
@@ -12,27 +13,34 @@ namespace InsertionFinder {
     class GreedyFinder: public Finder {
     private:
         struct CheapInsertion {
-            std::shared_ptr<Algorithm> skeleton;
+            const Algorithm* skeleton;
             std::size_t insert_place;
             const Algorithm* insertion;
+            bool swapped;
         };
         struct SolvingStep {
-            std::vector<CheapInsertion> steps;
+            CheapInsertion insertion;
             CycleStatus cycle_status;
         };
         struct PartialState {
             std::atomic<std::size_t> fewest_moves;
             std::mutex fewest_moves_mutex;
         };
+        struct Skeleton {
+            const Algorithm* skeleton;
+            const CycleStatus* cycle_status;
+        };
         class Worker {
         private:
             GreedyFinder& finder;
-            const SolvingStep& solving_step;
+            const Algorithm& skeleton;
+            const CycleStatus& cycle_status;
         public:
             explicit Worker(
                 GreedyFinder& finder,
-                const SolvingStep& solving_step
-            ): finder(finder), solving_step(solving_step) {}
+                const Algorithm& skeleton,
+                const CycleStatus& cycle_status
+            ): finder(finder), skeleton(skeleton), cycle_status(cycle_status) {}
         public:
             void search();
         private:
@@ -51,14 +59,14 @@ namespace InsertionFinder {
                 bool swapped = false
             );
             void solution_found(
-                std::shared_ptr<Algorithm> skeleton,
                 std::size_t insert_place,
+                bool swapped,
                 const Case& _case
             );
         };
     private:
         const std::size_t threshold;
-        std::vector<std::vector<SolvingStep>> partial_solutions;
+        std::vector<std::unordered_multimap<Algorithm, SolvingStep>> partial_solutions;
         PartialState* partial_states;
     public:
         GreedyFinder(
@@ -78,6 +86,9 @@ namespace InsertionFinder {
             const SearchParams& params
         ) override;
     private:
-        void run_worker(std::size_t start, std::size_t step);
+        void run_worker(
+            const std::vector<Skeleton>& skeletons,
+            std::size_t start, std::size_t step
+        );
     };
 };
