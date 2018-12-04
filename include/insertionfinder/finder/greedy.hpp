@@ -67,6 +67,7 @@ namespace InsertionFinder {
     private:
         const std::size_t threshold;
         std::vector<std::unordered_multimap<Algorithm, SolvingStep>> partial_solutions;
+        std::unordered_map<Algorithm, std::size_t> cycles_mapping;
         PartialState* partial_states;
     public:
         GreedyFinder(
@@ -89,6 +90,10 @@ namespace InsertionFinder {
         void run_worker(
             const std::vector<Skeleton>& skeletons,
             std::size_t start, std::size_t step
+        );
+        void dump_solutions(
+            std::vector<Insertion>& current_state,
+            const Algorithm& current_skeleton
         );
     };
 };
