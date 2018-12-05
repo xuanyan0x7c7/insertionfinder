@@ -59,6 +59,9 @@ void BruteForceFinder::Worker::search(
     if (this->finder.change_edge) {
         twist_flag |= CubeTwist::edges;
     }
+    if (this->finder.change_center) {
+        twist_flag |= CubeTwist::centers;
+    }
 
     Cube state;
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
