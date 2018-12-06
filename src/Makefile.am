@@ -13,6 +13,13 @@ insertionfinder_LDADD = \
     -lboost_system \
     -lboost_filesystem \
     -lboost_program_options
+lib_LTLIBRARIES = libinsertionfinder.la
+libinsertionfinder_la_SOURCES =
+libinsertionfinder_la_LIBADD = \
+    finder/libfinder.la \
+    case/libcase.la \
+    cube/libcube.la \
+    algorithm/libalgorithm.la
 
 install-exec-hook:
 	cd $(DESTDIR)$(bindir) \
