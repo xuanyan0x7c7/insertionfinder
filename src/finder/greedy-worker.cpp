@@ -239,13 +239,10 @@ void GreedyFinder::Worker::try_insertion(
                         }
                     }
                 }
-                partial_solution.emplace(
-                    new_skeleton,
-                    SolvingStep{
-                        {&this->skeleton, insert_place, &algorithm, swapped},
-                        {new_parity, new_corner_cycles, new_edge_cycles, new_placement}
-                    }
-                );
+                partial_solution[new_skeleton] = SolvingStep{
+                    {&this->skeleton, insert_place, &algorithm, swapped},
+                    {new_parity, new_corner_cycles, new_edge_cycles, new_placement}
+                };
             }
         }
     }
@@ -281,6 +278,7 @@ void GreedyFinder::Worker::solution_found(
             continue;
         }
         Algorithm new_skeleton = skeleton.insert(algorithm, insert_place).first;
+        new_skeleton.normalize();
         if (new_skeleton.length() <= this->finder.fewest_moves) {
             lock_guard<mutex> lock(this->finder.partial_states[0].fewest_moves_mutex);
             if (new_skeleton.length() > this->finder.fewest_moves) {
@@ -290,13 +288,10 @@ void GreedyFinder::Worker::solution_found(
                 partial_solution.clear();
                 this->finder.fewest_moves = new_skeleton.length();
             }
-            partial_solution.emplace(
-                new_skeleton,
-                SolvingStep{
-                    {&this->skeleton, insert_place, &algorithm, swapped},
-                    {false, 0, 0, 0}
-                }
-            );
+            partial_solution[new_skeleton] = SolvingStep{
+                {&this->skeleton, insert_place, &algorithm, swapped},
+                {false, 0, 0, 0}
+            };
         }
     }
 }

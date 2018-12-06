@@ -39,9 +39,7 @@ void GreedyFinder::search_core(
     for (int depth = cycles; depth > 0; --depth) {
         vector<Skeleton> skeletons;
         for (const auto& [skeleton, step]: this->partial_solutions[depth]) {
-            if (skeletons.empty() || skeleton != *(skeletons.back().skeleton)) {
-                skeletons.push_back({&skeleton, &step.cycle_status});
-            }
+            skeletons.push_back({&skeleton, &step.cycle_status});
         }
         sort(
             skeletons.begin(), skeletons.end(),
@@ -68,13 +66,23 @@ void GreedyFinder::search_core(
         }
     }
 
-    const Algorithm* last_skeleton = nullptr;
     for (const auto& [skeleton, step]: this->partial_solutions[0]) {
-        if (!last_skeleton || skeleton != *last_skeleton) {
-            last_skeleton = &skeleton;
-            vector<Insertion> current_state({{skeleton, 0, nullptr}});
-            this->dump_solutions(current_state, skeleton);
+        vector<Insertion> result({{skeleton, 0, nullptr}});
+        Algorithm current_skeleton = skeleton;
+        while (current_skeleton != this->skeleton) {
+            size_t depth = this->cycles_mapping[current_skeleton];
+            const auto& [_skeleton, insert_place, insertion, swapped]
+                = this->partial_solutions[depth][current_skeleton].insertion;
+            current_skeleton = *_skeleton;
+            Algorithm previous_skeleton = *_skeleton;
+            if (swapped) {
+                previous_skeleton.swap_adjacent(insert_place);
+            }
+            result.push_back({previous_skeleton, insert_place, insertion});
         }
+        this->solutions.push_back({
+            vector<Insertion>(result.crbegin(), result.crend())
+        });
     }
 }
 
@@ -91,30 +99,4 @@ void GreedyFinder::run_worker(
             + Cube::center_cycles[cycle_status->placement];
         Worker(*this, *skeleton, *cycle_status).search();
     }
-}
-
-
-void GreedyFinder::dump_solutions(
-    vector<Insertion>& current_state,
-    const Algorithm& current_skeleton
-) {
-    if (this->skeleton == current_skeleton) {
-        this->solutions.push_back({
-            vector<Insertion>(current_state.crbegin(), current_state.crend())
-        });
-        return;
-    }
-    size_t depth = this->cycles_mapping[current_skeleton];
-    auto [begin, end] = this->partial_solutions[depth].equal_range(current_skeleton);
-    current_state.push_back({});
-    for (auto iter = begin; iter != end; ++iter) {
-        const auto& [_skeleton, insert_place, insertion, swapped] = iter->second.insertion;
-        Algorithm skeleton = *_skeleton;
-        if (swapped) {
-            skeleton.swap_adjacent(insert_place);
-        }
-        current_state.back() = {skeleton, insert_place, insertion};
-        this->dump_solutions(current_state, *_skeleton);
-    }
-    current_state.pop_back();
 }
