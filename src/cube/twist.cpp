@@ -136,48 +136,28 @@ void Cube::twist_before(const Cube& cube, byte flags) noexcept {
 optional<Cube> Cube::twist_effectively(
     const Cube& cube, byte flags
 ) const noexcept {
-    bool corners_filled = false;
-    bool edges_filled = false;
-    bool centers_filled = false;
     Cube result(nullopt);
     if (static_cast<bool>(flags & CubeTwist::centers)) {
-        if (this->_placement == 0) {
-            return nullopt;
-        }
         result._placement = Cube::center_transform[this->_placement][cube._placement];
-        centers_filled = true;
+    } else {
+        result._placement = this->_placement;
     }
     if (static_cast<bool>(flags & CubeTwist::corners)) {
         for (int i = 0; i < 8; ++i) {
             int item = this->corner[i];
             int transform = cube.corner[item / 3];
-            int new_corner = transform - transform % 3 + (item + transform) % 3;
-            if (new_corner / 3 == i && new_corner % 3 && new_corner != item) {
-                return nullopt;
-            }
-            result.corner[i] = new_corner;
+            result.corner[i] = transform - transform % 3 + (item + transform) % 3;
         }
-        corners_filled = true;
+    } else {
+        memcpy(result.corner, this->corner, 8 * sizeof(int));
     }
     if (static_cast<bool>(flags & CubeTwist::edges)) {
         for (int i = 0; i < 12; ++i) {
             int item = this->edge[i];
-            int new_edge = cube.edge[item >> 1] ^ (item & 1);
-            if (new_edge == (i << 1 | 1) && new_edge != item) {
-                return nullopt;
-            }
-            result.edge[i] = new_edge;
+            result.edge[i] = cube.edge[item >> 1] ^ (item & 1);
         }
-        edges_filled = true;
-    }
-    if (!corners_filled) {
-        memcpy(result.corner, this->corner, 8 * sizeof(int));
-    }
-    if (!edges_filled) {
+    } else {
         memcpy(result.edge, this->edge, 12 * sizeof(int));
-    }
-    if (!centers_filled) {
-        result._placement = this->_placement;
     }
     return result;
 }

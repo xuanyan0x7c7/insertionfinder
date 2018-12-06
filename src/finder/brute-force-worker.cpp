@@ -78,18 +78,14 @@ void BruteForceFinder::Worker::search(
         this->try_insertion(insert_place, state, cycle_status);
 
         if (skeleton.swappable(insert_place)) {
+            int twist0 = skeleton[insert_place - 1];
+            int twist1 = skeleton[insert_place];
             Cube swapped_state;
-            swapped_state.twist(skeleton[insert_place - 1], twist_flag);
-            swapped_state.twist(
-                Algorithm::inverse_twist[skeleton[insert_place]],
-                twist_flag
-            );
+            swapped_state.twist(twist0, twist_flag);
+            swapped_state.twist(Algorithm::inverse_twist[twist1], twist_flag);
             swapped_state.twist(state, twist_flag);
-            swapped_state.twist(skeleton[insert_place], twist_flag);
-            swapped_state.twist(
-                Algorithm::inverse_twist[skeleton[insert_place - 1]],
-                twist_flag
-            );
+            swapped_state.twist(twist1, twist_flag);
+            swapped_state.twist(Algorithm::inverse_twist[twist0], twist_flag);
             this->try_insertion(insert_place, swapped_state, cycle_status, true);
         }
     }
