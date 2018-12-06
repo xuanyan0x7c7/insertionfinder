@@ -1,7 +1,7 @@
 #pragma once
-#include <config.h>
+#include <insertionfinder/config.h>
 
-#ifdef HAVE_OPTIONAL
+#ifdef INSERTIONFINDER_HAVE_OPTIONAL
     #include <optional>
 #else
     #include <boost/optional.hpp>

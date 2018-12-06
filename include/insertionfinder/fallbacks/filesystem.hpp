@@ -1,7 +1,7 @@
 #pragma once
-#include <config.h>
+#include <insertionfinder/config.h>
 
-#ifdef HAVE_FILESYSTEM
+#ifdef INSERTIONFINDER_HAVE_FILESYSTEM
     #include <filesystem>
 #else
     #include <boost/filesystem.hpp>

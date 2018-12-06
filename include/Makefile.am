@@ -3,6 +3,7 @@ nobase_include_HEADERS = \
     insertionfinder/fallbacks/optional.hpp \
     insertionfinder/algorithm.hpp \
     insertionfinder/case.hpp \
+    insertionfinder/config.h \
     insertionfinder/cube.hpp \
     insertionfinder/finder/brute-force.hpp \
     insertionfinder/finder/finder.hpp \

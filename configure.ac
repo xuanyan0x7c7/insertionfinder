@@ -15,6 +15,7 @@ AC_CHECK_HEADERS([optional])
 AC_CHECK_HEADERS([filesystem])
 
 AC_CONFIG_HEADERS([config.h])
+AX_PREFIX_CONFIG_H(include/insertionfinder/config.h)
 AC_CONFIG_FILES([
     Makefile
     include/Makefile
