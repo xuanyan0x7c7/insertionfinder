@@ -80,6 +80,7 @@ Makefile.in
 /install-sh
 /m4/*
 !/m4/ax_cxx_compile_stdcxx.m4
+!/m4/ax_prefix_config_h.m4
 !/m4/ax_pthread.m4
 /missing
 /stamp-h1
