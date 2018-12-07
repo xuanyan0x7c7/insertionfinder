@@ -239,8 +239,8 @@ void GreedyFinder::Worker::try_insertion(
                         }
                     }
                 }
-                partial_solution[new_skeleton] = SolvingStep{
-                    {&this->skeleton, insert_place, &algorithm, swapped},
+                partial_solution[move(new_skeleton)] = {
+                    &this->skeleton, insert_place, &algorithm, swapped,
                     {new_parity, new_corner_cycles, new_edge_cycles, new_placement}
                 };
             }
@@ -288,8 +288,8 @@ void GreedyFinder::Worker::solution_found(
                 partial_solution.clear();
                 this->finder.fewest_moves = new_skeleton.length();
             }
-            partial_solution[new_skeleton] = SolvingStep{
-                {&this->skeleton, insert_place, &algorithm, swapped},
+            partial_solution[move(new_skeleton)] = {
+                &this->skeleton, insert_place, &algorithm, swapped,
                 {false, 0, 0, 0}
             };
         }

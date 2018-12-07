@@ -12,14 +12,11 @@
 namespace InsertionFinder {
     class GreedyFinder: public Finder {
     private:
-        struct CheapInsertion {
+        struct SolvingStep {
             const Algorithm* skeleton;
             std::size_t insert_place;
             const Algorithm* insertion;
             bool swapped;
-        };
-        struct SolvingStep {
-            CheapInsertion insertion;
             CycleStatus cycle_status;
         };
         struct PartialState {

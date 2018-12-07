@@ -25,10 +25,8 @@ void GreedyFinder::search_core(
     int cycles = (Cube::center_cycles[placement] > 1 ? 0 : parity)
         + corner_cycles + edge_cycles + Cube::center_cycles[placement];
     this->partial_solutions.resize(cycles + 1);
-    this->partial_solutions.back().emplace(
-        this->skeleton,
-        SolvingStep{{nullptr, 0, nullptr, false}, cycle_status}
-    );
+    this->partial_solutions.back()[this->skeleton]
+        = {nullptr, 0, nullptr, false, cycle_status};
     this->partial_states = new PartialState[cycles];
     for (int i = 0; i < cycles; ++i) {
         this->partial_states[i].fewest_moves =
@@ -66,13 +64,13 @@ void GreedyFinder::search_core(
         }
     }
 
-    for (const auto& [skeleton, step]: this->partial_solutions[0]) {
+    for (const auto& [skeleton, _]: this->partial_solutions[0]) {
         vector<Insertion> result({{skeleton, 0, nullptr}});
         Algorithm current_skeleton = skeleton;
         while (current_skeleton != this->skeleton) {
             size_t depth = this->cycles_mapping[current_skeleton];
-            const auto& [_skeleton, insert_place, insertion, swapped]
-                = this->partial_solutions[depth][current_skeleton].insertion;
+            const auto& [_skeleton, insert_place, insertion, swapped, _]
+                = this->partial_solutions[depth][current_skeleton];
             current_skeleton = *_skeleton;
             Algorithm previous_skeleton = *_skeleton;
             if (swapped) {
