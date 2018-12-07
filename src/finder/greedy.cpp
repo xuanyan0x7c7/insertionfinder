@@ -26,7 +26,7 @@ void GreedyFinder::search_core(
         + corner_cycles + edge_cycles + Cube::center_cycles[placement];
     this->partial_solutions.resize(cycles + 1);
     this->partial_solutions.back()[this->skeleton]
-        = {nullptr, 0, nullptr, false, cycle_status};
+        = {nullptr, 0, nullptr, false, cycle_status, 0};
     this->partial_states = new PartialState[cycles];
     for (int i = 0; i < cycles; ++i) {
         this->partial_states[i].fewest_moves =
@@ -37,7 +37,7 @@ void GreedyFinder::search_core(
     for (int depth = cycles; depth > 0; --depth) {
         vector<Skeleton> skeletons;
         for (const auto& [skeleton, step]: this->partial_solutions[depth]) {
-            skeletons.push_back({&skeleton, &step.cycle_status});
+            skeletons.push_back({&skeleton, &step.cycle_status, step.cancellation});
         }
         sort(
             skeletons.begin(), skeletons.end(),
@@ -69,18 +69,19 @@ void GreedyFinder::search_core(
         Algorithm current_skeleton = skeleton;
         while (current_skeleton != this->skeleton) {
             size_t depth = this->cycles_mapping[current_skeleton];
-            const auto& [_skeleton, insert_place, insertion, swapped, _]
-                = this->partial_solutions[depth][current_skeleton];
-            current_skeleton = *_skeleton;
-            Algorithm previous_skeleton = *_skeleton;
-            if (swapped) {
-                previous_skeleton.swap_adjacent(insert_place);
+            const auto& step = this->partial_solutions[depth][current_skeleton];
+            current_skeleton = *step.skeleton;
+            Algorithm previous_skeleton = *step.skeleton;
+            if (step.swapped) {
+                previous_skeleton.swap_adjacent(step.insert_place);
             }
-            result.push_back({previous_skeleton, insert_place, insertion});
+            result.push_back({previous_skeleton, step.insert_place, step.insertion});
         }
-        this->solutions.push_back({
-            vector<Insertion>(result.crbegin(), result.crend())
-        });
+        size_t depth = result.size();
+        for (size_t i = 0; i < depth >> 1; ++i) {
+            swap(result[i], result[depth - 1 - i]);
+        }
+        this->solutions.push_back({move(result)});
     }
 }
 
@@ -90,11 +91,11 @@ void GreedyFinder::run_worker(
     size_t start, size_t step
 ) {
     for (size_t index = start; index < skeletons.size(); index += step) {
-        const auto& [skeleton, cycle_status] = skeletons[index];
+        const auto& [skeleton, cycle_status, cancellation] = skeletons[index];
         this->cycles_mapping[*skeleton] =
             cycle_status->parity
             + cycle_status->corner_cycles + cycle_status->edge_cycles
             + Cube::center_cycles[cycle_status->placement];
-        Worker(*this, *skeleton, *cycle_status).search();
+        Worker(*this, *skeleton, *cycle_status, cancellation).search();
     }
 }

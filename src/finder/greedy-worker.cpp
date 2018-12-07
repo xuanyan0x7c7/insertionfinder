@@ -239,10 +239,21 @@ void GreedyFinder::Worker::try_insertion(
                         }
                     }
                 }
-                partial_solution[move(new_skeleton)] = {
+                size_t new_cancellation = this->cancellation
+                    + this->skeleton.length() + algorithm.length() - new_skeleton.length();
+                SolvingStep new_step = {
                     &this->skeleton, insert_place, &algorithm, swapped,
-                    {new_parity, new_corner_cycles, new_edge_cycles, new_placement}
+                    {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
+                    new_cancellation
                 };
+                auto iter = partial_solution.find(new_skeleton);
+                if (iter == partial_solution.end()) {
+                    partial_solution[move(new_skeleton)] = new_step;
+                } else {
+                    if (new_cancellation < iter->second.cancellation) {
+                        iter->second = new_step;
+                    }
+                }
             }
         }
     }
@@ -288,10 +299,21 @@ void GreedyFinder::Worker::solution_found(
                 partial_solution.clear();
                 this->finder.fewest_moves = new_skeleton.length();
             }
-            partial_solution[move(new_skeleton)] = {
+            size_t new_cancellation = this->cancellation
+                + this->skeleton.length() + algorithm.length() - new_skeleton.length();
+            SolvingStep new_step = {
                 &this->skeleton, insert_place, &algorithm, swapped,
-                {false, 0, 0, 0}
+                {false, 0, 0, 0},
+                new_cancellation
             };
+            auto iter = partial_solution.find(new_skeleton);
+            if (iter == partial_solution.end()) {
+                partial_solution[move(new_skeleton)] = new_step;
+            } else {
+                if (new_cancellation < iter->second.cancellation) {
+                    iter->second = new_step;
+                }
+            }
         }
     }
 }

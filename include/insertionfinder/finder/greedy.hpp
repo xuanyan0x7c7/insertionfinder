@@ -18,6 +18,7 @@ namespace InsertionFinder {
             const Algorithm* insertion;
             bool swapped;
             CycleStatus cycle_status;
+            std::size_t cancellation;
         };
         struct PartialState {
             std::atomic<std::size_t> fewest_moves;
@@ -26,18 +27,23 @@ namespace InsertionFinder {
         struct Skeleton {
             const Algorithm* skeleton;
             const CycleStatus* cycle_status;
+            std::size_t cancellation;
         };
         class Worker {
         private:
             GreedyFinder& finder;
             const Algorithm& skeleton;
             const CycleStatus& cycle_status;
+            const std::size_t cancellation;
         public:
             explicit Worker(
                 GreedyFinder& finder,
                 const Algorithm& skeleton,
-                const CycleStatus& cycle_status
-            ): finder(finder), skeleton(skeleton), cycle_status(cycle_status) {}
+                const CycleStatus& cycle_status,
+                std::size_t cancellation
+            ):
+                finder(finder), skeleton(skeleton),
+                cycle_status(cycle_status), cancellation(cancellation) {}
         public:
             void search();
         private:
