@@ -69,8 +69,9 @@ namespace InsertionFinder {
         };
     private:
         const std::size_t threshold;
-        std::vector<std::unordered_map<Algorithm, SolvingStep>> partial_solutions;
-        std::unordered_map<Algorithm, std::size_t> cycles_mapping;
+        std::vector<std::vector<std::pair<Algorithm, SolvingStep>>>
+        partial_solution_list;
+        std::unordered_map<Algorithm, SolvingStep> partial_solution_map;
         PartialState* partial_states;
     public:
         GreedyFinder(

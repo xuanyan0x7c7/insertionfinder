@@ -24,11 +24,13 @@ void GreedyFinder::search_core(
     int placement = cycle_status.placement;
     int cycles = (Cube::center_cycles[placement] > 1 ? 0 : parity)
         + corner_cycles + edge_cycles + Cube::center_cycles[placement];
-    this->partial_solutions.resize(cycles + 1);
-    this->partial_solutions.back()[this->skeleton]
-        = {nullptr, 0, nullptr, false, cycle_status, 0};
-    this->partial_states = new PartialState[cycles];
-    for (int i = 0; i < cycles; ++i) {
+    this->partial_solution_list.resize(cycles + 1);
+    this->partial_solution_list.back().push_back({
+        this->skeleton,
+        SolvingStep{nullptr, 0, nullptr, false, cycle_status, 0}
+    });
+    this->partial_states = new PartialState[cycles + 1];
+    for (int i = 1; i <= cycles; ++i) {
         this->partial_states[i].fewest_moves =
             max<size_t>(this->fewest_moves, this->threshold) - this->threshold;
     }
@@ -36,7 +38,20 @@ void GreedyFinder::search_core(
     size_t max_threads = params.max_threads;
     for (int depth = cycles; depth > 0; --depth) {
         vector<Skeleton> skeletons;
-        for (const auto& [skeleton, step]: this->partial_solutions[depth]) {
+        for (const auto& [skeleton, step]: this->partial_solution_list[depth]) {
+            if (skeleton.length() > this->partial_states[depth].fewest_moves + this->threshold) {
+                continue;
+            }
+            auto iter = this->partial_solution_map.find(skeleton);
+            if (iter == this->partial_solution_map.end()) {
+                this->partial_solution_map[skeleton] = step;
+            } else {
+                if (step.cancellation < iter->second.cancellation) {
+                    iter->second = step;
+                } else {
+                    continue;
+                }
+            }
             skeletons.push_back({&skeleton, &step.cycle_status, step.cancellation});
         }
         sort(
@@ -64,12 +79,21 @@ void GreedyFinder::search_core(
         }
     }
 
-    for (const auto& [skeleton, _]: this->partial_solutions[0]) {
+    for (const auto& [skeleton, step]: this->partial_solution_list[0]) {
+        auto iter = this->partial_solution_map.find(skeleton);
+        if (iter == this->partial_solution_map.end()) {
+            this->partial_solution_map[skeleton] = step;
+        } else {
+            if (step.cancellation < iter->second.cancellation) {
+                iter->second = step;
+            } else {
+                continue;
+            }
+        }
         vector<Insertion> result({{skeleton, 0, nullptr}});
         Algorithm current_skeleton = skeleton;
         while (current_skeleton != this->skeleton) {
-            size_t depth = this->cycles_mapping[current_skeleton];
-            const auto& step = this->partial_solutions[depth][current_skeleton];
+            const auto& step = this->partial_solution_map[current_skeleton];
             current_skeleton = *step.skeleton;
             Algorithm previous_skeleton = *step.skeleton;
             if (step.swapped) {
@@ -92,10 +116,6 @@ void GreedyFinder::run_worker(
 ) {
     for (size_t index = start; index < skeletons.size(); index += step) {
         const auto& [skeleton, cycle_status, cancellation] = skeletons[index];
-        this->cycles_mapping[*skeleton] =
-            cycle_status->parity
-            + cycle_status->corner_cycles + cycle_status->edge_cycles
-            + Cube::center_cycles[cycle_status->placement];
         Worker(*this, *skeleton, *cycle_status, cancellation).search();
     }
 }

@@ -206,7 +206,7 @@ void GreedyFinder::Worker::try_insertion(
             this->solution_found(insert_place, swapped, _case);
         } else if (new_total_cycles < total_cycles) {
             for (const Algorithm& algorithm: _case.algorithm_list()) {
-                auto& partial_solution = this->finder.partial_solutions[new_total_cycles];
+                auto& partial_solution = this->finder.partial_solution_list[new_total_cycles];
                 auto& partial_state = this->finder.partial_states[new_total_cycles];
                 size_t target = partial_state.fewest_moves + this->finder.threshold;
                 if (!skeleton.is_worthy_insertion(
@@ -227,17 +227,6 @@ void GreedyFinder::Worker::try_insertion(
                 }
                 if (new_skeleton.length() < partial_state.fewest_moves) {
                     partial_state.fewest_moves = new_skeleton.length();
-                    target = new_skeleton.length() + this->finder.threshold;
-                    for (
-                        auto iter = partial_solution.begin();
-                        iter != partial_solution.end();
-                    ) {
-                        if (iter->first.length() <= target) {
-                            ++iter;
-                        } else {
-                            iter = partial_solution.erase(iter);
-                        }
-                    }
                 }
                 size_t new_cancellation = this->cancellation
                     + this->skeleton.length() + algorithm.length() - new_skeleton.length();
@@ -246,14 +235,14 @@ void GreedyFinder::Worker::try_insertion(
                     {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
                     new_cancellation
                 };
-                auto iter = partial_solution.find(new_skeleton);
-                if (iter == partial_solution.end()) {
-                    partial_solution[move(new_skeleton)] = new_step;
-                } else {
-                    if (new_cancellation < iter->second.cancellation) {
-                        iter->second = new_step;
+                partial_solution.push_back({
+                    move(new_skeleton),
+                    SolvingStep{
+                        &this->skeleton, insert_place, &algorithm, swapped,
+                        {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
+                        new_cancellation
                     }
-                }
+                });
             }
         }
     }
@@ -280,7 +269,7 @@ void GreedyFinder::Worker::solution_found(
     }
     auto insert_place_mask = skeleton.get_insert_place_mask(insert_place);
     for (const Algorithm& algorithm: _case.algorithm_list()) {
-        auto& partial_solution = this->finder.partial_solutions.front();
+        auto& partial_solution = this->finder.partial_solution_list.front();
         if (!skeleton.is_worthy_insertion(
             algorithm, insert_place,
             insert_place_mask,
@@ -306,14 +295,14 @@ void GreedyFinder::Worker::solution_found(
                 {false, 0, 0, 0},
                 new_cancellation
             };
-            auto iter = partial_solution.find(new_skeleton);
-            if (iter == partial_solution.end()) {
-                partial_solution[move(new_skeleton)] = new_step;
-            } else {
-                if (new_cancellation < iter->second.cancellation) {
-                    iter->second = new_step;
+            partial_solution.push_back({
+                move(new_skeleton),
+                SolvingStep{
+                    &this->skeleton, insert_place, &algorithm, swapped,
+                    {false, 0, 0, 0},
+                    new_cancellation
                 }
-            }
+            });
         }
     }
 }
