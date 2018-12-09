@@ -230,11 +230,6 @@ void GreedyFinder::Worker::try_insertion(
                 }
                 size_t new_cancellation = this->cancellation
                     + this->skeleton.length() + algorithm.length() - new_skeleton.length();
-                SolvingStep new_step = {
-                    &this->skeleton, insert_place, &algorithm, swapped,
-                    {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
-                    new_cancellation
-                };
                 partial_solution.push_back({
                     move(new_skeleton),
                     SolvingStep{
@@ -290,11 +285,6 @@ void GreedyFinder::Worker::solution_found(
             }
             size_t new_cancellation = this->cancellation
                 + this->skeleton.length() + algorithm.length() - new_skeleton.length();
-            SolvingStep new_step = {
-                &this->skeleton, insert_place, &algorithm, swapped,
-                {false, 0, 0, 0},
-                new_cancellation
-            };
             partial_solution.push_back({
                 move(new_skeleton),
                 SolvingStep{

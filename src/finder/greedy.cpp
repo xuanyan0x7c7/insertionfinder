@@ -42,8 +42,10 @@ void GreedyFinder::search_core(
             if (skeleton.length() > this->partial_states[depth].fewest_moves + this->threshold) {
                 continue;
             }
-            auto iter = this->partial_solution_map.find(skeleton);
-            if (iter == this->partial_solution_map.end()) {
+            if (
+                auto iter = this->partial_solution_map.find(skeleton);
+                iter == this->partial_solution_map.end()
+            ) {
                 this->partial_solution_map[skeleton] = step;
             } else {
                 if (step.cancellation < iter->second.cancellation) {
