@@ -99,6 +99,7 @@ Cube Cube::inverse() const noexcept {
 
 
 uint32_t Cube::mask() const noexcept {
+    static constexpr uint32_t center_mask[4] = {0, 3, 12, 15};
     uint32_t mask = 0;
     for (int i = 0; i < 8; ++i) {
         if (this->corner[i] != i * 3) {
@@ -110,7 +111,7 @@ uint32_t Cube::mask() const noexcept {
             mask |= 1 << (i + 8);
         }
     }
-    mask |= Cube::center_cycles[this->_placement] << 20;
+    mask |= center_mask[Cube::center_cycles[this->_placement]] << 20;
     return mask;
 }
 
