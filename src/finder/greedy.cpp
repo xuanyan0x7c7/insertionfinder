@@ -113,9 +113,7 @@ void GreedyFinder::search_core(
             result.push_back({previous_skeleton, step.insert_place, step.insertion});
         }
         size_t depth = result.size();
-        for (size_t i = 0; i < depth >> 1; ++i) {
-            swap(result[i], result[depth - 1 - i]);
-        }
+        reverse(result.begin(), result.end());
         this->solutions.push_back({move(result)});
     }
 }

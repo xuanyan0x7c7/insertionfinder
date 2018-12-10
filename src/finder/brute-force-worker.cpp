@@ -93,7 +93,7 @@ void BruteForceFinder::Worker::search(
 
 void BruteForceFinder::Worker::search_last_parity(size_t begin, size_t end) {
     const Algorithm skeleton = this->solving_step.back().skeleton;
-    const byte twist_flag = CubeTwist::corners | CubeTwist::edges | CubeTwist::reversed;
+    static constexpr byte twist_flag = CubeTwist::corners | CubeTwist::edges | CubeTwist::reversed;
     const auto& parity_index = this->finder.parity_index;
 
     int index = -1;
@@ -121,7 +121,7 @@ void BruteForceFinder::Worker::search_last_parity(size_t begin, size_t end) {
 
 void BruteForceFinder::Worker::search_last_corner_cycle(size_t begin, size_t end) {
     const Algorithm skeleton = this->solving_step.back().skeleton;
-    const byte twist_flag = CubeTwist::corners | CubeTwist::reversed;
+    static constexpr byte twist_flag = CubeTwist::corners | CubeTwist::reversed;
     const auto& corner_cycle_index = this->finder.corner_cycle_index;
 
     int index = -1;
@@ -149,7 +149,7 @@ void BruteForceFinder::Worker::search_last_corner_cycle(size_t begin, size_t end
 
 void BruteForceFinder::Worker::search_last_edge_cycle(size_t begin, size_t end) {
     const Algorithm skeleton = this->solving_step.back().skeleton;
-    const byte twist_flag = CubeTwist::edges | CubeTwist::reversed;
+    static constexpr byte twist_flag = CubeTwist::edges | CubeTwist::reversed;
     const auto& edge_cycle_index = this->finder.edge_cycle_index;
 
     int index = -1;
@@ -214,7 +214,7 @@ void BruteForceFinder::Worker::try_insertion(
         }
         bool corner_changed = _case.mask() & 0xff;
         bool edge_changed = _case.mask() & 0xfff00;
-        bool center_changed = _case.mask() & 0x300000;
+        bool center_changed = _case.mask() & 0xf00000;
         auto cube = state.twist_effectively(
             _case.state(),
             (corner_changed ? CubeTwist::corners : byte{0})

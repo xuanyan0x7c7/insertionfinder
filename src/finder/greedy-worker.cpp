@@ -72,7 +72,7 @@ void GreedyFinder::Worker::search() {
 }
 
 void GreedyFinder::Worker::search_last_parity() {
-    const byte twist_flag = CubeTwist::corners | CubeTwist::edges | CubeTwist::reversed;
+    static constexpr byte twist_flag = CubeTwist::corners | CubeTwist::edges | CubeTwist::reversed;
     const auto& parity_index = this->finder.parity_index;
 
     int index = -1;
@@ -98,7 +98,7 @@ void GreedyFinder::Worker::search_last_parity() {
 }
 
 void GreedyFinder::Worker::search_last_corner_cycle() {
-    const byte twist_flag = CubeTwist::corners | CubeTwist::reversed;
+    static constexpr byte twist_flag = CubeTwist::corners | CubeTwist::reversed;
     const auto& corner_cycle_index = this->finder.corner_cycle_index;
 
     int index = -1;
@@ -124,7 +124,7 @@ void GreedyFinder::Worker::search_last_corner_cycle() {
 }
 
 void GreedyFinder::Worker::search_last_edge_cycle() {
-    const byte twist_flag = CubeTwist::edges | CubeTwist::reversed;
+    static constexpr byte twist_flag = CubeTwist::edges | CubeTwist::reversed;
     const auto& edge_cycle_index = this->finder.edge_cycle_index;
 
     int index = -1;
@@ -160,11 +160,7 @@ void GreedyFinder::Worker::search_last_placement(int placement) {
 }
 
 
-void GreedyFinder::Worker::try_insertion(
-    size_t insert_place,
-    const Cube& state,
-    bool swapped
-) {
+void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state, bool swapped) {
     const auto& cycle_status = this->cycle_status;
     Algorithm skeleton = this->skeleton;
     if (swapped) {
@@ -185,7 +181,7 @@ void GreedyFinder::Worker::try_insertion(
         }
         bool corner_changed = _case.mask() & 0xff;
         bool edge_changed = _case.mask() & 0xfff00;
-        bool center_changed = _case.mask() & 0x300000;
+        bool center_changed = _case.mask() & 0xf00000;
         auto cube = state.twist_effectively(
             _case.state(),
             (corner_changed ? CubeTwist::corners : byte{0})
@@ -254,10 +250,7 @@ void GreedyFinder::Worker::try_last_insertion(
 }
 
 
-void GreedyFinder::Worker::solution_found(
-    size_t insert_place, bool swapped,
-    const Case& _case
-) {
+void GreedyFinder::Worker::solution_found(size_t insert_place, bool swapped, const Case& _case) {
     Algorithm skeleton = this->skeleton;
     if (swapped) {
         skeleton.swap_adjacent(insert_place);

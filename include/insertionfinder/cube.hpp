@@ -27,6 +27,7 @@ namespace InsertionFinder {
         constexpr std::byte edges {2};
         constexpr std::byte centers {4};
         constexpr std::byte reversed {8};
+        constexpr std::byte full = corners | edges | centers;
     };
 
     class Cube {
@@ -90,45 +91,38 @@ namespace InsertionFinder {
     public:
         inline void twist(
             int twist,
-            std::byte flags =
-                CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
+            std::byte flags = CubeTwist::full
         ) {
             this->twist(Cube::twist_cube[twist], flags);
         }
         inline void twist(
             const Algorithm& algorithm,
-            std::byte flags =
-                CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
+            std::byte flags = CubeTwist::full
         ) noexcept {
             this->twist(algorithm, 0, algorithm.length(), flags);
         }
         void twist(
             const Algorithm& algorithm,
             std::size_t begin, std::size_t end,
-            std::byte flags =
-                CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
+            std::byte flags = CubeTwist::full
         );
         void twist(
             const Cube& cube,
-            std::byte flags =
-                CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
+            std::byte flags = CubeTwist::full
         ) noexcept;
         inline void twist_before(
             int twist,
-            std::byte flags =
-                CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
+            std::byte flags = CubeTwist::full
         ) {
             this->twist_before(Cube::twist_cube[twist], flags);
         }
         void twist_before(
             const Cube& cube,
-            std::byte flags =
-                CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
+            std::byte flags = CubeTwist::full
         ) noexcept;
         std::optional<Cube> twist_effectively(
             const Cube& cube,
-            std::byte flags =
-                CubeTwist::corners | CubeTwist::edges | CubeTwist::centers
+            std::byte flags = CubeTwist::full
         ) const noexcept;
         void rotate(int rotation) {
             if (rotation == 0) {
