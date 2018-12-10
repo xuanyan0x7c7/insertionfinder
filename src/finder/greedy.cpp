@@ -47,14 +47,19 @@ void GreedyFinder::search_core(
                 iter == this->partial_solution_map.end()
             ) {
                 this->partial_solution_map[skeleton] = step;
+                skeletons.push_back({&skeleton, &step.cycle_status, step.cancellation});
             } else {
                 if (step.cancellation < iter->second.cancellation) {
                     iter->second = step;
+                    auto place = find_if(
+                        skeletons.begin(), skeletons.end(),
+                        [iter](const auto& x) {return *x.skeleton == iter->first;}
+                    );
+                    *place = {&skeleton, &step.cycle_status, step.cancellation};
                 } else {
                     continue;
                 }
             }
-            skeletons.push_back({&skeleton, &step.cycle_status, step.cancellation});
         }
         sort(
             skeletons.begin(), skeletons.end(),
@@ -81,10 +86,12 @@ void GreedyFinder::search_core(
         }
     }
 
+    vector<Algorithm> skeletons;
     for (const auto& [skeleton, step]: this->partial_solution_list[0]) {
         auto iter = this->partial_solution_map.find(skeleton);
         if (iter == this->partial_solution_map.end()) {
             this->partial_solution_map[skeleton] = step;
+            skeletons.push_back(skeleton);
         } else {
             if (step.cancellation < iter->second.cancellation) {
                 iter->second = step;
@@ -92,6 +99,8 @@ void GreedyFinder::search_core(
                 continue;
             }
         }
+    }
+    for (const Algorithm& skeleton: skeletons) {
         vector<Insertion> result({{skeleton, 0, nullptr}});
         Algorithm current_skeleton = skeleton;
         while (current_skeleton != this->skeleton) {
