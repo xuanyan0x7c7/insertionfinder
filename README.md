@@ -14,7 +14,7 @@ Commands:
 
 Configurations:
 	-a [ --algfile ] arg                  algorithm file
-	--algs-dir arg (=/usr/local/Cellar/insertionfinder/0.4.9/share/insertionfinder/algorithms)
+	--algs-dir arg (=/usr/local/share/insertionfinder/0.4.14/algorithms)
 																				algorithms directory
 	--all-algs                            all algorithms
 	--all-extra-algs                      all extra algorithms
