@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 namespace InsertionFinder::Details {
     inline bool bitcount_less_than_2(std::uint32_t n) {

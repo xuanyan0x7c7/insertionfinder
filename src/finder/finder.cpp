@@ -71,6 +71,7 @@ Finder::Finder(
 
 
 void Finder::search(const SearchParams& params) {
+    this->parity_multiplier = params.parity_multiplier * 2;
     auto begin = high_resolution_clock::now();
 
     do {

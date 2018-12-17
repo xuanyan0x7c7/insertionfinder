@@ -360,7 +360,11 @@ void CLI::find_insertions(const po::variables_map& vm) {
         search_target = vm["target"].as<size_t>();
     }
     size_t max_threads = vm["jobs"].as<size_t>();
-    finder->search({search_target, max_threads});
+    double parity_multiplier = vm["parity"].as<double>();
+    if (parity_multiplier != 1) {
+        parity_multiplier = 1.5;
+    }
+    finder->search({search_target, parity_multiplier, max_threads});
     printer->print_result(
         scramble, skeleton,
         {parity, corner_cycles, edge_cycles, center_cycles},

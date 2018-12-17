@@ -9,8 +9,10 @@
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/finder/finder.hpp>
 #include <insertionfinder/finder/greedy.hpp>
+#include "utils.hpp"
 using namespace std;
 using namespace InsertionFinder;
+using namespace Details;
 
 
 void GreedyFinder::search_core(
@@ -22,8 +24,7 @@ void GreedyFinder::search_core(
     int corner_cycles = cycle_status.corner_cycles;
     int edge_cycles = cycle_status.edge_cycles;
     int placement = cycle_status.placement;
-    int cycles = (Cube::center_cycles[placement] > 1 ? 0 : parity)
-        + corner_cycles + edge_cycles + Cube::center_cycles[placement];
+    int cycles = get_total_cycles(parity, corner_cycles, edge_cycles, placement);
     this->partial_solution_list.resize(cycles + 1);
     this->partial_solution_list.back().push_back({
         this->skeleton,
@@ -67,8 +68,8 @@ void GreedyFinder::search_core(
                 return x.skeleton->length() < y.skeleton->length();
             }
         );
-        if (this->verbose) {
-            cerr << "Searching depth " << depth << ": "
+        if (this->verbose && (!skeletons.empty() || (depth & 1) == 0)) {
+            cerr << "Searching depth " << depth / 2.0 << ": "
                 << skeletons.size() << " case"
                 << (skeletons.size() == 1 ? "" : "s")
                 << '.' << endl;

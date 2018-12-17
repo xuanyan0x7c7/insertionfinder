@@ -54,6 +54,11 @@ void CLI::parse(int argc, char** argv) try {
             "suboptimal moves tolerance"
         )
         (
+            "parity",
+            po::value<double>()->default_value(1.5),
+            "count parity as 1/1.5 cycles"
+        )
+        (
             "jobs,j",
             po::value<size_t>()
                 ->default_value(1)

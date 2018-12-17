@@ -17,6 +17,7 @@ namespace InsertionFinder {
             int edge_cycles;
             int placement;
         };
+        int parity_multiplier = 3;
     public:
         struct Insertion {
             Algorithm skeleton;
@@ -41,6 +42,7 @@ namespace InsertionFinder {
         };
         struct SearchParams {
             std::size_t search_target;
+            double parity_multiplier;
             std::size_t max_threads;
         };
     protected:
@@ -88,6 +90,14 @@ namespace InsertionFinder {
     public:
         void set_verbose(bool verbose = true) noexcept {
             this->verbose = verbose;
+        }
+    public:
+        inline int get_total_cycles(
+            bool parity, int corner_cycles, int edge_cycles, int placement
+        ) {
+            int center_cycles = Cube::center_cycles[placement];
+            return (center_cycles > 1 ? 0 : parity * this->parity_multiplier)
+                + (corner_cycles + edge_cycles + center_cycles) * 2;
         }
     };
 };

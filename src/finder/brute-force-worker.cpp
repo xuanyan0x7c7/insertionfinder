@@ -235,12 +235,8 @@ void BruteForceFinder::Worker::try_insertion(
         ) {
             this->solution_found(insert_place, _case);
         } else if (
-            (Cube::center_cycles[new_placement] > 1 ? 0 : new_parity)
-                + new_corner_cycles + new_edge_cycles
-                + Cube::center_cycles[new_placement]
-            < (Cube::center_cycles[placement] > 1 ? 0 : parity)
-                + corner_cycles + edge_cycles
-                + Cube::center_cycles[placement]
+            this->finder.get_total_cycles(new_parity, new_corner_cycles, new_edge_cycles, new_placement)
+            < this->finder.get_total_cycles(parity, corner_cycles, edge_cycles, placement)
         ) {
             for (const Algorithm& algorithm: _case.algorithm_list()) {
                 Insertion& insertion = this->solving_step.back();

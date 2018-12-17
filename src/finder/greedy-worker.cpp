@@ -172,8 +172,7 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
     int corner_cycles = cycle_status.corner_cycles;
     int edge_cycles = cycle_status.edge_cycles;
     int placement = cycle_status.placement;
-    size_t total_cycles = (Cube::center_cycles[placement] > 1 ? 0 : parity)
-        + corner_cycles + edge_cycles + Cube::center_cycles[placement];
+    int total_cycles = this->finder.get_total_cycles(parity, corner_cycles, edge_cycles, placement);
 
     for (const Case& _case: this->finder.cases) {
         if (bitcount_less_than_2(mask & _case.mask())) {
@@ -195,9 +194,9 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
         int new_corner_cycles = corner_changed ? cube->corner_cycles() : corner_cycles;
         int new_edge_cycles = edge_changed ? cube->edge_cycles() : edge_cycles;
         int new_placement = Cube::placement_twist(placement, _case.rotation());
-        size_t new_total_cycles = (Cube::center_cycles[new_placement] > 1 ? 0 : new_parity)
-            + new_corner_cycles + new_edge_cycles
-            + Cube::center_cycles[new_placement];
+        int new_total_cycles = this->finder.get_total_cycles(
+            new_parity, new_corner_cycles, new_edge_cycles, new_placement
+        );
         if (new_total_cycles == 0) {
             this->solution_found(insert_place, swapped, _case);
         } else if (new_total_cycles < total_cycles) {
