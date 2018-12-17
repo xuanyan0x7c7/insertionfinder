@@ -10,9 +10,9 @@ insertionfinder_LDADD = \
     cube/libcube.la \
     algorithm/libalgorithm.la \
     ${PTHREAD_CFLAGS} \
-    -lboost_system \
-    -lboost_filesystem \
-    -lboost_program_options
+    ${BOOST_SYSTEM_LIBS} \
+    ${BOOST_FILESYSTEM_LIBS} \
+    ${BOOST_PROGRAM_OPTIONS_LIBS}
 lib_LTLIBRARIES = libinsertionfinder.la
 libinsertionfinder_la_SOURCES =
 libinsertionfinder_la_LIBADD = \
