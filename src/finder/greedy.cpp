@@ -93,12 +93,8 @@ void GreedyFinder::search_core(
         if (iter == this->partial_solution_map.end()) {
             this->partial_solution_map[skeleton] = step;
             skeletons.push_back(skeleton);
-        } else {
-            if (step.cancellation < iter->second.cancellation) {
-                iter->second = step;
-            } else {
-                continue;
-            }
+        } else if (step.cancellation < iter->second.cancellation) {
+            iter->second = step;
         }
     }
     for (const Algorithm& skeleton: skeletons) {
