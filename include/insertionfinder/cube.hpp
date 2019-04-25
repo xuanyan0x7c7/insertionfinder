@@ -78,14 +78,12 @@ namespace InsertionFinder {
     private:
         static std::array<Cube, 24> twist_cube;
         static std::array<Cube, 24> rotation_cube;
-        static std::vector<std::array<int, 24>> parity_transform;
         static std::vector<std::array<int, 24>> corner_cycle_transform;
         static std::vector<std::array<int, 24>> edge_cycle_transform;
         static const std::array<std::array<int, 24>, 24> center_transform;
     private:
         static void generate_twist_cube_table() noexcept;
         static void generate_rotation_cube_table() noexcept;
-        static void generate_parity_transform_table() noexcept;
         static void generate_corner_cycle_transform_table() noexcept;
         static void generate_edge_cycle_transform_table() noexcept;
     public:
@@ -144,18 +142,13 @@ namespace InsertionFinder {
             return this->_placement;
         }
     private:
-        static Cube parity_cube(int index);
         static Cube corner_cycle_cube(int index);
         static Cube edge_cycle_cube(int index);
     public:
-        int parity_index() const noexcept;
         int corner_cycle_index() const noexcept;
         int edge_cycle_index() const noexcept;
         Cube best_placement() const noexcept;
     public:
-        static int next_parity_index(int index, int twist) {
-            return Cube::parity_transform[index][twist];
-        }
         static int next_corner_cycle_index(int index, int twist) {
             return Cube::corner_cycle_transform[index][twist];
         }

@@ -133,21 +133,6 @@ int Cube::edge_cycles() const noexcept {
 }
 
 
-Cube Cube::parity_cube(int index) {
-    Cube cube;
-    int w = index / 24 / 11 / 24;
-    int x = index / 11 / 24 % 24;
-    int y = index / 24 % 11;
-    int z = index % 24;
-    if (w < x / 3 && y < z >> 1) {
-        cube.corner[w] = x;
-        cube.corner[x / 3] = w * 3 + (24 - x) % 3;
-        cube.edge[y] = z;
-        cube.edge[z >> 1] = y << 1 | (z & 1);
-    }
-    return cube;
-}
-
 Cube Cube::corner_cycle_cube(int index) {
     Cube cube;
     int x = index / 24 / 24;
@@ -175,30 +160,6 @@ Cube Cube::edge_cycle_cube(int index) {
 }
 
 
-int Cube::parity_index() const noexcept {
-    int temp = 0;
-    for (int i = 0; i < 8; ++i) {
-        int j = this->corner[i];
-        if (j != i * 3) {
-            if (j / 3 == i) {
-                return -1;
-            }
-            temp = i * 24 + j;
-            break;
-        }
-    }
-    if (!temp) {
-        return -1;
-    }
-    for (int i = 0; i < 12; ++i) {
-        int j = this->edge[i];
-        if (j != i << 1) {
-            return j >> 1 == i ? -1 : temp * 11 * 24 + i * 24 + j;
-        }
-    }
-    return -1;
-}
-
 int Cube::corner_cycle_index() const noexcept {
     for (int i = 0; i < 8; ++i) {
         int j = this->corner[i];
@@ -221,29 +182,6 @@ int Cube::edge_cycle_index() const noexcept {
     return -1;
 }
 
-
-void Cube::generate_parity_transform_table() noexcept {
-    auto& table = Cube::parity_transform;
-    for (int i = 0; i < 7 * 24 * 11 * 24; ++i) {
-        Cube cube = Cube::parity_cube(i);
-        if (cube.mask() == 0) {
-            for (int j = 0; j < 24; ++j) {
-                table[i][j] = i;
-            }
-        } else {
-            for (int j = 0; j < 24; ++j) {
-                if (j & 3) {
-                    Cube new_cube = cube;
-                    new_cube.twist_before(Algorithm::inverse_twist[j]);
-                    new_cube.twist(j);
-                    table[i][j] = new_cube.parity_index();
-                } else {
-                    table[i][j] = i;
-                }
-            }
-        }
-    }
-}
 
 void Cube::generate_corner_cycle_transform_table() noexcept {
    auto& table = Cube::corner_cycle_transform;

@@ -47,7 +47,6 @@ namespace InsertionFinder {
         public:
             void search();
         private:
-            void search_last_parity();
             void search_last_corner_cycle();
             void search_last_edge_cycle();
             void search_last_placement(int placement);

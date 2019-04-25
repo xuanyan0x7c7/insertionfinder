@@ -16,10 +16,7 @@ void GreedyFinder::Worker::search() {
     int corner_cycles = this->cycle_status.corner_cycles;
     int edge_cycles = this->cycle_status.edge_cycles;
     int placement = this->cycle_status.placement;
-    if (parity && corner_cycles == 0 && edge_cycles == 0 && placement == 0) {
-        this->search_last_parity();
-        return;
-    } else if (!parity && corner_cycles == 1 && edge_cycles == 0 && placement == 0) {
+    if (!parity && corner_cycles == 1 && edge_cycles == 0 && placement == 0) {
         this->search_last_corner_cycle();
         return;
     } else if (!parity && corner_cycles == 0 && edge_cycles == 1 && placement == 0) {
@@ -67,32 +64,6 @@ void GreedyFinder::Worker::search() {
             swapped_state.twist(twist1, twist_flag);
             swapped_state.twist(Algorithm::inverse_twist[twist0], twist_flag);
             this->try_insertion(insert_place, swapped_state, true);
-        }
-    }
-}
-
-void GreedyFinder::Worker::search_last_parity() {
-    static constexpr byte twist_flag = CubeTwist::corners | CubeTwist::edges | CubeTwist::reversed;
-    const auto& parity_index = this->finder.parity_index;
-
-    int index = -1;
-    for (size_t insert_place = 0; insert_place <= this->skeleton.length(); ++insert_place) {
-        if (insert_place == 0) {
-            Cube state;
-            state.twist(this->finder.inverse_scramble_cube, twist_flag);
-            state.twist(this->skeleton, twist_flag);
-            index = state.parity_index();
-        } else {
-            index = Cube::next_parity_index(index, this->skeleton[insert_place - 1]);
-        }
-        this->try_last_insertion(insert_place, parity_index[index]);
-
-        if (this->skeleton.swappable(insert_place)) {
-            int swapped_index = Cube::next_parity_index(
-                Cube::next_parity_index(index, this->skeleton[insert_place]),
-                Algorithm::inverse_twist[this->skeleton[insert_place - 1]]
-            );
-            this->try_last_insertion(insert_place, parity_index[swapped_index], true);
         }
     }
 }

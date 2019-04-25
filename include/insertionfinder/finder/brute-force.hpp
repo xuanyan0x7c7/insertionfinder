@@ -23,7 +23,6 @@ namespace InsertionFinder {
                 std::size_t begin, std::size_t end
             );
         private:
-            void search_last_parity(std::size_t begin, std::size_t end);
             void search_last_corner_cycle(std::size_t begin, std::size_t end);
             void search_last_edge_cycle(std::size_t begin, std::size_t end);
             void search_last_placement(

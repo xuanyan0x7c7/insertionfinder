@@ -21,7 +21,6 @@ Finder::Finder(
     change_parity(false),
     change_corner(false), change_edge(false),
     change_center(false) {
-    this->parity_index.fill(-1);
     this->corner_cycle_index.fill(-1);
     this->edge_cycle_index.fill(-1);
     this->center_index.fill(-1);
@@ -50,9 +49,6 @@ Finder::Finder(
         }
         if (rotation) {
             this->change_center = true;
-        }
-        if (parity && corner_cycles == 0 && edge_cycles == 0 && rotation == 0) {
-            this->parity_index[state.parity_index()] = index;
         }
         if (!parity && corner_cycles == 1 && edge_cycles == 0 && rotation == 0) {
             this->corner_cycle_index[state.corner_cycle_index()] = index;

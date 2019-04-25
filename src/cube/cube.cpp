@@ -13,14 +13,12 @@ using namespace InsertionFinder;
 
 array<Cube, 24> Cube::twist_cube = {};
 array<Cube, 24> Cube::rotation_cube = {};
-vector<array<int, 24>> Cube::parity_transform(7 * 24 * 11 * 24);
 vector<array<int, 24>> Cube::corner_cycle_transform(6 * 24 * 24);
 vector<array<int, 24>> Cube::edge_cycle_transform(10 * 24 * 24);
 
 void Cube::init() {
     Cube::generate_twist_cube_table();
     Cube::generate_rotation_cube_table();
-    Cube::generate_parity_transform_table();
     Cube::generate_corner_cycle_transform_table();
     Cube::generate_edge_cycle_transform_table();
 }

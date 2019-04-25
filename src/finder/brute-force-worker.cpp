@@ -34,10 +34,7 @@ void BruteForceFinder::Worker::search(
     int corner_cycles = cycle_status.corner_cycles;
     int edge_cycles = cycle_status.edge_cycles;
     int placement = cycle_status.placement;
-    if (parity && corner_cycles == 0 && edge_cycles == 0 && placement == 0) {
-        this->search_last_parity(begin, end);
-        return;
-    } else if (!parity && corner_cycles == 1 && edge_cycles == 0 && placement == 0) {
+    if (!parity && corner_cycles == 1 && edge_cycles == 0 && placement == 0) {
         this->search_last_corner_cycle(begin, end);
         return;
     } else if (!parity && corner_cycles == 0 && edge_cycles == 1 && placement == 0) {
@@ -87,34 +84,6 @@ void BruteForceFinder::Worker::search(
             swapped_state.twist(twist1, twist_flag);
             swapped_state.twist(Algorithm::inverse_twist[twist0], twist_flag);
             this->try_insertion(insert_place, swapped_state, cycle_status, true);
-        }
-    }
-}
-
-void BruteForceFinder::Worker::search_last_parity(size_t begin, size_t end) {
-    const Algorithm skeleton = this->solving_step.back().skeleton;
-    static constexpr byte twist_flag = CubeTwist::corners | CubeTwist::edges | CubeTwist::reversed;
-    const auto& parity_index = this->finder.parity_index;
-
-    int index = -1;
-    for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
-        if (insert_place == begin) {
-            Cube state;
-            state.twist(skeleton, 0, insert_place, twist_flag);
-            state.twist(this->finder.inverse_scramble_cube, twist_flag);
-            state.twist(skeleton, insert_place, skeleton.length(), twist_flag);
-            index = state.parity_index();
-        } else {
-            index = Cube::next_parity_index(index, skeleton[insert_place - 1]);
-        }
-        this->try_last_insertion(insert_place, parity_index[index]);
-
-        if (skeleton.swappable(insert_place)) {
-            int swapped_index = Cube::next_parity_index(
-                Cube::next_parity_index(index, skeleton[insert_place]),
-                Algorithm::inverse_twist[skeleton[insert_place - 1]]
-            );
-            this->try_last_insertion(insert_place, parity_index[swapped_index], true);
         }
     }
 }

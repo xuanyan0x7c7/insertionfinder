@@ -54,7 +54,6 @@ namespace InsertionFinder {
         Result result;
         bool verbose;
     protected:
-        std::array<int, 7 * 24 * 11 * 24> parity_index;
         std::array<int, 6 * 24 * 24> corner_cycle_index;
         std::array<int, 10 * 24 * 24> edge_cycle_index;
         std::array<int, 24> center_index;
