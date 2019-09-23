@@ -196,7 +196,7 @@ void BruteForceFinder::Worker::try_insertion(
         bool new_parity = parity ^ _case.has_parity();
         int new_corner_cycles = corner_changed ? cube->corner_cycles() : corner_cycles;
         int new_edge_cycles = edge_changed ? cube->edge_cycles() : edge_cycles;
-        int new_placement = Cube::placement_twist(placement, _case.rotation());
+        int new_placement = Cube::placement_twist(_case.rotation(), placement);
         if (
             !new_parity
             && new_corner_cycles == 0 && new_edge_cycles == 0
