@@ -89,10 +89,5 @@ namespace InsertionFinder {
             const CycleStatus& cycle_status,
             const SearchParams& params
         ) override;
-    private:
-        void run_worker(
-            const std::vector<Skeleton>& skeletons,
-            std::size_t start, std::size_t step
-        );
     };
 };

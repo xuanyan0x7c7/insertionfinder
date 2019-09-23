@@ -3,9 +3,9 @@
 #include <functional>
 #include <iostream>
 #include <mutex>
-#include <thread>
 #include <utility>
 #include <vector>
+#include <boost/asio.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/finder/finder.hpp>
 #include <insertionfinder/finder/greedy.hpp>
@@ -74,17 +74,13 @@ void GreedyFinder::search_core(
                 << (skeletons.size() == 1 ? "" : "s")
                 << '.' << endl;
         }
-        vector<thread> worker_threads;
-        for (size_t i = 0; i < max_threads; ++i) {
-            worker_threads.emplace_back(
-                mem_fn(&GreedyFinder::run_worker),
-                ref(*this),
-                skeletons, i, max_threads
-            );
+        boost::asio::thread_pool pool(max_threads);
+        for (const auto& _skeleton: skeletons) {
+            boost::asio::post(pool, [&, this]() {
+                Worker(*this, *_skeleton.skeleton, *_skeleton.cycle_status, _skeleton.cancellation).search();
+            });
         }
-        for (thread& thread: worker_threads) {
-            thread.join();
-        }
+        pool.join();
     }
 
     vector<Algorithm> skeletons;
@@ -112,16 +108,5 @@ void GreedyFinder::search_core(
         size_t depth = result.size();
         reverse(result.begin(), result.end());
         this->solutions.push_back({move(result)});
-    }
-}
-
-
-void GreedyFinder::run_worker(
-    const vector<GreedyFinder::Skeleton>& skeletons,
-    size_t start, size_t step
-) {
-    for (size_t index = start; index < skeletons.size(); index += step) {
-        const auto& [skeleton, cycle_status, cancellation] = skeletons[index];
-        Worker(*this, *skeleton, *cycle_status, cancellation).search();
     }
 }
