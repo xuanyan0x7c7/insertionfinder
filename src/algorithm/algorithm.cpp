@@ -147,9 +147,6 @@ Algorithm::Algorithm(const string& algorithm_string) {
 
 
 int Algorithm::compare(const Algorithm& lhs, const Algorithm& rhs) noexcept {
-    if (lhs.rotation != rhs.rotation) {
-        return lhs.rotation - rhs.rotation;
-    }
     const auto& t1 = lhs.twists;
     const auto& t2 = rhs.twists;
     if (int x = static_cast<int>(t1.size()) - static_cast<int>(t2.size())) {
@@ -159,6 +156,9 @@ int Algorithm::compare(const Algorithm& lhs, const Algorithm& rhs) noexcept {
         if (t1[i] != t2[i]) {
             return t1[i] - t2[i];
         }
+    }
+    if (lhs.rotation != rhs.rotation) {
+        return lhs.rotation - rhs.rotation;
     }
     return 0;
 }
