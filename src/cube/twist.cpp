@@ -133,9 +133,7 @@ void Cube::twist_before(const Cube& cube, byte flags) noexcept {
 }
 
 
-optional<Cube> Cube::twist_effectively(
-    const Cube& cube, byte flags
-) const noexcept {
+optional<Cube> Cube::twist_effectively(const Cube& cube, byte flags) const noexcept {
     Cube result(nullopt);
     if (static_cast<bool>(flags & CubeTwist::centers)) {
         result._placement = Cube::center_transform[this->_placement][cube._placement];

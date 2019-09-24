@@ -274,10 +274,8 @@ void CLI::find_insertions(const po::variables_map& vm) {
                 cerr << "Invalid algorithm file " << name << endl;
                 break;
             }
-            auto node = map.find(_case.state());
-            if (node == map.end()) {
-                map.insert({_case.state(), move(_case)});
-            } else {
+            auto [node, inserted] = map.try_emplace(_case.state(), move(_case));
+            if (!inserted) {
                 for (const Algorithm& algorithm: _case.algorithm_list()) {
                     node->second.add_algorithm(algorithm);
                 }

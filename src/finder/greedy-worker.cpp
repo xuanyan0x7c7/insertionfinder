@@ -197,14 +197,14 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
                 }
                 size_t new_cancellation = this->cancellation
                     + this->skeleton.length() + algorithm.length() - new_skeleton.length();
-                partial_solution.push_back({
+                partial_solution.emplace_back(
                     move(new_skeleton),
                     SolvingStep {
                         &this->skeleton, insert_place, &algorithm, swapped,
                         {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
                         new_cancellation
                     }
-                });
+                );
             }
         } else if (this->finder.options.enable_replacement && new_total_cycles == total_cycles) {
             auto& partial_solution = this->finder.additional_solution_list[new_total_cycles];
@@ -232,14 +232,14 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
                 }
                 size_t new_cancellation = this->cancellation
                     + this->skeleton.length() + algorithm.length() - new_skeleton.length();
-                partial_solution.push_back({
+                partial_solution.emplace_back(
                     move(new_skeleton),
                     SolvingStep {
                         &this->skeleton, insert_place, &algorithm, swapped,
                         {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
                         new_cancellation
                     }
-                });
+                );
             }
         }
     }
@@ -283,14 +283,14 @@ void GreedyFinder::Worker::solution_found(size_t insert_place, bool swapped, con
             }
             size_t new_cancellation = this->cancellation
                 + this->skeleton.length() + algorithm.length() - new_skeleton.length();
-            partial_solution.push_back({
+            partial_solution.emplace_back(
                 move(new_skeleton),
                 SolvingStep {
                     &this->skeleton, insert_place, &algorithm, swapped,
                     {false, 0, 0, 0},
                     new_cancellation
                 }
-            });
+            );
         }
     }
 }

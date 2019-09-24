@@ -58,8 +58,10 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
                 continue;
             }
 
-            auto node = map.find(cube);
-            if (node != map.end() && node->second.contains_algorithm(algorithm)) {
+            if (
+                auto node = map.find(cube);
+                node != map.end() && node->second.contains_algorithm(algorithm)
+            ) {
                 continue;
             }
             const auto isomorphism_list = algorithm.generate_isomorphisms();
@@ -67,12 +69,12 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
                 Cube cube;
                 cube.twist(algorithm);
                 auto node = map.find(cube);
-                if (node != map.end()) {
+                if (auto node = map.find(cube); node != map.end()) {
                     node->second.add_algorithm(algorithm);
                 } else {
                     Case _case(cube);
                     _case.add_algorithm(algorithm);
-                    map.insert({cube, move(_case)});
+                    map.emplace(cube, move(_case));
                 }
             }
         }
