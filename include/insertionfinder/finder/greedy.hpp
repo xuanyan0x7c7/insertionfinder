@@ -1,5 +1,6 @@
 #pragma once
 #include <atomic>
+#include <deque>
 #include <mutex>
 #include <unordered_map>
 #include <utility>
@@ -66,20 +67,27 @@ namespace InsertionFinder {
                 const Case& _case
             );
         };
+    public:
+        struct Options {
+            bool enable_replacement;
+            std::size_t greedy_threshold;
+            std::size_t replacement_threshold;
+        };
     private:
-        const std::size_t threshold;
+        const Options options;
         std::vector<std::vector<std::pair<Algorithm, SolvingStep>>>
         partial_solution_list;
         std::unordered_map<Algorithm, SolvingStep> partial_solution_map;
         PartialState* partial_states;
+        std::vector<std::deque<std::pair<Algorithm, SolvingStep>>>
+        additional_solution_list;
     public:
         GreedyFinder(
             const Algorithm& scramble, const Algorithm& skeleton,
-            const std::vector<Case>& cases,
-            std::size_t threshold = 2
+            const std::vector<Case>& cases, Options options
         ):
             Finder(scramble, skeleton, cases),
-            threshold(threshold),
+            options(options),
             partial_states(nullptr) {}
         ~GreedyFinder() {
             delete[] partial_states;

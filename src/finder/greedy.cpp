@@ -24,63 +24,93 @@ void GreedyFinder::search_core(
     int corner_cycles = cycle_status.corner_cycles;
     int edge_cycles = cycle_status.edge_cycles;
     int placement = cycle_status.placement;
-    int cycles = get_total_cycles(parity, corner_cycles, edge_cycles, placement);
+    int cycles = this->get_total_cycles(parity, corner_cycles, edge_cycles, placement);
     this->partial_solution_list.resize(cycles + 1);
     this->partial_solution_list.back().push_back({
         this->skeleton,
-        SolvingStep{nullptr, 0, nullptr, false, cycle_status, 0}
+        SolvingStep {nullptr, 0, nullptr, false, cycle_status, 0}
     });
     this->partial_states = new PartialState[cycles + 1];
     for (int i = 1; i <= cycles; ++i) {
         this->partial_states[i].fewest_moves =
-            max<size_t>(this->fewest_moves, this->threshold) - this->threshold;
+            max<size_t>(this->fewest_moves, this->options.greedy_threshold) - this->options.greedy_threshold;
     }
+    this->additional_solution_list.resize(cycles + 1);
 
     size_t max_threads = params.max_threads;
     for (int depth = cycles; depth > 0; --depth) {
-        vector<Skeleton> skeletons;
-        for (const auto& [skeleton, step]: this->partial_solution_list[depth]) {
-            if (skeleton.length() > this->partial_states[depth].fewest_moves + this->threshold) {
-                continue;
+        auto& solution_list = this->partial_solution_list[depth];
+        auto& state = this->partial_states[depth];
+        auto& additional_solution_list = this->additional_solution_list[depth];
+        solution_list.erase(
+            remove_if(
+                solution_list.begin(), solution_list.end(),
+                [&state, this](const auto& x) {
+                    return x.first.length() > state.fewest_moves + this->options.greedy_threshold;
+                }
+            ),
+            solution_list.end()
+        );
+        sort(solution_list.begin(), solution_list.end(), [](const auto& x, const auto& y) {
+            if (
+                int comparison = Algorithm::compare(x.first, y.first);
+                comparison < 0
+            ) {
+                return true;
+            } else if (comparison > 0) {
+                return false;
             }
+            return x.second.cancellation < y.second.cancellation;
+        });
+        solution_list.erase(
+            unique(
+                solution_list.begin(), solution_list.end(),
+                [](const auto& x, const auto& y) {return x.first == y.first;}
+            ),
+            solution_list.end()
+        );
+
+        if (this->verbose && (!solution_list.empty() || (depth & 1) == 0)) {
+            cerr << "Searching depth " << depth / 2.0 << ": "
+                << solution_list.size() << " case"
+                << (solution_list.size() == 1 ? "" : "s")
+                << '.' << endl;
+        }
+        boost::asio::thread_pool pool(max_threads);
+        for (const auto& item: solution_list) {
+            const auto& skeleton = item.first;
+            const auto& step = item.second;
             if (
                 auto iter = this->partial_solution_map.find(skeleton);
                 iter == this->partial_solution_map.end()
             ) {
-                this->partial_solution_map[skeleton] = step;
-                skeletons.push_back({&skeleton, &step.cycle_status, step.cancellation});
-            } else {
-                if (step.cancellation < iter->second.cancellation) {
-                    iter->second = step;
-                    auto place = find_if(
-                        skeletons.begin(), skeletons.end(),
-                        [iter](const auto& x) {return *x.skeleton == iter->first;}
-                    );
-                    *place = {&skeleton, &step.cycle_status, step.cancellation};
-                } else {
+                this->partial_solution_map.insert({skeleton, step});
+                boost::asio::post(pool, [&skeleton, &step, this]() {
+                    Worker(*this, skeleton, step.cycle_status, step.cancellation).search();
+                });
+            } else if (step.cancellation < iter->second.cancellation) {
+                iter->second = step;
+            }
+        }
+        pool.join();
+
+        if (this->options.enable_replacement) {
+            for (size_t i = 0; i < additional_solution_list.size(); ++i) {
+                const auto& [skeleton, step] = additional_solution_list[i];
+                if (skeleton.length() > state.fewest_moves + this->options.replacement_threshold) {
                     continue;
+                }
+                if (
+                    auto iter = this->partial_solution_map.find(skeleton);
+                    iter == this->partial_solution_map.end()
+                ) {
+                    this->partial_solution_map.insert({skeleton, step});
+                    Worker(*this, skeleton, step.cycle_status, step.cancellation).search();
+                } else if (step.cancellation < iter->second.cancellation) {
+                    iter->second = step;
                 }
             }
         }
-        sort(
-            skeletons.begin(), skeletons.end(),
-            [](const auto& x, const auto& y) {
-                return x.skeleton->length() < y.skeleton->length();
-            }
-        );
-        if (this->verbose && (!skeletons.empty() || (depth & 1) == 0)) {
-            cerr << "Searching depth " << depth / 2.0 << ": "
-                << skeletons.size() << " case"
-                << (skeletons.size() == 1 ? "" : "s")
-                << '.' << endl;
-        }
-        boost::asio::thread_pool pool(max_threads);
-        for (const auto& _skeleton: skeletons) {
-            boost::asio::post(pool, [&, this]() {
-                Worker(*this, *_skeleton.skeleton, *_skeleton.cycle_status, _skeleton.cancellation).search();
-            });
-        }
-        pool.join();
     }
 
     vector<Algorithm> skeletons;

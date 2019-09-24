@@ -16,18 +16,20 @@ void GreedyFinder::Worker::search() {
     int corner_cycles = this->cycle_status.corner_cycles;
     int edge_cycles = this->cycle_status.edge_cycles;
     int placement = this->cycle_status.placement;
-    if (!parity && corner_cycles == 1 && edge_cycles == 0 && placement == 0) {
-        this->search_last_corner_cycle();
-        return;
-    } else if (!parity && corner_cycles == 0 && edge_cycles == 1 && placement == 0) {
-        this->search_last_edge_cycle();
-        return;
-    } else if (
-        !parity && corner_cycles == 0 && edge_cycles == 0
-        && Cube::center_cycles[placement] == 1
-    ) {
-        this->search_last_placement(placement);
-        return;
+    if (this->finder.options.enable_replacement) {
+        if (!parity && corner_cycles == 1 && edge_cycles == 0 && placement == 0) {
+            this->search_last_corner_cycle();
+            return;
+        } else if (!parity && corner_cycles == 0 && edge_cycles == 1 && placement == 0) {
+            this->search_last_edge_cycle();
+            return;
+        } else if (
+            !parity && corner_cycles == 0 && edge_cycles == 0
+            && Cube::center_cycles[placement] == 1
+        ) {
+            this->search_last_placement(placement);
+            return;
+        }
     }
 
     byte twist_flag{0};
@@ -130,7 +132,6 @@ void GreedyFinder::Worker::search_last_placement(int placement) {
     }
 }
 
-
 void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state, bool swapped) {
     const auto& cycle_status = this->cycle_status;
     Algorithm skeleton = this->skeleton;
@@ -171,10 +172,10 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
         if (new_total_cycles == 0) {
             this->solution_found(insert_place, swapped, _case);
         } else if (new_total_cycles < total_cycles) {
+            auto& partial_solution = this->finder.partial_solution_list[new_total_cycles];
+            auto& partial_state = this->finder.partial_states[new_total_cycles];
             for (const Algorithm& algorithm: _case.algorithm_list()) {
-                auto& partial_solution = this->finder.partial_solution_list[new_total_cycles];
-                auto& partial_state = this->finder.partial_states[new_total_cycles];
-                size_t target = partial_state.fewest_moves + this->finder.threshold;
+                size_t target = partial_state.fewest_moves + this->finder.options.greedy_threshold;
                 if (!skeleton.is_worthy_insertion(
                     algorithm, insert_place,
                     insert_place_mask,
@@ -198,7 +199,42 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
                     + this->skeleton.length() + algorithm.length() - new_skeleton.length();
                 partial_solution.push_back({
                     move(new_skeleton),
-                    SolvingStep{
+                    SolvingStep {
+                        &this->skeleton, insert_place, &algorithm, swapped,
+                        {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
+                        new_cancellation
+                    }
+                });
+            }
+        } else if (this->finder.options.enable_replacement && new_total_cycles == total_cycles) {
+            auto& partial_solution = this->finder.additional_solution_list[new_total_cycles];
+            auto& partial_state = this->finder.partial_states[new_total_cycles];
+            for (const Algorithm& algorithm: _case.algorithm_list()) {
+                size_t target = partial_state.fewest_moves + this->finder.options.replacement_threshold;
+                if (!skeleton.is_worthy_insertion(
+                    algorithm, insert_place,
+                    insert_place_mask,
+                    target
+                )) {
+                    continue;
+                }
+                Algorithm new_skeleton = skeleton.insert(algorithm, insert_place).first;
+                new_skeleton.normalize();
+                if (new_skeleton.length() > target) {
+                    continue;
+                }
+                lock_guard<mutex> lock(partial_state.fewest_moves_mutex);
+                if (new_skeleton.length() > target) {
+                    continue;
+                }
+                if (new_skeleton.length() < partial_state.fewest_moves) {
+                    partial_state.fewest_moves = new_skeleton.length();
+                }
+                size_t new_cancellation = this->cancellation
+                    + this->skeleton.length() + algorithm.length() - new_skeleton.length();
+                partial_solution.push_back({
+                    move(new_skeleton),
+                    SolvingStep {
                         &this->skeleton, insert_place, &algorithm, swapped,
                         {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
                         new_cancellation
@@ -218,7 +254,6 @@ void GreedyFinder::Worker::try_last_insertion(
         this->solution_found(insert_place, swapped, this->finder.cases[case_index]);
     }
 }
-
 
 void GreedyFinder::Worker::solution_found(size_t insert_place, bool swapped, const Case& _case) {
     Algorithm skeleton = this->skeleton;
@@ -250,7 +285,7 @@ void GreedyFinder::Worker::solution_found(size_t insert_place, bool swapped, con
                 + this->skeleton.length() + algorithm.length() - new_skeleton.length();
             partial_solution.push_back({
                 move(new_skeleton),
-                SolvingStep{
+                SolvingStep {
                     &this->skeleton, insert_place, &algorithm, swapped,
                     {false, 0, 0, 0},
                     new_cancellation
