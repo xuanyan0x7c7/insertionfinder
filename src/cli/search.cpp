@@ -348,7 +348,11 @@ void CLI::find_insertions(const po::variables_map& vm) {
     } else {
         finder = make_unique<GreedyFinder>(
             scramble, skeleton, cases,
-            vm["greedy-threshold"].as<size_t>()
+            GreedyFinder::Options {
+                static_cast<bool>(vm.count("enable-replacement")),
+                vm["greedy-threshold"].as<size_t>(),
+                vm["replacement-threshold"].as<size_t>()
+            }
         );
     }
 

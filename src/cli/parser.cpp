@@ -48,10 +48,16 @@ void CLI::parse(int argc, char** argv) try {
         ("file,f", po::value<vector<string>>(), "input file")
         ("optimal,o", "search for optimal solutions")
         ("target", po::value<size_t>(), "search target")
+        ("enable-replacement", "enable replacement")
         (
             "greedy-threshold",
             po::value<size_t>()->default_value(2),
             "suboptimal moves tolerance"
+        )
+        (
+            "replacement-threshold",
+            po::value<size_t>()->default_value(0),
+            "tolerance to insert an algorithm remains number of insertions"
         )
         (
             "parity",
