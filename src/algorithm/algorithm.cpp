@@ -168,7 +168,7 @@ ostream& operator<<(ostream& out, const Algorithm& algorithm) {
     static const char* rotation_string[24] = {
         "", "y", "y2", "y'",
         "x", "x y", "x y2", "x y'",
-        "x2", "x2 y", "x2 y2", "x2 y'",
+        "x2", "x2 y", "z2", "x2 y'",
         "x'", "x' y", "x' y2", "x' y'",
         "z", "z y", "z y2", "z y'",
         "z'", "z' y", "z' y2", "z' y'"
