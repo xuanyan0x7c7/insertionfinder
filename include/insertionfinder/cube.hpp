@@ -5,9 +5,9 @@
 #include <exception>
 #include <functional>
 #include <istream>
+#include <optional>
 #include <ostream>
 #include <vector>
-#include <insertionfinder/fallbacks/optional.hpp>
 #include <insertionfinder/algorithm.hpp>
 
 namespace InsertionFinder {class Cube;};

@@ -1,6 +1,5 @@
 nobase_include_HEADERS = \
     insertionfinder/fallbacks/filesystem.hpp \
-    insertionfinder/fallbacks/optional.hpp \
     insertionfinder/algorithm.hpp \
     insertionfinder/case.hpp \
     insertionfinder/config.h \

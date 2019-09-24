@@ -5,7 +5,6 @@
 #include <memory>
 #include <ostream>
 #include <vector>
-#include <insertionfinder/fallbacks/optional.hpp>
 #include <insertionfinder/cube.hpp>
 using namespace std;
 using namespace InsertionFinder;

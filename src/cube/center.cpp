@@ -1,6 +1,5 @@
 #include <cstring>
 #include <array>
-#include <insertionfinder/fallbacks/optional.hpp>
 #include <insertionfinder/cube.hpp>
 using namespace std;
 using namespace InsertionFinder;
