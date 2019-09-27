@@ -26,10 +26,10 @@ void GreedyFinder::search_core(
     int placement = cycle_status.placement;
     int cycles = this->get_total_cycles(parity, corner_cycles, edge_cycles, placement);
     this->partial_solution_list.resize(cycles + 1);
-    this->partial_solution_list.back().push_back({
+    this->partial_solution_list.back().emplace_back(
         this->skeleton,
         SolvingStep {nullptr, 0, nullptr, false, cycle_status, 0}
-    });
+    );
     this->partial_states = new PartialState[cycles + 1];
     for (int i = 1; i <= cycles; ++i) {
         this->partial_states[i].fewest_moves =
@@ -118,7 +118,7 @@ void GreedyFinder::search_core(
         }
     }
     for (const Algorithm& skeleton: skeletons) {
-        vector<Insertion> result({{skeleton, 0, nullptr}});
+        vector<Insertion> result({Insertion(skeleton)});
         Algorithm current_skeleton = skeleton;
         while (current_skeleton != this->skeleton) {
             const auto& step = this->partial_solution_map[current_skeleton];
@@ -127,7 +127,7 @@ void GreedyFinder::search_core(
             if (step.swapped) {
                 previous_skeleton.swap_adjacent(step.insert_place);
             }
-            result.push_back({previous_skeleton, step.insert_place, step.insertion});
+            result.emplace_back(previous_skeleton, step.insert_place, step.insertion);
         }
         size_t depth = result.size();
         reverse(result.begin(), result.end());

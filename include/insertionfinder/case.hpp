@@ -4,9 +4,12 @@
 #include <exception>
 #include <istream>
 #include <ostream>
+#include <type_traits>
+#include <utility>
 #include <vector>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/utils.hpp>
 
 namespace InsertionFinder {
     struct CaseStreamError: std::exception {
@@ -67,9 +70,18 @@ namespace InsertionFinder {
                 algorithm
             ) != this->list.cend();
         }
-        void add_algorithm(const Algorithm& algorithm) {
+        template<class T> void add_algorithm(T&& algorithm) {
+            static_assert(std::is_same_v<
+                Insertionfinder::Details::remove_cvref_t<T>,
+                Algorithm
+            >);
             if (!this->contains_algorithm(algorithm)) {
-                this->list.push_back(algorithm);
+                this->list.emplace_back(std::forward<T>(algorithm));
+            }
+        }
+        void merge_algorithms(Case&& from) {
+            for (Algorithm& algorithm: from.list) {
+                this->add_algorithm(std::move(algorithm));
             }
         }
         void sort_algorithms() {

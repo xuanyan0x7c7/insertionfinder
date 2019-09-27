@@ -229,7 +229,7 @@ void CLI::find_insertions(const po::variables_map& vm) {
         try {
             for (auto& file: fs::directory_iterator(algorithms_directory)) {
                 if (fs::is_regular_file(file) && file.path().extension() == ".algs") {
-                    algfilenames.push_back(file.path().string());
+                    algfilenames.emplace_back(file.path().string());
                 }
             }
         } catch (const fs::filesystem_error& e) {
@@ -240,7 +240,7 @@ void CLI::find_insertions(const po::variables_map& vm) {
         try {
             for (auto &file : fs::directory_iterator(algorithms_directory / "extras")) {
                 if (fs::is_regular_file(file) && file.path().extension() == ".algs") {
-                    algfilenames.push_back(file.path().string());
+                    algfilenames.emplace_back(file.path().string());
                 }
             }
         } catch (const fs::filesystem_error &e) {
@@ -276,16 +276,14 @@ void CLI::find_insertions(const po::variables_map& vm) {
             }
             auto [node, inserted] = map.try_emplace(_case.state(), move(_case));
             if (!inserted) {
-                for (const Algorithm& algorithm: _case.algorithm_list()) {
-                    node->second.add_algorithm(algorithm);
-                }
+                node->second.merge_algorithms(move(_case));
             }
         }
     }
 
     vector<Case> cases;
     for (auto& node: map) {
-        cases.push_back(move(node.second));
+        cases.emplace_back(move(node.second));
     }
     sort(cases.begin(), cases.end());
 

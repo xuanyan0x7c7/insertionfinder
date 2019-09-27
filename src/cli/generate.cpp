@@ -27,11 +27,10 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
         out = &cout;
     } else {
         const string& name = algfilenames.front();
-        ofstream* fout = new ofstream(name, ios::out | ios::binary);
-        if (fout->fail()) {
+        out = new ofstream(name, ios::out | ios::binary);
+        if (out->fail()) {
             throw CLI::CommandExecutionError("Failed to open output file" + name);
         }
-        out = fout;
     }
 
     for (const string& name: filenames) {
@@ -64,16 +63,15 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
             ) {
                 continue;
             }
-            const auto isomorphism_list = algorithm.generate_isomorphisms();
-            for (const Algorithm& algorithm: isomorphism_list) {
+            auto isomorphism_list = algorithm.generate_isomorphisms();
+            for (Algorithm& algorithm: isomorphism_list) {
                 Cube cube;
                 cube.twist(algorithm);
-                auto node = map.find(cube);
                 if (auto node = map.find(cube); node != map.end()) {
-                    node->second.add_algorithm(algorithm);
+                    node->second.add_algorithm(move(algorithm));
                 } else {
                     Case _case(cube);
-                    _case.add_algorithm(algorithm);
+                    _case.add_algorithm(move(algorithm));
                     map.emplace(cube, move(_case));
                 }
             }
@@ -84,7 +82,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
     vector<Case> cases;
     cases.reserve(size);
     for (auto& node: map) {
-        cases.push_back(move(node.second));
+        cases.emplace_back(move(node.second));
     }
     sort(cases.begin(), cases.end());
     out->write(reinterpret_cast<const char*>(&size), sizeof(size_t));

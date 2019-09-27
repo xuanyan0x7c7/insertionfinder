@@ -223,7 +223,7 @@ void BruteForceFinder::Worker::try_insertion(
                     && new_skeleton.length() <= this->finder.fewest_moves
                 ) {
                     size_t new_end = new_skeleton.length();
-                    this->solving_step.push_back({move(new_skeleton)});
+                    this->solving_step.emplace_back(move(new_skeleton));
                     this->search(
                         {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
                         new_begin, new_end
@@ -270,9 +270,7 @@ void BruteForceFinder::Worker::solution_found(size_t insert_place, const Case& _
         )) {
             continue;
         }
-        this->solving_step.push_back({
-            insertion.skeleton.insert(algorithm, insert_place).first,
-        });
+        this->solving_step.emplace_back(insertion.skeleton.insert(algorithm, insert_place).first);
         this->update_fewest_moves();
         this->solving_step.pop_back();
     }
@@ -293,8 +291,7 @@ void BruteForceFinder::Worker::update_fewest_moves() {
         finder.solutions.clear();
         finder.fewest_moves = twists;
         if (this->finder.verbose) {
-            cerr << this->solving_step.back().skeleton
-                << " (" << twists << "f)" << endl;
+            cerr << this->solving_step.back().skeleton << " (" << twists << "f)" << endl;
         }
     }
     finder.solutions.push_back({this->solving_step});

@@ -16,7 +16,7 @@ namespace InsertionFinder {
         public:
             explicit Worker(BruteForceFinder& finder):
                 finder(finder),
-                solving_step({{finder.skeleton}}) {}
+                solving_step({Insertion(finder.skeleton)}) {}
         public:
             void search(
                 const CycleStatus& cycle_status,

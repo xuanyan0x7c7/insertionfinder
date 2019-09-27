@@ -2,11 +2,13 @@
 #include <cstdint>
 #include <array>
 #include <atomic>
-#include <vector>
+#include <type_traits>
 #include <utility>
+#include <vector>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/utils.hpp>
 
 namespace InsertionFinder {
     class Finder {
@@ -23,6 +25,24 @@ namespace InsertionFinder {
             Algorithm skeleton;
             std::size_t insert_place;
             const Algorithm* insertion;
+            explicit Insertion(
+                const Algorithm& skeleton,
+                std::size_t insert_place = 0,
+                const Algorithm* insertion = nullptr
+            ):
+                skeleton(skeleton),
+                insert_place(insert_place),
+                insertion(insertion)
+                {}
+            explicit Insertion(
+                Algorithm&& skeleton,
+                std::size_t insert_place = 0,
+                const Algorithm* insertion = nullptr
+            ):
+                skeleton(std::move(skeleton)),
+                insert_place(insert_place),
+                insertion(insertion)
+                {}
         };
         struct Solution {
             std::vector<Insertion> insertions;
@@ -80,7 +100,7 @@ namespace InsertionFinder {
         std::size_t get_fewest_moves() const noexcept {
             return this->fewest_moves;
         }
-        std::vector<Solution> get_solutions() const noexcept {
+        const std::vector<Solution> get_solutions() const noexcept {
             return this->solutions;
         }
         Result get_result() const noexcept {

@@ -6,4 +6,5 @@ nobase_include_HEADERS = \
     insertionfinder/cube.hpp \
     insertionfinder/finder/brute-force.hpp \
     insertionfinder/finder/finder.hpp \
-    insertionfinder/finder/greedy.hpp
+    insertionfinder/finder/greedy.hpp \
+    insertionfinder/utils.hpp
