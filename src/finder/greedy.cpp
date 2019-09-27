@@ -82,7 +82,6 @@ void GreedyFinder::search_core(
             const auto& step = item.second;
             auto [iter, inserted] = this->partial_solution_map.try_emplace(skeleton, step);
             if (inserted) {
-                this->partial_solution_map.insert({skeleton, step});
                 boost::asio::post(pool, [&skeleton, &step, this]() {
                     Worker(*this, skeleton, step.cycle_status, step.cancellation).search();
                 });
@@ -100,7 +99,6 @@ void GreedyFinder::search_core(
                 }
                 auto [iter, inserted] = this->partial_solution_map.try_emplace(skeleton, step);
                 if (inserted) {
-                    this->partial_solution_map.insert({skeleton, step});
                     Worker(*this, skeleton, step.cycle_status, step.cancellation).search();
                 } else if (step.cancellation < iter->second.cancellation) {
                     iter->second = step;
