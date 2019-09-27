@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <mutex>
 #include <utility>
+#include <boost/asio.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
@@ -232,14 +233,23 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
                 }
                 size_t new_cancellation = this->cancellation
                     + this->skeleton.length() + algorithm.length() - new_skeleton.length();
-                partial_solution.emplace_back(
-                    move(new_skeleton),
-                    SolvingStep {
-                        &this->skeleton, insert_place, &algorithm, swapped,
-                        {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
-                        new_cancellation
-                    }
-                );
+                SolvingStep step = {
+                    &this->skeleton, insert_place, &algorithm, swapped,
+                    {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
+                    new_cancellation
+                };
+                partial_solution.emplace_back(move(new_skeleton), step);
+                const auto& item = partial_solution.back();
+                const auto& _skeleton = item.first;
+                const auto& _step = item.second;
+                auto [iter, inserted] = this->finder.partial_solution_map.try_emplace(_skeleton, _step);
+                if (inserted) {
+                    boost::asio::post(this->pool, [&]() {
+                        Worker(this->finder, this->pool, _skeleton, _step.cycle_status, _step.cancellation).search();
+                    });
+                } else if (_step.cancellation < iter->second.cancellation) {
+                    iter->second = _step;
+                }
             }
         }
     }

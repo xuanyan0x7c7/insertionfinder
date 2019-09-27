@@ -35,6 +35,9 @@ void GreedyFinder::search_core(
         this->partial_states[i].fewest_moves =
             max<size_t>(this->fewest_moves, this->options.greedy_threshold) - this->options.greedy_threshold;
     }
+    if (this->partial_states[cycles].fewest_moves > this->skeleton.length()) {
+        this->partial_states[cycles].fewest_moves = this->skeleton.length();
+    }
     this->additional_solution_list.resize(cycles + 1);
 
     size_t max_threads = params.max_threads;
@@ -83,28 +86,13 @@ void GreedyFinder::search_core(
             auto [iter, inserted] = this->partial_solution_map.try_emplace(skeleton, step);
             if (inserted) {
                 boost::asio::post(pool, [&]() {
-                    Worker(*this, skeleton, step.cycle_status, step.cancellation).search();
+                    Worker(*this, pool, skeleton, step.cycle_status, step.cancellation).search();
                 });
             } else if (step.cancellation < iter->second.cancellation) {
                 iter->second = step;
             }
         }
         pool.join();
-
-        if (this->options.enable_replacement) {
-            for (size_t i = 0; i < additional_solution_list.size(); ++i) {
-                const auto& [skeleton, step] = additional_solution_list[i];
-                if (skeleton.length() > state.fewest_moves + this->options.replacement_threshold) {
-                    continue;
-                }
-                auto [iter, inserted] = this->partial_solution_map.try_emplace(skeleton, step);
-                if (inserted) {
-                    Worker(*this, skeleton, step.cycle_status, step.cancellation).search();
-                } else if (step.cancellation < iter->second.cancellation) {
-                    iter->second = step;
-                }
-            }
-        }
     }
 
     vector<Algorithm> skeletons;

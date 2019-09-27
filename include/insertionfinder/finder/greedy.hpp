@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <boost/asio/thread_pool.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
@@ -33,17 +34,19 @@ namespace InsertionFinder {
         class Worker {
         private:
             GreedyFinder& finder;
+            boost::asio::thread_pool& pool;
             const Algorithm& skeleton;
             const CycleStatus& cycle_status;
             const std::size_t cancellation;
         public:
             explicit Worker(
                 GreedyFinder& finder,
+                boost::asio::thread_pool& pool,
                 const Algorithm& skeleton,
                 const CycleStatus& cycle_status,
                 std::size_t cancellation
             ):
-                finder(finder), skeleton(skeleton),
+                finder(finder), pool(pool), skeleton(skeleton),
                 cycle_status(cycle_status), cancellation(cancellation) {}
         public:
             void search();
