@@ -82,7 +82,7 @@ void GreedyFinder::search_core(
             const auto& step = item.second;
             auto [iter, inserted] = this->partial_solution_map.try_emplace(skeleton, step);
             if (inserted) {
-                boost::asio::post(pool, [&skeleton, &step, this]() {
+                boost::asio::post(pool, [&]() {
                     Worker(*this, skeleton, step.cycle_status, step.cancellation).search();
                 });
             } else if (step.cancellation < iter->second.cancellation) {
