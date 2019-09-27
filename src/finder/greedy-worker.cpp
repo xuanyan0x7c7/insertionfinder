@@ -16,7 +16,7 @@ void GreedyFinder::Worker::search() {
     int corner_cycles = this->cycle_status.corner_cycles;
     int edge_cycles = this->cycle_status.edge_cycles;
     int placement = this->cycle_status.placement;
-    if (this->finder.options.enable_replacement) {
+    if (!this->finder.options.enable_replacement) {
         if (!parity && corner_cycles == 1 && edge_cycles == 0 && placement == 0) {
             this->search_last_corner_cycle();
             return;
