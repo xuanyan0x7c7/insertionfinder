@@ -190,9 +190,6 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
                     continue;
                 }
                 lock_guard<mutex> lock(partial_state.fewest_moves_mutex);
-                if (new_skeleton.length() > target) {
-                    continue;
-                }
                 if (new_skeleton.length() < partial_state.fewest_moves) {
                     partial_state.fewest_moves = new_skeleton.length();
                 }
@@ -224,9 +221,6 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
                     continue;
                 }
                 lock_guard<mutex> lock(partial_state.fewest_moves_mutex);
-                if (new_skeleton.length() > target) {
-                    continue;
-                }
                 if (new_skeleton.length() < partial_state.fewest_moves) {
                     partial_state.fewest_moves = new_skeleton.length();
                 }
