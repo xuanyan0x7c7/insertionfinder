@@ -78,38 +78,49 @@ void GreedyFinder::search_core(
                 << '.' << endl;
         }
         boost::asio::thread_pool pool(max_threads);
-        for (const auto& item: solution_list) {
-            const auto& skeleton = item.first;
-            const auto& step = item.second;
-            this->run_worker(pool, skeleton, step);
+        for (auto& [skeleton, step]: solution_list) {
+            this->run_worker(pool, move(skeleton), step);
         }
         pool.join();
     }
 
-    vector<Algorithm> skeletons;
-    for (const auto& [skeleton, step]: this->partial_solution_list[0]) {
-        auto [iter, inserted] = this->partial_solution_map.try_emplace(skeleton, step);
+    vector<const Algorithm*> skeletons;
+    for (auto& [skeleton, step]: this->partial_solution_list[0]) {
+        auto [iter, inserted] = this->partial_solution_map.try_emplace(move(skeleton), step);
+        const Algorithm& old_skeleton = iter->first;
+        auto& old_step = iter->second;
         if (inserted) {
-            this->partial_solution_map[skeleton] = step;
-            skeletons.push_back(skeleton);
-        } else if (step.cancellation < iter->second.cancellation) {
-            iter->second = step;
+            skeletons.push_back(&old_skeleton);
+        } else if (step.cancellation < old_step.cancellation) {
+            old_step = step;
         }
     }
-    for (const Algorithm& skeleton: skeletons) {
-        vector<Insertion> result({Insertion(skeleton)});
-        Algorithm current_skeleton = skeleton;
-        while (current_skeleton != this->skeleton) {
-            const auto& step = this->partial_solution_map[current_skeleton];
-            current_skeleton = *step.skeleton;
+    for (const Algorithm* current_skeleton: skeletons) {
+        vector<Insertion> result({Insertion(*current_skeleton)});
+        while (*current_skeleton != this->skeleton) {
+            const auto& step = this->partial_solution_map[*current_skeleton];
+            current_skeleton = step.skeleton;
             Algorithm previous_skeleton = *step.skeleton;
             if (step.swapped) {
                 previous_skeleton.swap_adjacent(step.insert_place);
             }
-            result.emplace_back(previous_skeleton, step.insert_place, step.insertion);
+            result.emplace_back(move(previous_skeleton), step.insert_place, step.insertion);
         }
-        size_t depth = result.size();
         reverse(result.begin(), result.end());
-        this->solutions.push_back({move(result)});
+        this->solutions.emplace_back(move(result));
+    }
+}
+
+void GreedyFinder::run_worker(boost::asio::thread_pool& pool, Algorithm&& skeleton, const SolvingStep& step) {
+    lock_guard<mutex> lock(this->worker_mutex);
+    auto [iter, inserted] = this->partial_solution_map.try_emplace(move(skeleton), step);
+    const auto& old_skeleton = iter->first;
+    auto& old_step = iter->second;
+    if (inserted) {
+        boost::asio::post(pool, [&]() {
+            Worker(*this, pool, old_skeleton, old_step.cycle_status, old_step.cancellation).search();
+        });
+    } else if (step.cancellation < old_step.cancellation) {
+        old_step = step;
     }
 }

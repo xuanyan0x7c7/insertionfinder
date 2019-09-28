@@ -1,7 +1,6 @@
 #pragma once
 #include <atomic>
 #include <mutex>
-#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -10,7 +9,6 @@
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/finder/finder.hpp>
-#include <insertionfinder/utils.hpp>
 
 namespace InsertionFinder {
     class GreedyFinder: public Finder {
@@ -101,37 +99,10 @@ namespace InsertionFinder {
             const SearchParams& params
         ) override;
     private:
-        template<class T> void run_worker(
+        void run_worker(
             boost::asio::thread_pool& pool,
-            T&& skeleton,
+            Algorithm&& skeleton,
             const SolvingStep& step
         );
     };
-
-    template <class T> void GreedyFinder::run_worker(
-        boost::asio::thread_pool& pool,
-        T&& skeleton,
-        const SolvingStep& step
-    ) {
-        static_assert(std::is_same_v<
-            Insertionfinder::Details::remove_cvref_t<T>,
-            Algorithm
-        >);
-        std::lock_guard<std::mutex> lock(this->worker_mutex);
-        auto [iter, inserted] = this->partial_solution_map.try_emplace(
-            std::forward<T>(skeleton), step
-        );
-        const auto& old_skeleton = iter->first;
-        auto& old_step = iter->second;
-        if (inserted) {
-            boost::asio::post(pool, [&]() {
-                Worker(
-                    *this, pool,
-                    old_skeleton, old_step.cycle_status, old_step.cancellation
-                ).search();
-            });
-        } else if (step.cancellation < old_step.cancellation) {
-            old_step = step;
-        }
-    }
 };

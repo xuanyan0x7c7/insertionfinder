@@ -294,5 +294,5 @@ void BruteForceFinder::Worker::update_fewest_moves() {
             cerr << this->solving_step.back().skeleton << " (" << twists << "f)" << endl;
         }
     }
-    finder.solutions.push_back({this->solving_step});
+    finder.solutions.emplace_back(this->solving_step);
 }

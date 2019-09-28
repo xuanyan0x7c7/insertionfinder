@@ -47,6 +47,10 @@ namespace InsertionFinder {
         struct Solution {
             std::vector<Insertion> insertions;
             std::size_t cancellation;
+            Solution(const std::vector<Insertion>& insertions):
+                insertions(insertions), cancellation(0) {}
+            Solution(std::vector<Insertion>&& insertions):
+                insertions(std::move(insertions)), cancellation(0) {}
         };
         enum class Status {
             SUCCESS,
