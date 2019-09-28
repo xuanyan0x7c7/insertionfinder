@@ -208,7 +208,6 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
                 );
             }
         } else if (this->finder.options.enable_replacement && new_total_cycles == total_cycles) {
-            auto& partial_solution = this->finder.additional_solution_list[new_total_cycles];
             auto& partial_state = this->finder.partial_states[new_total_cycles];
             for (const Algorithm& algorithm: _case.algorithm_list()) {
                 size_t target = partial_state.fewest_moves + this->finder.options.replacement_threshold;
@@ -233,23 +232,15 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
                 }
                 size_t new_cancellation = this->cancellation
                     + this->skeleton.length() + algorithm.length() - new_skeleton.length();
-                SolvingStep step = {
-                    &this->skeleton, insert_place, &algorithm, swapped,
-                    {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
-                    new_cancellation
-                };
-                partial_solution.emplace_back(move(new_skeleton), step);
-                const auto& item = partial_solution.back();
-                const auto& _skeleton = item.first;
-                const auto& _step = item.second;
-                auto [iter, inserted] = this->finder.partial_solution_map.try_emplace(_skeleton, _step);
-                if (inserted) {
-                    boost::asio::post(this->pool, [&]() {
-                        Worker(this->finder, this->pool, _skeleton, _step.cycle_status, _step.cancellation).search();
-                    });
-                } else if (_step.cancellation < iter->second.cancellation) {
-                    iter->second = _step;
-                }
+                this->finder.run_worker(
+                    pool,
+                    move(new_skeleton),
+                    SolvingStep {
+                        &this->skeleton, insert_place, &algorithm, swapped,
+                        {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
+                        new_cancellation
+                    }
+                );
             }
         }
     }

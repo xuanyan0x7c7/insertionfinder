@@ -5,7 +5,7 @@
 #include <mutex>
 #include <utility>
 #include <vector>
-#include <boost/asio.hpp>
+#include <boost/asio/thread_pool.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/finder/finder.hpp>
 #include <insertionfinder/finder/greedy.hpp>
@@ -38,13 +38,11 @@ void GreedyFinder::search_core(
     if (this->partial_states[cycles].fewest_moves > this->skeleton.length()) {
         this->partial_states[cycles].fewest_moves = this->skeleton.length();
     }
-    this->additional_solution_list.resize(cycles + 1);
 
     size_t max_threads = params.max_threads;
     for (int depth = cycles; depth > 0; --depth) {
         auto& solution_list = this->partial_solution_list[depth];
         auto& state = this->partial_states[depth];
-        auto& additional_solution_list = this->additional_solution_list[depth];
         solution_list.erase(
             remove_if(
                 solution_list.begin(), solution_list.end(),
@@ -83,14 +81,7 @@ void GreedyFinder::search_core(
         for (const auto& item: solution_list) {
             const auto& skeleton = item.first;
             const auto& step = item.second;
-            auto [iter, inserted] = this->partial_solution_map.try_emplace(skeleton, step);
-            if (inserted) {
-                boost::asio::post(pool, [&]() {
-                    Worker(*this, pool, skeleton, step.cycle_status, step.cancellation).search();
-                });
-            } else if (step.cancellation < iter->second.cancellation) {
-                iter->second = step;
-            }
+            this->run_worker(pool, skeleton, step);
         }
         pool.join();
     }
