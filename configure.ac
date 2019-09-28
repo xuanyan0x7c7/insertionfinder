@@ -14,7 +14,7 @@ AX_PTHREAD
 AC_CHECK_HEADERS([optional], [], [Missing header file])
 AC_CHECK_HEADERS([filesystem], [HAVE_FILESYSTEM=yes])
 
-BOOST_REQUIRE([1.67.0])
+BOOST_REQUIRE([1.66.0])
 AS_IF([test "$HAVE_FILESYSTEM"], [], [
     BOOST_SYSTEM
     BOOST_FILESYSTEM
