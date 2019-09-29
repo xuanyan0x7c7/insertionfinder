@@ -1,8 +1,4 @@
-#include <array>
 #include <chrono>
-#include <limits>
-#include <vector>
-#include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/finder/finder.hpp>
@@ -11,23 +7,13 @@ using namespace chrono;
 using namespace InsertionFinder;
 
 
-Finder::Finder(
-    const Algorithm& scramble, const Algorithm& skeleton,
-    const vector<Case>& cases
-):
-    scramble(scramble), skeleton(skeleton), cases(cases),
-    fewest_moves(numeric_limits<size_t>::max()),
-    verbose(false),
-    change_parity(false),
-    change_corner(false), change_edge(false),
-    change_center(false) {
+void Finder::init() {
     this->corner_cycle_index.fill(-1);
     this->edge_cycle_index.fill(-1);
     this->center_index.fill(-1);
-    this->change_parity = false;
 
-    for (size_t index = 0; index < cases.size(); ++index) {
-        const Case& _case = cases[index];
+    for (size_t index = 0; index < this->cases.size(); ++index) {
+        const Case& _case = this->cases[index];
         const Cube& state = _case.state();
         if (state.mask() == 0) {
             continue;
@@ -40,15 +26,19 @@ Finder::Finder(
         bool edge_changed = _case.mask() & 0xfff00;
         if (parity || Cube::center_cycles[rotation] > 1) {
             this->change_parity = true;
+            this->result.status &= ~FinderStatus::parity_algorithms_needed;
         }
         if (corner_changed) {
             this->change_corner = true;
+            this->result.status &= ~FinderStatus::corner_cycle_algorithms_needed;
         }
         if (edge_changed) {
             this->change_edge = true;
+            this->result.status &= ~FinderStatus::edge_cycle_algorithms_needed;
         }
         if (rotation) {
             this->change_center = true;
+            this->result.status &= ~FinderStatus::center_algorithms_needed;
         }
         if (!parity && corner_cycles == 1 && edge_cycles == 0 && rotation == 0) {
             this->corner_cycle_index[state.corner_cycle_index()] = index;
@@ -65,39 +55,12 @@ Finder::Finder(
     this->inverse_scramble_cube = this->scramble_cube.inverse();
 }
 
-
 void Finder::search(const SearchParams& params) {
+    this->fewest_moves = params.search_target;
     this->parity_multiplier = params.parity_multiplier * 2;
     auto begin = high_resolution_clock::now();
-
-    do {
-        Cube original_cube = this->scramble_cube;
-        original_cube.twist(this->skeleton);
-        Cube cube = original_cube.best_placement();
-        bool parity = cube.has_parity();
-        int corner_cycles = cube.corner_cycles();
-        int edge_cycles = cube.edge_cycles();
-        int placement = cube.placement();
-        if (!parity && corner_cycles == 0 && edge_cycles == 0 && placement == 0) {
-            this->result.status = Finder::Status::SUCCESS_SOLVED;
-            break;
-        } else if ((parity || Cube::center_cycles[placement] > 1) && !this->change_parity) {
-            this->result.status = Finder::Status::FAILURE_PARITY_ALGORITHMS_NEEDED;
-            break;
-        } else if (corner_cycles && !this->change_corner) {
-            this->result.status = Finder::Status::FAILURE_CORNER_CYCLE_ALGORITHMS_NEEDED;
-            break;
-        } else if (edge_cycles && !this->change_edge) {
-            this->result.status = Finder::Status::FAILURE_EDGE_CYCLE_ALGORITHMS_NEEDED;
-            break;
-        } else if (placement && !this->change_center) {
-            this->result.status = Finder::Status::FAILURE_CENTER_ALGORITHMS_NEEDED;
-            break;
-        }
-
-        this->search_core({parity, corner_cycles, edge_cycles, placement}, params);
-        this->result.status = Finder::Status::SUCCESS;
-
+    this->search_core(params);
+    if (this->result.status == FinderStatus::success) {
         for (auto& solution: this->solutions) {
             size_t cancellation = solution.insertions.front().skeleton.length();
             for (size_t i = 0; i < solution.insertions.size() - 1; ++i) {
@@ -110,8 +73,7 @@ void Finder::search(const SearchParams& params) {
             this->solutions.begin(), this->solutions.end(),
             [](const auto& x, const auto& y) {return x.cancellation < y.cancellation;}
         );
-    } while (false);
-
+    }
     auto end = high_resolution_clock::now();
     this->result.duration = (end - begin).count();
 }

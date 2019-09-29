@@ -158,7 +158,6 @@ void BruteForceFinder::Worker::search_last_placement(
     }
 }
 
-
 void BruteForceFinder::Worker::try_insertion(
     size_t insert_place,
     const Cube& state,
@@ -255,7 +254,6 @@ void BruteForceFinder::Worker::try_last_insertion(
     }
 }
 
-
 void BruteForceFinder::Worker::solution_found(size_t insert_place, const Case& _case) {
     Insertion& insertion = this->solving_step.back();
     insertion.insert_place = insert_place;
@@ -276,23 +274,21 @@ void BruteForceFinder::Worker::solution_found(size_t insert_place, const Case& _
     }
 }
 
-
 void BruteForceFinder::Worker::update_fewest_moves() {
-    BruteForceFinder& finder = this->finder;
     size_t twists = this->solving_step.back().skeleton.length();
-    if (twists > finder.fewest_moves) {
+    if (twists > this->finder.fewest_moves) {
         return;
     }
-    lock_guard<mutex> lock(finder.fewest_moves_mutex);
-    if (twists > finder.fewest_moves) {
+    lock_guard<mutex> lock(this->finder.fewest_moves_mutex);
+    if (twists > this->finder.fewest_moves) {
         return;
     }
-    if (twists < finder.fewest_moves) {
-        finder.solutions.clear();
-        finder.fewest_moves = twists;
+    if (twists < this->finder.fewest_moves) {
+        this->finder.solutions.clear();
+        this->finder.fewest_moves = twists;
         if (this->finder.verbose) {
             cerr << this->solving_step.back().skeleton << " (" << twists << "f)" << endl;
         }
     }
-    finder.solutions.emplace_back(this->solving_step);
+    this->finder.solutions.emplace_back(this->solving_step);
 }

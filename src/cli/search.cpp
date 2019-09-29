@@ -102,7 +102,7 @@ namespace {
             const CycleStatus& status,
             const Finder& finder, const Finder::Result& result
         ) override {
-            if (result.status == Finder::Status::SUCCESS) {
+            if (result.status == FinderStatus::success) {
                 const auto& solutions = finder.get_solutions();
                 if (solutions.empty()) {
                     cout << "No solution found." << endl;
@@ -132,14 +132,19 @@ namespace {
                         << " cancelled." << endl
                         << "Full solution: " << solution.insertions.back().skeleton << endl;
                 }
-            } else if (result.status == Finder::Status::FAILURE_PARITY_ALGORITHMS_NEEDED) {
-                cout << "Parity algorithms needed." << endl;
-            } else if (result.status == Finder::Status::FAILURE_CORNER_CYCLE_ALGORITHMS_NEEDED) {
-                cout << "Corner cycle algorithms needed." << endl;
-            } else if (result.status == Finder::Status::FAILURE_EDGE_CYCLE_ALGORITHMS_NEEDED) {
-                cout << "Edge cycle algorithms needed." << endl;
-            } else if (result.status == Finder::Status::FAILURE_CENTER_ALGORITHMS_NEEDED) {
-                cout << "Center algorithms needed." << endl;
+            } else {
+                if (result.status == FinderStatus::parity_algorithms_needed) {
+                    cout << "Parity algorithms needed." << endl;
+                }
+                if (result.status == FinderStatus::corner_cycle_algorithms_needed) {
+                    cout << "Corner cycle algorithms needed." << endl;
+                }
+                if (result.status == FinderStatus::edge_cycle_algorithms_needed) {
+                    cout << "Edge cycle algorithms needed." << endl;
+                }
+                if (result.status == FinderStatus::center_algorithms_needed) {
+                    cout << "Center algorithms needed." << endl;
+                }
             }
             cout << "Time usage: " << fixed << setprecision(3);
             if (result.duration < 1000) {

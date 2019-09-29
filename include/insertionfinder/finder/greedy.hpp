@@ -1,5 +1,6 @@
 #pragma once
 #include <atomic>
+#include <deque>
 #include <mutex>
 #include <unordered_map>
 #include <utility>
@@ -53,21 +54,9 @@ namespace InsertionFinder {
             void search_last_corner_cycle();
             void search_last_edge_cycle();
             void search_last_placement(int placement);
-            void try_insertion(
-                std::size_t insert_place,
-                const Cube& state,
-                bool swapped = false
-            );
-            void try_last_insertion(
-                std::size_t insert_place,
-                int case_index,
-                bool swapped = false
-            );
-            void solution_found(
-                std::size_t insert_place,
-                bool swapped,
-                const Case& _case
-            );
+            void try_insertion(std::size_t insert_place, const Cube& state, bool swapped = false);
+            void try_last_insertion(std::size_t insert_place, int case_index, bool swapped = false);
+            void solution_found(std::size_t insert_place, bool swapped, const Case& _case);
         };
     public:
         struct Options {
@@ -77,32 +66,18 @@ namespace InsertionFinder {
         };
     private:
         const Options options;
-        std::vector<std::vector<std::pair<Algorithm, SolvingStep>>>
-        partial_solution_list;
+        std::vector<std::vector<std::pair<Algorithm, SolvingStep>>> partial_solution_list;
         std::unordered_map<Algorithm, SolvingStep> partial_solution_map;
-        PartialState* partial_states;
+        std::deque<PartialState> partial_states;
         std::mutex worker_mutex;
     public:
         GreedyFinder(
             const Algorithm& scramble, const Algorithm& skeleton,
             const std::vector<Case>& cases, Options options
-        ):
-            Finder(scramble, skeleton, cases),
-            options(options),
-            partial_states(nullptr) {}
-        ~GreedyFinder() {
-            delete[] partial_states;
-        }
+        ): Finder(scramble, skeleton, cases), options(options), partial_solution_list(1), partial_states(1) {}
     protected:
-        void search_core(
-            const CycleStatus& cycle_status,
-            const SearchParams& params
-        ) override;
+        void search_core(const SearchParams& params) override;
     private:
-        void run_worker(
-            boost::asio::thread_pool& pool,
-            Algorithm&& skeleton,
-            const SolvingStep& step
-        );
+        void run_worker(boost::asio::thread_pool& pool, Algorithm&& skeleton, const SolvingStep& step);
     };
 };

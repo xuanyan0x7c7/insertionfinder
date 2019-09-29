@@ -15,32 +15,56 @@ using namespace InsertionFinder;
 using namespace Details;
 
 
-void GreedyFinder::search_core(
-    const CycleStatus& cycle_status,
-    const SearchParams& params
-) {
-    this->fewest_moves = params.search_target;
-    bool parity = cycle_status.parity;
-    int corner_cycles = cycle_status.corner_cycles;
-    int edge_cycles = cycle_status.edge_cycles;
-    int placement = cycle_status.placement;
-    int cycles = this->get_total_cycles(parity, corner_cycles, edge_cycles, placement);
-    this->partial_solution_list.resize(cycles + 1);
-    this->partial_solution_list.back().emplace_back(
-        this->skeleton,
-        SolvingStep {nullptr, 0, nullptr, false, cycle_status, 0}
-    );
-    this->partial_states = new PartialState[cycles + 1];
-    for (int i = 1; i <= cycles; ++i) {
-        this->partial_states[i].fewest_moves =
-            max<size_t>(this->fewest_moves, this->options.greedy_threshold) - this->options.greedy_threshold;
-    }
-    if (this->partial_states[cycles].fewest_moves > this->skeleton.length()) {
-        this->partial_states[cycles].fewest_moves = this->skeleton.length();
+void GreedyFinder::search_core(const SearchParams& params) {
+    size_t max_threshold = max<size_t>(this->options.greedy_threshold, this->options.replacement_threshold);
+    this->partial_states[0].fewest_moves = numeric_limits<size_t>::max() - max_threshold;
+    for (const Algorithm& skeleton: this->skeletons) {
+        Cube original_cube = this->scramble_cube;
+        original_cube.twist(skeleton);
+        Cube cube = original_cube.best_placement();
+        bool parity = cube.has_parity();
+        int corner_cycles = cube.corner_cycles();
+        int edge_cycles = cube.edge_cycles();
+        int placement = cube.placement();
+        if (!parity && Cube::center_cycles[placement] <= 1) {
+            this->result.status &= ~FinderStatus::parity_algorithms_needed;
+        } else if (!this->change_parity) {
+            continue;
+        }
+        if (corner_cycles == 0) {
+            this->result.status &= ~FinderStatus::corner_cycle_algorithms_needed;
+        } else if (!this->change_corner) {
+            continue;
+        }
+        if (edge_cycles == 0) {
+            this->result.status &= ~FinderStatus::edge_cycle_algorithms_needed;
+        } else if (!this->change_edge) {
+            continue;
+        }
+        if (placement == 0) {
+            this->result.status &= ~FinderStatus::center_algorithms_needed;
+        } else if (!this->change_center) {
+            continue;
+        }
+        int cycles = this->get_total_cycles(parity, corner_cycles, edge_cycles, placement);
+        if (cycles >= this->partial_states.size()) {
+            int previous_cycles = this->partial_states.size() - 1;
+            this->partial_solution_list.resize(cycles + 1);
+            this->partial_states.resize(cycles + 1);
+            for (int depth = previous_cycles; ++depth <= cycles;) {
+                this->partial_states[depth].fewest_moves = numeric_limits<size_t>::max() - max_threshold;
+            }
+        }
+        if (this->partial_states[cycles].fewest_moves > skeleton.length()) {
+            this->partial_states[cycles].fewest_moves = skeleton.length();
+        }
+        this->partial_solution_list[cycles].emplace_back(
+            skeleton,
+            SolvingStep {nullptr, 0, nullptr, false, {parity, corner_cycles, edge_cycles, placement}, 0}
+        );
     }
 
-    size_t max_threads = params.max_threads;
-    for (int depth = cycles; depth > 0; --depth) {
+    for (int depth = this->partial_states.size(); --depth > 0;) {
         auto& solution_list = this->partial_solution_list[depth];
         auto& state = this->partial_states[depth];
         solution_list.erase(
@@ -53,10 +77,7 @@ void GreedyFinder::search_core(
             solution_list.end()
         );
         sort(solution_list.begin(), solution_list.end(), [](const auto& x, const auto& y) {
-            if (
-                int comparison = Algorithm::compare(x.first, y.first);
-                comparison < 0
-            ) {
+            if (int comparison = Algorithm::compare(x.first, y.first); comparison < 0) {
                 return true;
             } else if (comparison > 0) {
                 return false;
@@ -77,7 +98,7 @@ void GreedyFinder::search_core(
                 << (solution_list.size() == 1 ? "" : "s")
                 << '.' << endl;
         }
-        boost::asio::thread_pool pool(max_threads);
+        boost::asio::thread_pool pool(params.max_threads);
         for (auto& [skeleton, step]: solution_list) {
             this->run_worker(pool, move(skeleton), step);
         }
@@ -97,7 +118,10 @@ void GreedyFinder::search_core(
     }
     for (const Algorithm* current_skeleton: skeletons) {
         vector<Insertion> result({Insertion(*current_skeleton)});
-        while (*current_skeleton != this->skeleton) {
+        while (all_of(
+            this->skeletons.cbegin(), this->skeletons.cend(),
+            [&](const Algorithm& x) {return x != *current_skeleton;}
+        )) {
             const auto& step = this->partial_solution_map[*current_skeleton];
             current_skeleton = step.skeleton;
             Algorithm previous_skeleton = *step.skeleton;
