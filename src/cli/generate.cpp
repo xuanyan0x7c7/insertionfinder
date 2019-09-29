@@ -15,10 +15,8 @@ using namespace InsertionFinder;
 
 
 void CLI::generate_algorithms(const po::variables_map& vm) {
-    const vector<string> filenames = vm.count("file")
-        ? vm["file"].as<vector<string>>() : vector<string>();
-    const vector<string> algfilenames = vm.count("algfile")
-        ? vm["algfile"].as<vector<string>>() : vector<string>();
+    const vector<string> filenames = vm.count("file") ? vm["file"].as<vector<string>>() : vector<string>();
+    const vector<string> algfilenames = vm.count("algfile") ? vm["algfile"].as<vector<string>>() : vector<string>();
 
     unordered_map<Cube, Case> map;
 
@@ -57,10 +55,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
                 continue;
             }
 
-            if (
-                auto node = map.find(cube);
-                node != map.end() && node->second.contains_algorithm(algorithm)
-            ) {
+            if (auto node = map.find(cube); node != map.end() && node->second.contains_algorithm(algorithm)) {
                 continue;
             }
             auto isomorphism_list = algorithm.generate_isomorphisms();

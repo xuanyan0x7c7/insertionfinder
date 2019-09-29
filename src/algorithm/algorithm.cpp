@@ -1,15 +1,13 @@
-#include <array>
-#include <algorithm>
 #include <cstdint>
+#include <algorithm>
+#include <array>
 #include <functional>
 #include <istream>
-#include <memory>
 #include <ostream>
 #include <regex>
 #include <sstream>
 #include <string>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
@@ -114,10 +112,7 @@ Algorithm::Algorithm(const string& algorithm_string) {
         if (match_result.position()) {
             throw AlgorithmError(algorithm_string);
         }
-        if (
-            auto find_result = pattern_table.find(match_result[1]);
-            find_result != pattern_table.cend()
-        ) {
+        if (auto find_result = pattern_table.find(match_result[1]); find_result != pattern_table.cend()) {
             const auto& [pattern_transform, twist] = find_result->second;
             if (twist != -1) {
                 this->twists.push_back(transform_twist(transform.data(), twist));
@@ -129,10 +124,7 @@ Algorithm::Algorithm(const string& algorithm_string) {
             }
             transform = new_transform;
         } else {
-            int twist = find(
-                twist_string, twist_string + 24,
-                string(match_result[1])
-            ) - twist_string;
+            int twist = find(twist_string, twist_string + 24, string(match_result[1])) - twist_string;
             this->twists.push_back(transform_twist(transform.data(), twist));
         }
         temp_string = match_result.suffix();

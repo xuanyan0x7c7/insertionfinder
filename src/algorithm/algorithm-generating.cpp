@@ -18,7 +18,7 @@ void Algorithm::normalize() noexcept {
 
 void Algorithm::rotate(int rotation) {
     const int* table = rotation_permutation[rotation];
-    for (int& twist: twists) {
+    for (int& twist: this->twists) {
         twist = transform_twist(table, twist);
     }
 }

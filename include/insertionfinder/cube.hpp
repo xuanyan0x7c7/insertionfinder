@@ -69,9 +69,7 @@ namespace InsertionFinder {
         static void init();
     public:
         static int compare(const Cube& lhs, const Cube& rhs) noexcept;
-        bool operator==(const Cube& rhs) const noexcept {
-            return this->compare(*this, rhs) == 0;
-        }
+        bool operator==(const Cube& rhs) const noexcept;
         bool operator<(const Cube& rhs) const noexcept {
             return this->compare(*this, rhs) < 0;
         }
@@ -87,46 +85,23 @@ namespace InsertionFinder {
         static void generate_corner_cycle_transform_table() noexcept;
         static void generate_edge_cycle_transform_table() noexcept;
     public:
-        inline void twist(
-            int twist,
-            std::byte flags = CubeTwist::full
-        ) {
+        void twist(int twist, std::byte flags = CubeTwist::full) {
             this->twist(Cube::twist_cube[twist], flags);
         }
-        inline void twist(
-            const Algorithm& algorithm,
-            std::byte flags = CubeTwist::full
-        ) noexcept {
+        void twist(const Algorithm& algorithm, std::byte flags = CubeTwist::full) noexcept {
             this->twist(algorithm, 0, algorithm.length(), flags);
         }
-        void twist(
-            const Algorithm& algorithm,
-            std::size_t begin, std::size_t end,
-            std::byte flags = CubeTwist::full
-        );
-        void twist(
-            const Cube& cube,
-            std::byte flags = CubeTwist::full
-        ) noexcept;
-        inline void twist_before(
-            int twist,
-            std::byte flags = CubeTwist::full
-        ) {
+        void twist(const Algorithm& algorithm, std::size_t begin, std::size_t end, std::byte flags = CubeTwist::full);
+        void twist(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
+        void twist_before(int twist, std::byte flags = CubeTwist::full) {
             this->twist_before(Cube::twist_cube[twist], flags);
         }
-        void twist_before(
-            const Cube& cube,
-            std::byte flags = CubeTwist::full
-        ) noexcept;
-        std::optional<Cube> twist_effectively(
-            const Cube& cube,
-            std::byte flags = CubeTwist::full
-        ) const noexcept;
+        void twist_before(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
+        std::optional<Cube> twist_effectively(const Cube& cube, std::byte flags = CubeTwist::full) const noexcept;
         void rotate(int rotation) {
-            if (rotation == 0) {
-                return;
+            if (rotation) {
+                this->twist(Cube::rotation_cube[rotation]);
             }
-            this->twist(Cube::rotation_cube[rotation]);
         }
         static int placement_twist(int placement, int rotation) {
             return Cube::center_transform[placement][rotation];
@@ -136,6 +111,9 @@ namespace InsertionFinder {
         std::uint32_t mask() const noexcept;
     public:
         bool has_parity() const noexcept;
+        bool parity() const noexcept {
+            return Cube::center_cycles[this->_placement] > 1 || this->has_parity();
+        }
         int corner_cycles() const noexcept;
         int edge_cycles() const noexcept;
         int placement() const noexcept {

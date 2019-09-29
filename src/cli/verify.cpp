@@ -53,11 +53,7 @@ namespace {
             cout << "Scramble: " << status.scramble << endl;
             cout << "Skeleton: " << status.skeleton << endl;
             cout << "The cube ";
-            if (
-                !status.parity
-                && status.corner_cycles == 0 && status.edge_cycles == 0
-                && status.center_cycles == 0
-            ) {
+            if (!status.parity && status.corner_cycles == 0 && status.edge_cycles == 0 && status.center_cycles == 0) {
                 cout << "is already solved";
             } else {
                 cout << "has ";

@@ -195,10 +195,7 @@ void Cube::generate_corner_cycle_transform_table() noexcept {
             for (int j = 0; j < 24; ++j) {
                 if (j & 3) {
                     Cube new_cube = cube;
-                    new_cube.twist_before(
-                        Algorithm::inverse_twist[j],
-                        CubeTwist::corners
-                    );
+                    new_cube.twist_before(Algorithm::inverse_twist[j], CubeTwist::corners);
                     new_cube.twist(j, CubeTwist::corners);
                     table[i][j] = new_cube.corner_cycle_index();
                 } else {
@@ -221,10 +218,7 @@ void Cube::generate_edge_cycle_transform_table() noexcept {
             for (int j = 0; j < 24; ++j) {
                 if (j & 3) {
                     Cube new_cube = cube;
-                    new_cube.twist_before(
-                        Algorithm::inverse_twist[j],
-                        CubeTwist::edges
-                    );
+                    new_cube.twist_before(Algorithm::inverse_twist[j], CubeTwist::edges);
                     new_cube.twist(j, CubeTwist::edges);
                     table[i][j] = new_cube.edge_cycle_index();
                 } else {

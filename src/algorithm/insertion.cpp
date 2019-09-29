@@ -53,34 +53,23 @@ size_t Algorithm::cancel_moves() {
 }
 
 
-pair<uint32_t, uint32_t>
-Algorithm::get_insert_place_mask(size_t insert_place) const {
+pair<uint32_t, uint32_t> Algorithm::get_insert_place_mask(size_t insert_place) const {
     const auto& twists = this->twists;
-    uint32_t mask_before;
-    uint32_t mask_after;
-    if (insert_place == 0) {
-        mask_before = 0;
-    } else {
+    uint32_t mask_before = 0;
+    uint32_t mask_after = 0;
+    if (insert_place > 0) {
         mask_before = twist_mask(twists[insert_place - 1]);
-        if (
-            insert_place > 1
-            && twists[insert_place - 1] >> 3 == twists[insert_place - 2] >> 3
-        ) {
+        if (insert_place > 1 && twists[insert_place - 1] >> 3 == twists[insert_place - 2] >> 3) {
             mask_before |= twist_mask(twists[insert_place - 2]);
         }
     }
-    if (insert_place == twists.size()) {
-        mask_after = 0;
-    } else {
+    if (insert_place < twists.size()) {
         mask_after = twist_mask(twists[insert_place]);
-        if (
-            insert_place + 1 < twists.size()
-            && twists[insert_place] >> 3 == twists[insert_place + 1] >> 3
-        ) {
+        if (insert_place + 1 < twists.size() && twists[insert_place] >> 3 == twists[insert_place + 1] >> 3) {
             mask_after |= twist_mask(twists[insert_place + 1]);
         }
     }
-    return make_pair(mask_before, mask_after);
+    return {mask_before, mask_after};
 }
 
 
@@ -89,22 +78,12 @@ Algorithm::insert(const Algorithm& insertion, size_t insert_place) const {
     using namespace placeholders;
     Algorithm result;
     result.twists.reserve(this->twists.size() + insertion.twists.size());
-    result.twists.insert(
-        result.twists.end(),
-        this->twists.cbegin(), this->twists.cbegin() + insert_place
-    );
-    result.twists.insert(
-        result.twists.end(),
-        insertion.twists.cbegin(), insertion.twists.cend()
-    );
+    result.twists.insert(result.twists.end(), this->twists.cbegin(), this->twists.cbegin() + insert_place);
+    result.twists.insert(result.twists.end(), insertion.twists.cbegin(), insertion.twists.cend());
     transform(
         this->twists.cbegin() + insert_place, this->twists.cend(),
         back_inserter(result.twists),
-        bind(
-            transform_twist,
-            rotation_permutation[Cube::inverse_center[insertion.rotation]],
-            _1
-        )
+        bind(transform_twist, rotation_permutation[Cube::inverse_center[insertion.rotation]], _1)
     );
     size_t place = result.cancel_moves();
     return {result, min(place, insert_place + 1)};

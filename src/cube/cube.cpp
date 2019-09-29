@@ -79,6 +79,23 @@ int Cube::compare(const Cube& lhs, const Cube& rhs) noexcept {
     return 0;
 }
 
+bool Cube::operator==(const Cube& rhs) const noexcept {
+    if (this->_placement != rhs._placement) {
+        return false;
+    }
+    for (int i = 0; i < 8; ++i) {
+        if (this->corner[i] != rhs.corner[i]) {
+            return false;
+        }
+    }
+    for (int i = 0; i < 12; ++i) {
+        if (this->edge[i] != rhs.edge[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 
 Cube Cube::inverse() const noexcept {
     Cube result(nullopt);

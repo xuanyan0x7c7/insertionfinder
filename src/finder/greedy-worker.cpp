@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstdint>
 #include <mutex>
 #include <utility>
@@ -154,12 +155,17 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
         bool corner_changed = _case.mask() & 0xff;
         bool edge_changed = _case.mask() & 0xfff00;
         bool center_changed = _case.mask() & 0xf00000;
-        auto cube = state.twist_effectively(
-            _case.state(),
-            (corner_changed ? CubeTwist::corners : byte{0})
-                | (edge_changed ? CubeTwist::edges : byte{0})
-                | (center_changed ? CubeTwist::centers : byte{0})
-        );
+        byte twist_flag {0};
+        if (corner_changed) {
+            twist_flag |= CubeTwist::corners;
+        }
+        if (edge_changed) {
+            twist_flag |= CubeTwist::edges;
+        }
+        if (center_changed) {
+            twist_flag |= CubeTwist::centers;
+        }
+        auto cube = state.twist_effectively(_case.state(), twist_flag);
         if (!cube) {
             continue;
         }
@@ -240,11 +246,7 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
     }
 }
 
-void GreedyFinder::Worker::try_last_insertion(
-    size_t insert_place,
-    int case_index,
-    bool swapped
-) {
+void GreedyFinder::Worker::try_last_insertion(size_t insert_place, int case_index, bool swapped) {
     if (case_index != -1) {
         this->solution_found(insert_place, swapped, this->finder.cases[case_index]);
     }
@@ -258,11 +260,7 @@ void GreedyFinder::Worker::solution_found(size_t insert_place, bool swapped, con
     auto insert_place_mask = skeleton.get_insert_place_mask(insert_place);
     for (const Algorithm& algorithm: _case.algorithm_list()) {
         auto& partial_solution = this->finder.partial_solution_list.front();
-        if (!skeleton.is_worthy_insertion(
-            algorithm, insert_place,
-            insert_place_mask,
-            this->finder.fewest_moves
-        )) {
+        if (!skeleton.is_worthy_insertion(algorithm, insert_place, insert_place_mask, this->finder.fewest_moves)) {
             continue;
         }
         Algorithm new_skeleton = skeleton.insert(algorithm, insert_place).first;

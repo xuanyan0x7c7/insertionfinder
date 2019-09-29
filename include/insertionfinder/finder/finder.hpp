@@ -115,7 +115,7 @@ namespace InsertionFinder {
             this->verbose = verbose;
         }
     public:
-        inline int get_total_cycles(bool parity, int corner_cycles, int edge_cycles, int placement) {
+        int get_total_cycles(bool parity, int corner_cycles, int edge_cycles, int placement) {
             int center_cycles = Cube::center_cycles[placement];
             return (center_cycles > 1 ? 0 : parity * this->parity_multiplier)
                 + (corner_cycles + edge_cycles + center_cycles) * 2;

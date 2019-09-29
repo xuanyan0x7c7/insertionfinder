@@ -55,11 +55,7 @@ namespace {
             cout << "Scramble: " << scramble << endl;
             cout << "Skeleton: " << skeleton << endl;
             cout << "The cube ";
-            if (
-                !status.parity
-                && status.corner_cycles == 0 && status.edge_cycles == 0
-                && status.center_cycles == 0
-            ) {
+            if (!status.parity && status.corner_cycles == 0 && status.edge_cycles == 0 && status.center_cycles == 0) {
                 cout << "is already solved";
             } else {
                 cout << "has ";
@@ -186,11 +182,7 @@ namespace {
             map.pushKV("edge_cycles", status.edge_cycles);
             map.pushKV("center_cycles", status.center_cycles);
             const auto& solutions = finder.get_solutions();
-            if (
-                !status.parity
-                && status.corner_cycles == 0 && status.edge_cycles == 0
-                && status.center_cycles == 0
-            ) {
+            if (!status.parity && status.corner_cycles == 0 && status.edge_cycles == 0 && status.center_cycles == 0) {
                 map.pushKV("fewest_moves", static_cast<int>(skeleton.length()));
             } else if (solutions.empty()) {
                 map.pushKV("fewest_moves", UniValue());
@@ -225,11 +217,9 @@ namespace {
 
 
 void CLI::find_insertions(const po::variables_map& vm) {
-    const vector<string> filenames = vm.count("file")
-        ? vm["file"].as<vector<string>>() : vector<string>();
+    const vector<string> filenames = vm.count("file") ? vm["file"].as<vector<string>>() : vector<string>();
     const fs::path algorithms_directory = vm["algs-dir"].as<string>();
-    vector<string> algfilenames = vm.count("algfile")
-        ? vm["algfile"].as<vector<string>>() : vector<string>();
+    vector<string> algfilenames = vm.count("algfile") ? vm["algfile"].as<vector<string>>() : vector<string>();
     if (vm.count("all-algs")) {
         try {
             for (auto& file: fs::directory_iterator(algorithms_directory)) {
@@ -338,10 +328,7 @@ void CLI::find_insertions(const po::variables_map& vm) {
     int corner_cycles = cube.corner_cycles();
     int edge_cycles = cube.edge_cycles();
     int center_cycles = Cube::center_cycles[cube.placement()];
-    printer->print_case_information(
-        scramble, skeleton,
-        {parity, corner_cycles, edge_cycles, center_cycles}
-    );
+    printer->print_case_information(scramble, skeleton, {parity, corner_cycles, edge_cycles, center_cycles});
 
     unique_ptr<Finder> finder;
     if (vm.count("optimal")) {

@@ -26,10 +26,7 @@ namespace {
 };
 
 
-void BruteForceFinder::Worker::search(
-    const BruteForceFinder::CycleStatus& cycle_status,
-    size_t begin, size_t end
-) {
+void BruteForceFinder::Worker::search(const CycleStatus& cycle_status, size_t begin, size_t end) {
     bool parity = cycle_status.parity;
     int corner_cycles = cycle_status.corner_cycles;
     int edge_cycles = cycle_status.edge_cycles;
@@ -144,10 +141,7 @@ void BruteForceFinder::Worker::search_last_edge_cycle(size_t begin, size_t end) 
     }
 }
 
-void BruteForceFinder::Worker::search_last_placement(
-    int placement,
-    size_t begin, size_t end
-) {
+void BruteForceFinder::Worker::search_last_placement(int placement, size_t begin, size_t end) {
     const Algorithm skeleton = this->solving_step.back().skeleton;
     int case_index = this->finder.center_index[Cube::inverse_center[placement]];
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
@@ -183,12 +177,17 @@ void BruteForceFinder::Worker::try_insertion(
         bool corner_changed = _case.mask() & 0xff;
         bool edge_changed = _case.mask() & 0xfff00;
         bool center_changed = _case.mask() & 0xf00000;
-        auto cube = state.twist_effectively(
-            _case.state(),
-            (corner_changed ? CubeTwist::corners : byte{0})
-                | (edge_changed ? CubeTwist::edges : byte{0})
-                | (center_changed ? CubeTwist::centers : byte{0})
-        );
+        byte twist_flag {0};
+        if (corner_changed) {
+            twist_flag |= CubeTwist::corners;
+        }
+        if (edge_changed) {
+            twist_flag |= CubeTwist::edges;
+        }
+        if (center_changed) {
+            twist_flag |= CubeTwist::centers;
+        }
+        auto cube = state.twist_effectively(_case.state(), twist_flag);
         if (!cube) {
             continue;
         }

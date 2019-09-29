@@ -54,10 +54,7 @@ namespace {
                 int center0 = rotation_permutation[j][rotation_permutation[i][0]];
                 int center2 = rotation_permutation[j][rotation_permutation[i][2]];
                 for (int k = 0; k < 24; ++k) {
-                    if (
-                        center0 == rotation_permutation[k][0]
-                        && center2 == rotation_permutation[k][2]
-                    ) {
+                    if (center0 == rotation_permutation[k][0] && center2 == rotation_permutation[k][2]) {
                         center_transform[i][j] = k;
                         break;
                     }
@@ -74,16 +71,8 @@ const array<array<int, 24>, 24> Cube::center_transform = generate_center_transfo
 void Cube::generate_rotation_cube_table() noexcept {
     array<Cube, 4> basic_rotation_cube;
     for (int i = 0; i < 4; ++i) {
-        memcpy(
-            basic_rotation_cube[i].corner,
-            rotation_corner_table[i],
-            8 * sizeof(int)
-        );
-        memcpy(
-            basic_rotation_cube[i].edge,
-            rotation_edge_table[i],
-            12 * sizeof(int)
-        );
+        memcpy(basic_rotation_cube[i].corner, rotation_corner_table[i], 8 * sizeof(int));
+        memcpy(basic_rotation_cube[i].edge, rotation_edge_table[i], 12 * sizeof(int));
     }
     for (int front = 0; front < 4; ++front) {
         Cube::rotation_cube[front | 4].twist(basic_rotation_cube[1]);

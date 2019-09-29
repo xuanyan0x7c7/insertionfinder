@@ -77,17 +77,16 @@ namespace InsertionFinder {
     public:
         static int compare(const Algorithm& lhs, const Algorithm& rhs) noexcept;
         bool operator==(const Algorithm& rhs) const noexcept {
-            return Algorithm::compare(*this, rhs) == 0;
+            return this->rotation == rhs.rotation && this->twists == rhs.twists;
         }
         bool operator!=(const Algorithm& rhs) const noexcept {
-            return Algorithm::compare(*this, rhs) != 0;
+            return this->rotation != rhs.rotation || this->twists != rhs.twists;
         }
         bool operator<(const Algorithm& rhs) const noexcept {
             return Algorithm::compare(*this, rhs) < 0;
         }
     public:
-        friend std::ostream&
-        ::operator<<(std::ostream& out, const Algorithm& algorithm);
+        friend std::ostream& ::operator<<(std::ostream& out, const Algorithm& algorithm);
         void print(std::ostream& out, std::size_t begin, std::size_t end) const;
         std::string str() const;
     public:
@@ -97,10 +96,8 @@ namespace InsertionFinder {
         std::size_t cancel_moves();
     public:
         void detect_rotation() noexcept;
-        std::pair<std::uint32_t, std::uint32_t>
-        get_insert_place_mask(std::size_t insert_place) const;
-        std::pair<Algorithm, std::size_t>
-        insert(const Algorithm& insertion, std::size_t insert_place) const;
+        std::pair<std::uint32_t, std::uint32_t> get_insert_place_mask(std::size_t insert_place) const;
+        std::pair<Algorithm, std::size_t> insert(const Algorithm& insertion, std::size_t insert_place) const;
         bool is_worthy_insertion(
             const Algorithm& insertion, std::size_t insert_place,
             const std::pair<std::uint32_t, std::uint32_t>& insert_place_mask,

@@ -36,7 +36,7 @@ namespace InsertionFinder {
     public:
         static int compare(const Case& lhs, const Case& rhs) noexcept;
         bool operator==(const Case& rhs) const noexcept {
-            return this->compare(*this, rhs) == 0;
+            return this->_state == rhs._state;
         }
         bool operator<(const Case& rhs) const noexcept {
             return this->compare(*this, rhs) < 0;
@@ -50,6 +50,9 @@ namespace InsertionFinder {
         }
         bool has_parity() const noexcept {
             return this->_has_parity;
+        }
+        bool parity() const noexcept {
+            return this->_has_parity || Cube::center_cycles[this->_state.placement()] > 1;
         }
         int corner_cycles() const noexcept {
             return this->_corner_cycles;
@@ -71,10 +74,7 @@ namespace InsertionFinder {
             ) != this->list.cend();
         }
         template<class T> void add_algorithm(T&& algorithm) {
-            static_assert(std::is_same_v<
-                Insertionfinder::Details::remove_cvref_t<T>,
-                Algorithm
-            >);
+            static_assert(std::is_same_v<Insertionfinder::Details::remove_cvref_t<T>, Algorithm>);
             if (!this->contains_algorithm(algorithm)) {
                 this->list.emplace_back(std::forward<T>(algorithm));
             }
