@@ -105,3 +105,6 @@ Makefile
 /src/insertionfinder
 /insertionfinder-*.tar.gz
 /include/insertionfinder/config.h
+/test/insertionfinder-test
+/test/*.log
+/test/*.trs

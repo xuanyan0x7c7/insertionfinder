@@ -21,6 +21,7 @@ AS_IF([test "$HAVE_FILESYSTEM"], [], [
 ])
 BOOST_ASIO
 BOOST_PROGRAM_OPTIONS
+BOOST_TEST
 
 AC_CONFIG_HEADERS([config.h])
 AX_PREFIX_CONFIG_H(include/insertionfinder/config.h)
@@ -34,6 +35,7 @@ AC_CONFIG_FILES([
     src/cli/univalue/Makefile
     src/cube/Makefile
     src/finder/Makefile
+    test/Makefile
     data/algorithms/Makefile
     data/algorithms/extras/Makefile
 ])
