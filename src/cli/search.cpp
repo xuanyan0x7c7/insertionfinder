@@ -247,10 +247,7 @@ void CLI::find_insertions(const po::variables_map& vm) {
     for (const string& name: algfilenames) {
         ifstream fin(name, ios::in | ios::binary);
         if (fin.fail()) {
-            fin = ifstream(
-                (algorithms_directory / (name + ".algs")).string(),
-                ios::in | ios::binary
-            );
+            fin = ifstream((algorithms_directory / (name + ".algs")).string(), ios::in | ios::binary);
             if (fin.fail()) {
                 cerr << "Failed to open algorithm file " << name << endl;
                 continue;

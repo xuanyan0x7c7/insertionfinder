@@ -100,7 +100,7 @@ namespace InsertionFinder {
         std::pair<Algorithm, std::size_t> insert(const Algorithm& insertion, std::size_t insert_place) const;
         bool is_worthy_insertion(
             const Algorithm& insertion, std::size_t insert_place,
-            const std::pair<std::uint32_t, std::uint32_t>& insert_place_mask,
+            std::pair<std::uint32_t, std::uint32_t> insert_place_mask,
             std::size_t fewest_twists = std::numeric_limits<std::size_t>::max()
         ) const;
     public:

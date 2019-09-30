@@ -73,8 +73,7 @@ pair<uint32_t, uint32_t> Algorithm::get_insert_place_mask(size_t insert_place) c
 }
 
 
-pair<Algorithm, size_t>
-Algorithm::insert(const Algorithm& insertion, size_t insert_place) const {
+pair<Algorithm, size_t> Algorithm::insert(const Algorithm& insertion, size_t insert_place) const {
     using namespace placeholders;
     Algorithm result;
     result.twists.reserve(this->twists.size() + insertion.twists.size());
@@ -92,7 +91,7 @@ Algorithm::insert(const Algorithm& insertion, size_t insert_place) const {
 
 bool Algorithm::is_worthy_insertion(
     const Algorithm& insertion, size_t insert_place,
-    const pair<uint32_t, uint32_t>& insert_place_mask,
+    pair<uint32_t, uint32_t> insert_place_mask,
     size_t fewest_twists
 ) const {
     size_t length = this->twists.size();

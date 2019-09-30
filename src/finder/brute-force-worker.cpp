@@ -236,11 +236,7 @@ void BruteForceFinder::Worker::try_insertion(
     }
 }
 
-void BruteForceFinder::Worker::try_last_insertion(
-    std::size_t insert_place,
-    int case_index,
-    bool swapped
-) {
+void BruteForceFinder::Worker::try_last_insertion(std::size_t insert_place, int case_index, bool swapped) {
     if (case_index == -1) {
         return;
     }

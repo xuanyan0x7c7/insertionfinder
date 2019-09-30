@@ -73,11 +73,7 @@ void Cube::generate_twist_cube_table() noexcept {
 }
 
 
-void Cube::twist(
-    const Algorithm& algorithm,
-    size_t begin, size_t end,
-    byte flags
-) {
+void Cube::twist(const Algorithm& algorithm, size_t begin, size_t end, byte flags) {
     if (static_cast<bool>(flags & CubeTwist::reversed)) {
         this->rotate(Cube::inverse_center[algorithm.cube_rotation()]);
         for (size_t i = end; i-- != begin;) {
