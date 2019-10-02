@@ -88,6 +88,10 @@ void Cube::twist(const Algorithm& algorithm, size_t begin, size_t end, byte flag
 }
 
 void Cube::twist(const Cube& cube, byte flags) noexcept {
+    if (this == &cube) {
+        this->twist_before(*this, flags);
+        return;
+    }
     if (static_cast<bool>(flags & CubeTwist::corners)) {
         for (int& item: this->corner) {
             int transform = cube.corner[item / 3];
