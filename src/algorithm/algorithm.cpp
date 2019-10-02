@@ -132,9 +132,6 @@ Algorithm::Algorithm(const string& algorithm_string) {
     if (!temp_string.empty()) {
         throw AlgorithmError(algorithm_string);
     }
-    this->rotation = 0;
-
-    this->cancel_moves();
 }
 
 

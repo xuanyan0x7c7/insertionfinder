@@ -47,6 +47,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
                 cerr << "Invalid algorithm: " << e.what() << endl;
                 continue;
             }
+            algorithm.simplify();
             algorithm.normalize();
             algorithm.detect_rotation();
             Cube cube;

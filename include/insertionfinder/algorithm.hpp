@@ -112,6 +112,10 @@ namespace InsertionFinder {
             std::swap(this->twists[place - 1], this->twists[place]);
         }
     public:
+        void simplify() {
+            this->rotation = 0;
+            this->cancel_moves();
+        }
         void normalize() noexcept;
         void rotate(int rotation);
         std::vector<Algorithm> generate_isomorphisms() const;

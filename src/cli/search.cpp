@@ -317,6 +317,8 @@ void CLI::find_insertions(const po::variables_map& vm) {
         delete in;
     }
 
+    scramble.simplify();
+    skeleton.simplify();
     Cube original_cube;
     original_cube.twist(scramble);
     original_cube.twist(skeleton);

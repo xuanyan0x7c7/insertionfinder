@@ -25,6 +25,8 @@ namespace {
     verify(const string& scramble_string, const string& skeleton_string) try {
         Algorithm scramble(scramble_string);
         Algorithm skeleton(skeleton_string);
+        scramble.simplify();
+        skeleton.simplify();
         Cube cube;
         cube.twist(scramble);
         cube.twist(skeleton);
