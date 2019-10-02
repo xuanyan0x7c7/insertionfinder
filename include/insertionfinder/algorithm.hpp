@@ -92,6 +92,21 @@ namespace InsertionFinder {
     public:
         void save_to(std::ostream& out) const;
         void read_from(std::istream& in);
+    public:
+        Algorithm operator+(const Algorithm& rhs) const;
+        Algorithm operator+(const std::string& rhs) const {
+            return *this + Algorithm(rhs);
+        }
+        friend Algorithm operator+(Algorithm&& lhs, const Algorithm& rhs) {
+            return std::move(lhs += rhs);
+        }
+        friend Algorithm operator+(const std::string& lhs, const Algorithm& rhs) {
+            return Algorithm(lhs) + rhs;
+        }
+        Algorithm& operator+=(const Algorithm& rhs);
+        Algorithm& operator+=(const std::string& rhs) {
+            return *this += Algorithm(rhs);
+        }
     private:
         std::size_t cancel_moves();
     public:

@@ -78,6 +78,7 @@ namespace InsertionFinder {
         static std::array<Cube, 24> rotation_cube;
         static std::vector<std::array<int, 24>> corner_cycle_transform;
         static std::vector<std::array<int, 24>> edge_cycle_transform;
+    public:
         static const std::array<std::array<int, 24>, 24> center_transform;
     private:
         static void generate_twist_cube_table() noexcept;

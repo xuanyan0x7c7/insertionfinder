@@ -2,11 +2,11 @@
 #include <cstdint>
 
 namespace InsertionFinder::Details {
-    inline std::uint32_t twist_mask(int twist) {
+    constexpr std::uint32_t twist_mask(int twist) {
         return 1 << twist | 1 << (24 + (twist >> 2));
     }
 
-    inline int transform_twist(const int* transform, int twist) {
+    constexpr int transform_twist(const int* transform, int twist) {
         return transform[twist >> 3] << 2 ^ (twist & 7);
     }
 

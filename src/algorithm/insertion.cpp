@@ -77,7 +77,7 @@ pair<Algorithm, size_t> Algorithm::insert(const Algorithm& insertion, size_t ins
     using namespace placeholders;
     Algorithm result;
     result.twists.reserve(this->twists.size() + insertion.twists.size());
-    result.twists.insert(result.twists.end(), this->twists.cbegin(), this->twists.cbegin() + insert_place);
+    result.twists.assign(this->twists.cbegin(), this->twists.cbegin() + insert_place);
     result.twists.insert(result.twists.end(), insertion.twists.cbegin(), insertion.twists.cend());
     transform(
         this->twists.cbegin() + insert_place, this->twists.cend(),

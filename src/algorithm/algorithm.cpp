@@ -105,7 +105,7 @@ Algorithm::Algorithm(const string& algorithm_string) {
         R"(\s*((?:2?[UDRLFB]w|[UDRLFB])[2']?|[xyz][2']?|\[[udrlfb][2']?\])\s*)",
         regex_constants::ECMAScript | regex_constants::optimize
     );
-    array<int, 3> transform = {0, 2, 4};
+    int transform[3] = {0, 2, 4};
     smatch match_result;
     string temp_string = algorithm_string;
     while (regex_search(temp_string, match_result, twists_regex)) {
@@ -115,22 +115,29 @@ Algorithm::Algorithm(const string& algorithm_string) {
         if (auto find_result = pattern_table.find(match_result[1]); find_result != pattern_table.cend()) {
             const auto& [pattern_transform, twist] = find_result->second;
             if (twist != -1) {
-                this->twists.push_back(transform_twist(transform.data(), twist));
+                this->twists.push_back(transform_twist(transform, twist));
             }
-            array<int, 3> new_transform;
+            int new_transform[3];
             for (int i = 0; i < 3; ++i) {
                 int temp = pattern_transform[i];
                 new_transform[i] = transform[temp >> 1] ^ (temp & 1);
             }
-            transform = new_transform;
+            swap(transform, new_transform);
         } else {
             int twist = find(twist_string, twist_string + 24, string(match_result[1])) - twist_string;
-            this->twists.push_back(transform_twist(transform.data(), twist));
+            this->twists.push_back(transform_twist(transform, twist));
         }
         temp_string = match_result.suffix();
     }
     if (!temp_string.empty()) {
         throw AlgorithmError(algorithm_string);
+    }
+    for (int i = 0; i < 24; ++i) {
+        const int* permutation = rotation_permutation[Cube::inverse_center[i]];
+        if (permutation[0] == transform[0] && permutation[1] == transform[1]) {
+            this->rotation = i;
+            break;
+        }
     }
 }
 
@@ -244,6 +251,33 @@ void Algorithm::read_from(istream& in) {
     } else {
         this->set_up_mask = 0;
     }
+}
+
+
+Algorithm Algorithm::operator+(const Algorithm& rhs) const {
+    using namespace placeholders;
+    Algorithm result;
+    result.twists.reserve(this->twists.size() + rhs.twists.size());
+    result.twists.assign(this->twists.cbegin(), this->twists.cend());
+    transform(
+        rhs.twists.cbegin(), rhs.twists.cend(),
+        back_inserter(result.twists),
+        bind(transform_twist, rotation_permutation[Cube::inverse_center[this->rotation]], _1)
+    );
+    result.rotation = Cube::center_transform[this->rotation][rhs.rotation];
+    return result;
+}
+
+Algorithm& Algorithm::operator+=(const Algorithm& rhs) {
+    using namespace placeholders;
+    this->twists.reserve(this->twists.size() + rhs.twists.size());
+    transform(
+        rhs.twists.cbegin(), rhs.twists.cend(),
+        back_inserter(this->twists),
+        bind(transform_twist, rotation_permutation[Cube::inverse_center[this->rotation]], _1)
+    );
+    this->rotation = Cube::center_transform[this->rotation][rhs.rotation];
+    return *this;
 }
 
 
