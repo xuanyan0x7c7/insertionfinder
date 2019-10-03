@@ -1,8 +1,10 @@
 #include <cstdint>
+#include <cstring>
 #include <algorithm>
 #include <array>
 #include <functional>
 #include <istream>
+#include <iterator>
 #include <ostream>
 #include <regex>
 #include <sstream>
@@ -122,7 +124,7 @@ Algorithm::Algorithm(const string& algorithm_string) {
                 int temp = pattern_transform[i];
                 new_transform[i] = transform[temp >> 1] ^ (temp & 1);
             }
-            swap(transform, new_transform);
+            memcpy(transform, new_transform, 3 * sizeof(int));
         } else {
             int twist = find(twist_string, twist_string + 24, string(match_result[1])) - twist_string;
             this->twists.push_back(transform_twist(transform, twist));
@@ -178,13 +180,15 @@ ostream& operator<<(ostream& out, const Algorithm& algorithm) {
 }
 
 void Algorithm::print(ostream& out, size_t begin, size_t end) const {
+    using namespace placeholders;
     if (begin >= end) {
         return;
     }
-    out << twist_string[this->twists[begin]];
-    for (size_t i = begin; ++i < end;) {
-        out << ' ' << twist_string[this->twists[i]];
-    }
+    transform(
+        this->twists.cbegin() + begin, this->twists.cbegin() + end,
+        ostream_iterator<const char*>(out, " "),
+        [](int twist) {return twist_string[twist];}
+    );
 }
 
 string Algorithm::str() const {
