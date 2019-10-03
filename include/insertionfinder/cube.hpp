@@ -108,7 +108,8 @@ namespace InsertionFinder {
             return Cube::center_transform[placement][rotation];
         }
     public:
-        Cube inverse() const noexcept;
+        void inverse() noexcept;
+        static Cube inverse(const Cube& cube) noexcept;
         std::uint32_t mask() const noexcept;
     public:
         bool has_parity() const noexcept;

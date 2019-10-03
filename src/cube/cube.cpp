@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <cstring>
 #include <array>
 #include <istream>
 #include <functional>
@@ -97,17 +98,33 @@ bool Cube::operator==(const Cube& rhs) const noexcept {
 }
 
 
-Cube Cube::inverse() const noexcept {
-    Cube result(nullopt);
+void Cube::inverse() noexcept {
+    int corner[8];
+    int edge[12];
     for (int i = 0; i < 8; ++i) {
         int item = this->corner[i];
+        corner[item / 3] = i * 3 + (24 - item) % 3;
+    }
+    memcpy(this->corner, corner, 8 * sizeof(int));
+    for (int i = 0; i < 12; ++i) {
+        int item = this->edge[i];
+        edge[item >> 1] = i << 1 | (item & 1);
+    }
+    memcpy(this->edge, edge, 12 * sizeof(int));
+    this->_placement = Cube::inverse_center[this->_placement];
+}
+
+Cube Cube::inverse(const Cube& cube) noexcept {
+    Cube result(nullopt);
+    for (int i = 0; i < 8; ++i) {
+        int item = cube.corner[i];
         result.corner[item / 3] = i * 3 + (24 - item) % 3;
     }
     for (int i = 0; i < 12; ++i) {
-        int item = this->edge[i];
+        int item = cube.edge[i];
         result.edge[item >> 1] = i << 1 | (item & 1);
     }
-    result._placement = Cube::inverse_center[this->_placement];
+    result._placement = Cube::inverse_center[cube._placement];
     return result;
 }
 

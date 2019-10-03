@@ -52,7 +52,7 @@ void Finder::init() {
     }
 
     this->scramble_cube.twist(scramble);
-    this->inverse_scramble_cube = this->scramble_cube.inverse();
+    this->inverse_scramble_cube = Cube::inverse(this->scramble_cube);
 }
 
 void Finder::search(const SearchParams& params) {
