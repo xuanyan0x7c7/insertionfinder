@@ -299,3 +299,23 @@ void Algorithm::detect_rotation() noexcept {
     cube.twist(*this);
     this->rotation = cube.best_placement().placement();
 }
+
+
+void Algorithm::inverse() {
+    reverse(this->twists.begin(), this->twists.end());
+    this->rotate(this->rotation);
+    this->rotation = Cube::inverse_center[this->rotation];
+}
+
+Algorithm Algorithm::inverse(const Algorithm& algorithm) {
+    using namespace placeholders;
+    Algorithm result;
+    result.twists.reserve(algorithm.twists.size());
+    transform(
+        algorithm.twists.crbegin(), algorithm.twists.crend(),
+        back_inserter(result.twists),
+        bind(transform_twist, rotation_permutation[algorithm.rotation], _1)
+    );
+    result.rotation = Cube::inverse_center[algorithm.rotation];
+    return result;
+}
