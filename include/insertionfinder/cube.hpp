@@ -98,7 +98,7 @@ namespace InsertionFinder {
             this->twist_before(Cube::twist_cube[twist], flags);
         }
         void twist_before(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
-        std::optional<Cube> twist_effectively(const Cube& cube, std::byte flags = CubeTwist::full) const noexcept;
+        static Cube twist(const Cube& lhs, const Cube& rhs, std::byte flags = CubeTwist::full) noexcept;
         void rotate(int rotation) {
             if (rotation) {
                 this->twist(Cube::rotation_cube[rotation]);

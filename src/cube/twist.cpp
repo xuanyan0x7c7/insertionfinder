@@ -133,29 +133,29 @@ void Cube::twist_before(const Cube& cube, byte flags) noexcept {
 }
 
 
-optional<Cube> Cube::twist_effectively(const Cube& cube, byte flags) const noexcept {
+Cube Cube::twist(const Cube& lhs, const Cube& rhs, byte flags) noexcept {
     Cube result(nullopt);
     if (static_cast<bool>(flags & CubeTwist::centers)) {
-        result._placement = Cube::center_transform[this->_placement][cube._placement];
+        result._placement = Cube::center_transform[lhs._placement][rhs._placement];
     } else {
-        result._placement = this->_placement;
+        result._placement = lhs._placement;
     }
     if (static_cast<bool>(flags & CubeTwist::corners)) {
-        for (int i = 0; i < 8; ++i) {
-            int item = this->corner[i];
-            int transform = cube.corner[item / 3];
+        for (size_t i = 0; i < 8; ++i) {
+            int item = lhs.corner[i];
+            int transform = rhs.corner[item / 3];
             result.corner[i] = transform - transform % 3 + (item + transform) % 3;
         }
     } else {
-        memcpy(result.corner, this->corner, 8 * sizeof(int));
+        memcpy(result.corner, lhs.corner, 8 * sizeof(int));
     }
     if (static_cast<bool>(flags & CubeTwist::edges)) {
-        for (int i = 0; i < 12; ++i) {
-            int item = this->edge[i];
-            result.edge[i] = cube.edge[item >> 1] ^ (item & 1);
+        for (size_t i = 0; i < 12; ++i) {
+            int item = lhs.edge[i];
+            result.edge[i] = rhs.edge[item >> 1] ^ (item & 1);
         }
     } else {
-        memcpy(result.edge, this->edge, 12 * sizeof(int));
+        memcpy(result.edge, lhs.edge, 12 * sizeof(int));
     }
     return result;
 }

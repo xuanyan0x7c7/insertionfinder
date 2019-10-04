@@ -187,13 +187,10 @@ void BruteForceFinder::Worker::try_insertion(
         if (center_changed) {
             twist_flag |= CubeTwist::centers;
         }
-        auto cube = state.twist_effectively(_case.state(), twist_flag);
-        if (!cube) {
-            continue;
-        }
+        Cube cube = Cube::twist(state, _case.state(), twist_flag);
         bool new_parity = parity ^ _case.has_parity();
-        int new_corner_cycles = corner_changed ? cube->corner_cycles() : corner_cycles;
-        int new_edge_cycles = edge_changed ? cube->edge_cycles() : edge_cycles;
+        int new_corner_cycles = corner_changed ? cube.corner_cycles() : corner_cycles;
+        int new_edge_cycles = edge_changed ? cube.edge_cycles() : edge_cycles;
         int new_placement = Cube::placement_twist(_case.rotation(), placement);
         if (
             !new_parity
