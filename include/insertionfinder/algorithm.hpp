@@ -23,9 +23,8 @@ namespace InsertionFinder {
     public:
         AlgorithmError(std::string algorithm_string):
             algorithm_string(std::move(algorithm_string)),
-            explanation_string(
-                "Invalid algorithm string: " + this->algorithm_string
-            ) {}
+            explanation_string("Invalid algorithm string: " + this->algorithm_string)
+            {}
     public:
         virtual const char* what() const noexcept override {
             return explanation_string.c_str();

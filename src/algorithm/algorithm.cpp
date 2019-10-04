@@ -233,13 +233,9 @@ void Algorithm::read_from(istream& in) {
     if (length > 1 && twists[0] >> 3 == twists[1] >> 3) {
         this->begin_mask |= twist_mask(Algorithm::inverse_twist[twists[1]]);
     }
-    this->end_mask = twist_mask(Algorithm::inverse_twist[
-        transform_twist(transform, twists[length - 1])
-    ]);
+    this->end_mask = twist_mask(Algorithm::inverse_twist[transform_twist(transform, twists[length - 1])]);
     if (length > 1 && twists[length - 1] >> 3 == twists[length - 2] >> 3) {
-        this->end_mask |= twist_mask(Algorithm::inverse_twist[
-            transform_twist(transform, twists[length - 2])
-        ]);
+        this->end_mask |= twist_mask(Algorithm::inverse_twist[transform_twist(transform, twists[length - 2])]);
     }
     if (length > 2 && this->begin_mask & this->end_mask) {
         this->set_up_mask = 0;

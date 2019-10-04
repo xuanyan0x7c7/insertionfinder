@@ -37,13 +37,11 @@ vector<Algorithm> Algorithm::generate_isomorphisms() const {
             int twist = this->twists[index];
             int result_twist = transform_twist(table, twist);
             result[i].twists[index] = result_twist;
-            result[i + 24].twists[inversed_index] =
-                this->inverse_twist[result_twist];
+            result[i + 24].twists[inversed_index] = Algorithm::inverse_twist[result_twist];
             result[i + 48].twists[index] = result_twist < 16
-                ? this->inverse_twist[result_twist]
+                ? Algorithm::inverse_twist[result_twist]
                 : 40 - result_twist;
-            result[i + 72].twists[inversed_index] =
-                this->inverse_twist[result[i + 48].twists[index]];
+            result[i + 72].twists[inversed_index] = Algorithm::inverse_twist[result[i + 48].twists[index]];
         }
     }
     for (Algorithm& algorithm: result) {
