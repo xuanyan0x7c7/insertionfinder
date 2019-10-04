@@ -4,7 +4,6 @@
 #include <array>
 #include <functional>
 #include <istream>
-#include <iterator>
 #include <ostream>
 #include <regex>
 #include <sstream>
@@ -184,11 +183,10 @@ void Algorithm::print(ostream& out, size_t begin, size_t end) const {
     if (begin >= end) {
         return;
     }
-    transform(
-        this->twists.cbegin() + begin, this->twists.cbegin() + end,
-        ostream_iterator<const char*>(out, " "),
-        [](int twist) {return twist_string[twist];}
-    );
+    out << twist_string[this->twists[begin]];
+    for (size_t i = begin; ++i < end;) {
+        out << ' ' << twist_string[this->twists[i]];
+    }
 }
 
 string Algorithm::str() const {
