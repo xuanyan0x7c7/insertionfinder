@@ -115,7 +115,7 @@ void Cube::inverse() noexcept {
 }
 
 Cube Cube::inverse(const Cube& cube) noexcept {
-    Cube result(nullopt);
+    Cube result(Cube::raw_construct);
     for (int i = 0; i < 8; ++i) {
         int item = cube.corner[i];
         result.corner[item / 3] = i * 3 + (24 - item) % 3;

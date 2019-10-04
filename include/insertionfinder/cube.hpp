@@ -5,7 +5,6 @@
 #include <exception>
 #include <functional>
 #include <istream>
-#include <optional>
 #include <ostream>
 #include <vector>
 #include <insertionfinder/algorithm.hpp>
@@ -32,6 +31,9 @@ namespace InsertionFinder {
 
     class Cube {
         friend struct std::hash<Cube>;
+    private:
+        class RawConstructor {};
+        static constexpr RawConstructor raw_construct {};
     public:
         static constexpr int inverse_center[24] = {
             0, 3, 2, 1,
@@ -61,7 +63,7 @@ namespace InsertionFinder {
         Cube& operator=(Cube&&) = default;
         ~Cube() = default;
     private:
-        explicit Cube(std::nullopt_t) noexcept {}
+        explicit Cube(RawConstructor) noexcept {}
     public:
         void save_to(std::ostream& out) const;
         void read_from(std::istream& in);

@@ -1,7 +1,6 @@
 #include <cstddef>
 #include <cstring>
 #include <array>
-#include <optional>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 using namespace std;
@@ -134,7 +133,7 @@ void Cube::twist_before(const Cube& cube, byte flags) noexcept {
 
 
 Cube Cube::twist(const Cube& lhs, const Cube& rhs, byte flags) noexcept {
-    Cube result(nullopt);
+    Cube result(Cube::raw_construct);
     if (static_cast<bool>(flags & CubeTwist::centers)) {
         result._placement = Cube::center_transform[lhs._placement][rhs._placement];
     } else {
