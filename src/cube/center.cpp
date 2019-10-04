@@ -49,8 +49,8 @@ namespace {
 
     array<array<int, 24>, 24> generate_center_transform_table() noexcept {
         array<array<int, 24>, 24> center_transform;
-        for (int i = 0; i < 24; ++i) {
-            for (int j = 0; j < 24; ++j) {
+        for (size_t i = 0; i < 24; ++i) {
+            for (size_t j = 0; j < 24; ++j) {
                 int center0 = rotation_permutation[j][rotation_permutation[i][0]];
                 int center2 = rotation_permutation[j][rotation_permutation[i][2]];
                 for (int k = 0; k < 24; ++k) {
@@ -70,33 +70,33 @@ const array<array<int, 24>, 24> Cube::center_transform = generate_center_transfo
 
 void Cube::generate_rotation_cube_table() noexcept {
     array<Cube, 4> basic_rotation_cube;
-    for (int i = 0; i < 4; ++i) {
+    for (size_t i = 0; i < 4; ++i) {
         memcpy(basic_rotation_cube[i].corner, rotation_corner_table[i], 8 * sizeof(int));
         memcpy(basic_rotation_cube[i].edge, rotation_edge_table[i], 12 * sizeof(int));
     }
-    for (int front = 0; front < 4; ++front) {
+    for (size_t front = 0; front < 4; ++front) {
         Cube::rotation_cube[front | 4].twist(basic_rotation_cube[1]);
     }
-    for (int front = 0; front < 4; ++front) {
+    for (size_t front = 0; front < 4; ++front) {
         Cube::rotation_cube[front | 8].twist(basic_rotation_cube[1]);
         Cube::rotation_cube[front | 8].twist(basic_rotation_cube[1]);
     }
-    for (int front = 0; front < 4; ++front) {
+    for (size_t front = 0; front < 4; ++front) {
         Cube::rotation_cube[front | 12].twist(basic_rotation_cube[1]);
         Cube::rotation_cube[front | 12].twist(basic_rotation_cube[1]);
         Cube::rotation_cube[front | 12].twist(basic_rotation_cube[1]);
     }
-    for (int front = 0; front < 4; ++front) {
+    for (size_t front = 0; front < 4; ++front) {
         Cube::rotation_cube[front | 16].twist(basic_rotation_cube[3]);
     }
-    for (int front = 0; front < 4; ++front) {
+    for (size_t front = 0; front < 4; ++front) {
         Cube::rotation_cube[front | 20].twist(basic_rotation_cube[3]);
         Cube::rotation_cube[front | 20].twist(basic_rotation_cube[3]);
         Cube::rotation_cube[front | 20].twist(basic_rotation_cube[3]);
     }
-    for (int top = 0; top < 6; ++top) {
-        for (int front = 1; front < 4; ++front) {
-            for (int i = 0; i < front; ++i) {
+    for (size_t top = 0; top < 6; ++top) {
+        for (size_t front = 1; front < 4; ++front) {
+            for (size_t i = 0; i < front; ++i) {
                 Cube::rotation_cube[top << 2 | front].twist(basic_rotation_cube[2]);
             }
         }

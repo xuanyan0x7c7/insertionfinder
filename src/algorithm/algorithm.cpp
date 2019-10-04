@@ -120,7 +120,7 @@ Algorithm::Algorithm(const string& algorithm_string) {
                 this->twists.push_back(transform_twist(transform, twist));
             }
             int new_transform[3];
-            for (int i = 0; i < 3; ++i) {
+            for (size_t i = 0; i < 3; ++i) {
                 int temp = pattern_transform[i];
                 new_transform[i] = transform[temp >> 1] ^ (temp & 1);
             }

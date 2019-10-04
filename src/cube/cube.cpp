@@ -37,10 +37,10 @@ Cube::Cube() noexcept {
 
 void Cube::save_to(ostream& out) const {
     char data[21];
-    for (int i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; ++i) {
         data[i] = this->corner[i];
     }
-    for (int i = 0; i < 12; ++i) {
+    for (size_t i = 0; i < 12; ++i) {
         data[i + 8] = this->edge[i];
     }
     data[20] = this->_placement;
@@ -53,10 +53,10 @@ void Cube::read_from(istream& in) {
     if (in.gcount() != 21) {
         throw CubeStreamError();
     }
-    for (int i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; ++i) {
         this->corner[i] = data[i];
     }
-    for (int i = 0; i < 12; ++i) {
+    for (size_t i = 0; i < 12; ++i) {
         this->edge[i] = data[i + 8];
     }
     this->_placement = data[20];
@@ -67,12 +67,12 @@ int Cube::compare(const Cube& lhs, const Cube& rhs) noexcept {
     if (lhs._placement != rhs._placement) {
         return lhs._placement - rhs._placement;
     }
-    for (int i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; ++i) {
         if (lhs.corner[i] != rhs.corner[i]) {
             return lhs.corner[i] - rhs.corner[i];
         }
     }
-    for (int i = 0; i < 12; ++i) {
+    for (size_t i = 0; i < 12; ++i) {
         if (lhs.edge[i] != rhs.edge[i]) {
             return lhs.edge[i] - rhs.edge[i];
         }
@@ -84,12 +84,12 @@ bool Cube::operator==(const Cube& rhs) const noexcept {
     if (this->_placement != rhs._placement) {
         return false;
     }
-    for (int i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; ++i) {
         if (this->corner[i] != rhs.corner[i]) {
             return false;
         }
     }
-    for (int i = 0; i < 12; ++i) {
+    for (size_t i = 0; i < 12; ++i) {
         if (this->edge[i] != rhs.edge[i]) {
             return false;
         }
@@ -149,10 +149,10 @@ uint32_t Cube::mask() const noexcept {
 
 size_t hash<Cube>::operator()(const Cube& cube) const noexcept {
     size_t result = 0;
-    for (int i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; ++i) {
         result = result * 31 + cube.corner[i];
     }
-    for (int i = 0; i < 12; ++i) {
+    for (size_t i = 0; i < 12; ++i) {
         result = result * 31 + cube.edge[i];
     }
     result = result * 31 + cube._placement;

@@ -112,7 +112,7 @@ void Cube::twist(const Cube& cube, byte flags) noexcept {
 void Cube::twist_before(const Cube& cube, byte flags) noexcept {
     if (static_cast<bool>(flags & CubeTwist::corners)) {
         int corner[8];
-        for (int i = 0; i < 8; ++i) {
+        for (size_t i = 0; i < 8; ++i) {
             int item = cube.corner[i];
             int transform = this->corner[item / 3];
             corner[i] = transform - transform % 3 + (item + transform) % 3;
@@ -121,7 +121,7 @@ void Cube::twist_before(const Cube& cube, byte flags) noexcept {
     }
     if (static_cast<bool>(flags & CubeTwist::edges)) {
         int edge[12];
-        for (int i = 0; i < 12; ++i) {
+        for (size_t i = 0; i < 12; ++i) {
             int item = cube.edge[i];
             edge[i] = this->edge[item >> 1] ^ (item & 1);
         }
