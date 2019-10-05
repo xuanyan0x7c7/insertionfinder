@@ -155,7 +155,7 @@ void BruteForceFinder::Worker::search_last_placement(int placement, size_t begin
 void BruteForceFinder::Worker::try_insertion(
     size_t insert_place,
     const Cube& state,
-    const CycleStatus& cycle_status,
+    CycleStatus cycle_status,
     bool swapped
 ) {
     Insertion& insertion = this->solving_step.back();

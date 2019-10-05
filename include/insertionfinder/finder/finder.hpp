@@ -27,9 +27,12 @@ namespace InsertionFinder {
     protected:
         struct CycleStatus {
             bool parity;
-            int corner_cycles;
-            int edge_cycles;
-            int placement;
+            std::int8_t corner_cycles;
+            std::int8_t edge_cycles;
+            std::int8_t placement;
+            CycleStatus() = default;
+            CycleStatus(bool parity, int corner_cycles, int edge_cycles, int placement):
+                parity(parity), corner_cycles(corner_cycles), edge_cycles(edge_cycles), placement(placement) {}
         };
     public:
         struct Insertion {

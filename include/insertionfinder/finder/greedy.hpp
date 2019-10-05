@@ -26,24 +26,19 @@ namespace InsertionFinder {
             std::atomic<std::size_t> fewest_moves;
             std::mutex fewest_moves_mutex;
         };
-        struct Skeleton {
-            const Algorithm* skeleton;
-            const CycleStatus* cycle_status;
-            std::size_t cancellation;
-        };
         class Worker {
         private:
             GreedyFinder& finder;
             boost::asio::thread_pool& pool;
             const Algorithm& skeleton;
-            const CycleStatus& cycle_status;
+            const CycleStatus cycle_status;
             const std::size_t cancellation;
         public:
             explicit Worker(
                 GreedyFinder& finder,
                 boost::asio::thread_pool& pool,
                 const Algorithm& skeleton,
-                const CycleStatus& cycle_status,
+                CycleStatus cycle_status,
                 std::size_t cancellation
             ):
                 finder(finder), pool(pool), skeleton(skeleton),

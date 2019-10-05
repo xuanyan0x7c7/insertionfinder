@@ -202,7 +202,7 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
                     move(new_skeleton),
                     SolvingStep {
                         &this->skeleton, insert_place, &algorithm, swapped,
-                        {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
+                        CycleStatus(new_parity, new_corner_cycles, new_edge_cycles, new_placement),
                         new_cancellation
                     }
                 );
@@ -234,7 +234,7 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
                     move(new_skeleton),
                     SolvingStep {
                         &this->skeleton, insert_place, &algorithm, swapped,
-                        {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
+                        CycleStatus(new_parity, new_corner_cycles, new_edge_cycles, new_placement),
                         new_cancellation
                     }
                 );

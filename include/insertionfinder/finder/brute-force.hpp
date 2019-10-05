@@ -25,7 +25,7 @@ namespace InsertionFinder {
             void try_insertion(
                 std::size_t insert_place,
                 const Cube& state,
-                const CycleStatus& cycle_status,
+                CycleStatus cycle_status,
                 bool swapped = false
             );
             void try_last_insertion(std::size_t insert_place, int case_index, bool swapped = false);
@@ -39,11 +39,7 @@ namespace InsertionFinder {
     protected:
         void search_core(const SearchParams& params) override;
     private:
-        void run_worker(
-            const Algorithm& skeleton,
-            const CycleStatus& cycle_status,
-            std::size_t begin, std::size_t end
-        ) {
+        void run_worker(const Algorithm& skeleton, CycleStatus cycle_status, std::size_t begin, std::size_t end) {
             Worker(*this, skeleton).search(cycle_status, begin, end);
         }
     };

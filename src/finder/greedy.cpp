@@ -60,7 +60,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
         }
         this->partial_solution_list[cycles].emplace_back(
             skeleton,
-            SolvingStep {nullptr, 0, nullptr, false, {parity, corner_cycles, edge_cycles, placement}, 0}
+            SolvingStep {nullptr, 0, nullptr, false, CycleStatus(parity, corner_cycles, edge_cycles, placement), 0}
         );
     }
 
