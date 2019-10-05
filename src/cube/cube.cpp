@@ -11,27 +11,12 @@ using namespace std;
 using namespace InsertionFinder;
 
 
-array<Cube, 24> Cube::twist_cube = {};
-array<Cube, 24> Cube::rotation_cube = {};
 vector<array<int, 24>> Cube::corner_cycle_transform(6 * 24 * 24);
 vector<array<int, 24>> Cube::edge_cycle_transform(10 * 24 * 24);
 
 void Cube::init() {
-    Cube::generate_twist_cube_table();
-    Cube::generate_rotation_cube_table();
     Cube::generate_corner_cycle_transform_table();
     Cube::generate_edge_cycle_transform_table();
-}
-
-
-Cube::Cube() noexcept {
-    for (int i = 0; i < 8; ++i) {
-        this->corner[i] = i * 3;
-    }
-    for (int i = 0; i < 12; ++i) {
-        this->edge[i] = i << 1;
-    }
-    this->_placement = 0;
 }
 
 

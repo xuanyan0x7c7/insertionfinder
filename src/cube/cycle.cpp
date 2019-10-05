@@ -124,9 +124,7 @@ int Cube::edge_cycles() const noexcept {
         cycles += (small_cycles[0] + small_cycles[1]) >> 1;
     } else {
         static constexpr int flip_cycles[7] = {0, 2, 3, 5, 6, 8, 9};
-        cycles += small_cycles[1] + flip_cycles[
-            (small_cycles[0] - small_cycles[1]) >> 1
-        ];
+        cycles += small_cycles[1] + flip_cycles[(small_cycles[0] - small_cycles[1]) >> 1];
     }
 
     return cycles - parity;
@@ -185,14 +183,14 @@ int Cube::edge_cycle_index() const noexcept {
 
 void Cube::generate_corner_cycle_transform_table() noexcept {
    auto& table = Cube::corner_cycle_transform;
-    for (int i = 0; i < 6 * 24 * 24; ++i) {
+    for (size_t i = 0; i < 6 * 24 * 24; ++i) {
         Cube cube = Cube::corner_cycle_cube(i);
         if (cube.mask() == 0) {
-            for (int j = 0; j < 24; ++j) {
+            for (size_t j = 0; j < 24; ++j) {
                 table[i][j] = i;
             }
         } else {
-            for (int j = 0; j < 24; ++j) {
+            for (size_t j = 0; j < 24; ++j) {
                 if (j & 3) {
                     Cube new_cube = cube;
                     new_cube.twist_before(Algorithm::inverse_twist[j], CubeTwist::corners);
@@ -208,14 +206,14 @@ void Cube::generate_corner_cycle_transform_table() noexcept {
 
 void Cube::generate_edge_cycle_transform_table() noexcept {
     auto& table = Cube::edge_cycle_transform;
-    for (int i = 0; i < 10 * 24 * 24; ++i) {
+    for (size_t i = 0; i < 10 * 24 * 24; ++i) {
         Cube cube = Cube::edge_cycle_cube(i);
         if (cube.mask() == 0) {
-            for (int j = 0; j < 24; ++j) {
+            for (size_t j = 0; j < 24; ++j) {
                 table[i][j] = i;
             }
         } else {
-            for (int j = 0; j < 24; ++j) {
+            for (size_t j = 0; j < 24; ++j) {
                 if (j & 3) {
                     Cube new_cube = cube;
                     new_cube.twist_before(Algorithm::inverse_twist[j], CubeTwist::edges);

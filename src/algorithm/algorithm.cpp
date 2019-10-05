@@ -193,7 +193,7 @@ int Algorithm::compare(const Algorithm& lhs, const Algorithm& rhs) noexcept {
 
 
 ostream& operator<<(ostream& out, const Algorithm& algorithm) {
-    static const char* rotation_string[24] = {
+    static constexpr const char* rotation_string[24] = {
         "", "y", "y2", "y'",
         "x", "x y", "x y2", "x y'",
         "x2", "x2 y", "z2", "x2 y'",

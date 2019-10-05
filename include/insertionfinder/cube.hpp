@@ -56,7 +56,10 @@ namespace InsertionFinder {
         int edge[12];
         int _placement;
     public:
-        Cube() noexcept;
+        Cube() noexcept:
+            corner {0, 3, 6, 9, 12, 15, 18, 21},
+            edge {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22},
+            _placement(0) {}
         Cube(const Cube&) = default;
         Cube(Cube&&) = default;
         Cube& operator=(const Cube&) = default;
@@ -76,15 +79,15 @@ namespace InsertionFinder {
             return this->compare(*this, rhs) < 0;
         }
     private:
-        static std::array<Cube, 24> twist_cube;
-        static std::array<Cube, 24> rotation_cube;
+        static const std::array<Cube, 24> twist_cube;
+        static const std::array<Cube, 24> rotation_cube;
         static std::vector<std::array<int, 24>> corner_cycle_transform;
         static std::vector<std::array<int, 24>> edge_cycle_transform;
     public:
         static const std::array<std::array<int, 24>, 24> center_transform;
     private:
-        static void generate_twist_cube_table() noexcept;
-        static void generate_rotation_cube_table() noexcept;
+        static std::array<Cube, 24> generate_twist_cube_table() noexcept;
+        static std::array<Cube, 24> generate_rotation_cube_table() noexcept;
         static void generate_corner_cycle_transform_table() noexcept;
         static void generate_edge_cycle_transform_table() noexcept;
     public:

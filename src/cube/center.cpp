@@ -68,43 +68,39 @@ namespace {
 
 const array<array<int, 24>, 24> Cube::center_transform = generate_center_transform_table();
 
-void Cube::generate_rotation_cube_table() noexcept {
+array<Cube, 24> Cube::generate_rotation_cube_table() noexcept {
+    array<Cube, 24> rotation_cube;
     array<Cube, 4> basic_rotation_cube;
     for (size_t i = 0; i < 4; ++i) {
         memcpy(basic_rotation_cube[i].corner, rotation_corner_table[i], 8 * sizeof(int));
         memcpy(basic_rotation_cube[i].edge, rotation_edge_table[i], 12 * sizeof(int));
     }
     for (size_t front = 0; front < 4; ++front) {
-        Cube::rotation_cube[front | 4].twist(basic_rotation_cube[1]);
-    }
-    for (size_t front = 0; front < 4; ++front) {
-        Cube::rotation_cube[front | 8].twist(basic_rotation_cube[1]);
-        Cube::rotation_cube[front | 8].twist(basic_rotation_cube[1]);
-    }
-    for (size_t front = 0; front < 4; ++front) {
-        Cube::rotation_cube[front | 12].twist(basic_rotation_cube[1]);
-        Cube::rotation_cube[front | 12].twist(basic_rotation_cube[1]);
-        Cube::rotation_cube[front | 12].twist(basic_rotation_cube[1]);
-    }
-    for (size_t front = 0; front < 4; ++front) {
-        Cube::rotation_cube[front | 16].twist(basic_rotation_cube[3]);
-    }
-    for (size_t front = 0; front < 4; ++front) {
-        Cube::rotation_cube[front | 20].twist(basic_rotation_cube[3]);
-        Cube::rotation_cube[front | 20].twist(basic_rotation_cube[3]);
-        Cube::rotation_cube[front | 20].twist(basic_rotation_cube[3]);
+        rotation_cube[front | 4].twist(basic_rotation_cube[1]);
+        rotation_cube[front | 8].twist(basic_rotation_cube[1]);
+        rotation_cube[front | 8].twist(basic_rotation_cube[1]);
+        rotation_cube[front | 12].twist(basic_rotation_cube[1]);
+        rotation_cube[front | 12].twist(basic_rotation_cube[1]);
+        rotation_cube[front | 12].twist(basic_rotation_cube[1]);
+        rotation_cube[front | 16].twist(basic_rotation_cube[3]);
+        rotation_cube[front | 20].twist(basic_rotation_cube[3]);
+        rotation_cube[front | 20].twist(basic_rotation_cube[3]);
+        rotation_cube[front | 20].twist(basic_rotation_cube[3]);
     }
     for (size_t top = 0; top < 6; ++top) {
         for (size_t front = 1; front < 4; ++front) {
             for (size_t i = 0; i < front; ++i) {
-                Cube::rotation_cube[top << 2 | front].twist(basic_rotation_cube[2]);
+                rotation_cube[top << 2 | front].twist(basic_rotation_cube[2]);
             }
         }
     }
     for (int placement = 0; placement < 24; ++placement) {
-        Cube::rotation_cube[placement]._placement = placement;
+        rotation_cube[placement]._placement = placement;
     }
+    return rotation_cube;
 }
+
+const array<Cube, 24> Cube::rotation_cube = Cube::generate_rotation_cube_table();
 
 
 Cube Cube::best_placement() const noexcept {
