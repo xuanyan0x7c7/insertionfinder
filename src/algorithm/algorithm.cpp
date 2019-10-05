@@ -28,12 +28,43 @@ namespace {
         "", "B", "B2", "B'"
     };
 
+    int parse_twist(const string& twist_string) {
+        int offset = 0;
+        switch (twist_string[0]) {
+        case 'U':
+            offset = 0;
+            break;
+        case 'D':
+            offset = 4;
+            break;
+        case 'R':
+            offset = 8;
+            break;
+        case 'L':
+            offset = 12;
+            break;
+        case 'F':
+            offset = 16;
+            break;
+        case 'B':
+            offset = 20;
+            break;
+        }
+        if (twist_string.length() == 1) {
+            return offset + 1;
+        } else if (twist_string[1] == '2') {
+            return offset + 2;
+        } else {
+            return offset + 3;
+        }
+    }
+
     struct Transform {
         int transform[3];
         int additional_twist;
     };
 
-    const unordered_map<string, Transform> pattern_table({
+    const unordered_map<string, Transform> pattern_table = {
         {"x", {{4, 2, 1}, -1}},
         {"[r]", {{4, 2, 1}, -1}},
         {"[l']", {{4, 2, 1}, -1}},
@@ -97,23 +128,26 @@ namespace {
         {"2Bw2", {{1, 3, 4}, 18}},
         {"Bw'", {{3, 0, 4}, 19}},
         {"2Bw'", {{3, 0, 4}, 19}}
-    });
+    };
 };
 
 
-Algorithm::Algorithm(const string& algorithm_string) {
+Algorithm::Algorithm(const char* algorithm_string) {
     static const regex twists_regex(
         R"(\s*((?:2?[UDRLFB]w|[UDRLFB])[2']?|[xyz][2']?|\[[udrlfb][2']?\])\s*)",
         regex_constants::ECMAScript | regex_constants::optimize
     );
     int transform[3] = {0, 2, 4};
-    smatch match_result;
-    string temp_string = algorithm_string;
+    cmatch match_result;
+    const char* temp_string = algorithm_string;
     while (regex_search(temp_string, match_result, twists_regex)) {
         if (match_result.position()) {
             throw AlgorithmError(algorithm_string);
         }
-        if (auto find_result = pattern_table.find(match_result[1]); find_result != pattern_table.cend()) {
+        const string match_string = match_result.str(1);
+        if (auto find_result = pattern_table.find(match_string); find_result == pattern_table.cend()) {
+            this->twists.push_back(transform_twist(transform, parse_twist(match_string)));
+        } else {
             const auto& [pattern_transform, twist] = find_result->second;
             if (twist != -1) {
                 this->twists.push_back(transform_twist(transform, twist));
@@ -124,13 +158,10 @@ Algorithm::Algorithm(const string& algorithm_string) {
                 new_transform[i] = transform[temp >> 1] ^ (temp & 1);
             }
             memcpy(transform, new_transform, 3 * sizeof(int));
-        } else {
-            int twist = find(twist_string, twist_string + 24, string(match_result[1])) - twist_string;
-            this->twists.push_back(transform_twist(transform, twist));
         }
-        temp_string = match_result.suffix();
+        temp_string += match_result.length();
     }
-    if (!temp_string.empty()) {
+    if (*temp_string) {
         throw AlgorithmError(algorithm_string);
     }
     for (int i = 0; i < 24; ++i) {

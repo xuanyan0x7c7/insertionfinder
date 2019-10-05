@@ -21,8 +21,8 @@ namespace InsertionFinder {
         const std::string algorithm_string;
         const std::string explanation_string;
     public:
-        AlgorithmError(std::string algorithm_string):
-            algorithm_string(std::move(algorithm_string)),
+        template<class T> AlgorithmError(T&& algorithm_string):
+            algorithm_string(std::forward<T>(algorithm_string)),
             explanation_string("Invalid algorithm string: " + this->algorithm_string)
             {}
     public:
@@ -62,7 +62,8 @@ namespace InsertionFinder {
         Algorithm& operator=(const Algorithm&) = default;
         Algorithm& operator=(Algorithm&&) = default;
         ~Algorithm() = default;
-        explicit Algorithm(const std::string& algorithm_string);
+        explicit Algorithm(const char* algorithm_string);
+        explicit Algorithm(const std::string& algorithm_string): Algorithm(algorithm_string.data()) {}
     public:
         std::size_t length() const noexcept {
             return this->twists.size();
@@ -93,18 +94,18 @@ namespace InsertionFinder {
         void read_from(std::istream& in);
     public:
         Algorithm operator+(const Algorithm& rhs) const;
-        Algorithm operator+(const std::string& rhs) const {
-            return *this + Algorithm(rhs);
+        template<class T> Algorithm operator+(T&& rhs) const {
+            return *this + Algorithm(std::forward<T>(rhs));
         }
         friend Algorithm operator+(Algorithm&& lhs, const Algorithm& rhs) {
             return std::move(lhs += rhs);
         }
-        friend Algorithm operator+(const std::string& lhs, const Algorithm& rhs) {
-            return Algorithm(lhs) + rhs;
+        template<class T> friend Algorithm operator+(T&& lhs, const Algorithm& rhs) {
+            return Algorithm(std::forward<T>(lhs)) + rhs;
         }
         Algorithm& operator+=(const Algorithm& rhs);
-        Algorithm& operator+=(const std::string& rhs) {
-            return *this += Algorithm(rhs);
+        template<class T> Algorithm& operator+=(T&& rhs) {
+            return *this += Algorithm(std::forward<T>(rhs));
         }
     private:
         std::size_t cancel_moves();
