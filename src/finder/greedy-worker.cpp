@@ -52,15 +52,15 @@ void GreedyFinder::Worker::search() {
             state.rotate(placement);
             state.twist(this->finder.scramble_cube, twist_flag);
         } else {
-            int twist = this->skeleton[insert_place - 1];
+            int_fast8_t twist = this->skeleton[insert_place - 1];
             state.twist_before(Algorithm::inverse_twist[twist], twist_flag);
             state.twist(twist, twist_flag);
         }
         this->try_insertion(insert_place, state);
 
         if (this->skeleton.swappable(insert_place)) {
-            int twist0 = this->skeleton[insert_place - 1];
-            int twist1 = this->skeleton[insert_place];
+            int_fast8_t twist0 = this->skeleton[insert_place - 1];
+            int_fast8_t twist1 = this->skeleton[insert_place];
             Cube swapped_state;
             swapped_state.twist(twist0, twist_flag);
             swapped_state.twist(Algorithm::inverse_twist[twist1], twist_flag);

@@ -25,7 +25,7 @@ size_t Algorithm::cancel_moves() {
                 if (needle > p) {
                     needle = p;
                 }
-                int orientation = (*(p - 1) + *q) & 3;
+                int_fast8_t orientation = (*(p - 1) + *q) & 3;
                 if (orientation == 0) {
                     *(p - 1) = *p;
                     --p;
@@ -36,7 +36,7 @@ size_t Algorithm::cancel_moves() {
                 *++p = *q;
             }
         } else {
-            int orientation = (*p + *q) & 3;
+            int_fast8_t orientation = (*p + *q) & 3;
             if (orientation == 0) {
                 --p;
             } else {

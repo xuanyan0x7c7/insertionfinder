@@ -28,8 +28,8 @@ namespace {
         "", "B", "B2", "B'"
     };
 
-    int parse_twist(const string& twist_string) {
-        int offset = 0;
+    int_fast8_t parse_twist(const string& twist_string) {
+        int_fast8_t offset = 0;
         switch (twist_string[0]) {
         case 'U':
             offset = 0;
@@ -60,8 +60,8 @@ namespace {
     }
 
     struct Transform {
-        int transform[3];
-        int additional_twist;
+        int_fast8_t transform[3];
+        int_fast8_t additional_twist;
     };
 
     const unordered_map<string, Transform> pattern_table = {
@@ -137,7 +137,7 @@ Algorithm::Algorithm(const char* algorithm_string) {
         R"(\s*((?:2?[UDRLFB]w|[UDRLFB])[2']?|[xyz][2']?|\[[udrlfb][2']?\])\s*)",
         regex_constants::ECMAScript | regex_constants::optimize
     );
-    int transform[3] = {0, 2, 4};
+    int_fast8_t transform[3] = {0, 2, 4};
     cmatch match_result;
     const char* temp_string = algorithm_string;
     while (regex_search(temp_string, match_result, twists_regex)) {
@@ -152,12 +152,12 @@ Algorithm::Algorithm(const char* algorithm_string) {
             if (twist != -1) {
                 this->twists.push_back(transform_twist(transform, twist));
             }
-            int new_transform[3];
+            int_fast8_t new_transform[3];
             for (size_t i = 0; i < 3; ++i) {
-                int temp = pattern_transform[i];
+                int_fast8_t temp = pattern_transform[i];
                 new_transform[i] = transform[temp >> 1] ^ (temp & 1);
             }
-            memcpy(transform, new_transform, 3 * sizeof(int));
+            memcpy(transform, new_transform, 3 * sizeof(int_fast8_t));
         }
         temp_string += match_result.length();
     }
@@ -165,7 +165,7 @@ Algorithm::Algorithm(const char* algorithm_string) {
         throw AlgorithmError(algorithm_string);
     }
     for (int i = 0; i < 24; ++i) {
-        const int* permutation = rotation_permutation[Cube::inverse_center[i]];
+        const int_fast8_t* permutation = rotation_permutation[Cube::inverse_center[i]];
         if (permutation[0] == transform[0] && permutation[1] == transform[1]) {
             this->rotation = i;
             break;
@@ -250,7 +250,7 @@ void Algorithm::read_from(istream& in) {
     if (static_cast<size_t>(in.gcount()) != length) {
         throw AlgorithmStreamError();
     }
-    this->twists = vector<int>(data.get(), data.get() + length);
+    this->twists = vector<int_fast8_t>(data.get(), data.get() + length);
     char rotation_data;
     in.read(&rotation_data, 1);
     if (static_cast<size_t>(in.gcount()) != 1) {
@@ -258,7 +258,7 @@ void Algorithm::read_from(istream& in) {
     }
     this->rotation = rotation_data;
 
-    const int* transform = rotation_permutation[this->rotation];
+    const int_fast8_t* transform = rotation_permutation[this->rotation];
     auto& twists = this->twists;
     this->begin_mask = twist_mask(Algorithm::inverse_twist[twists[0]]);
     if (length > 1 && twists[0] >> 3 == twists[1] >> 3) {
@@ -312,7 +312,7 @@ Algorithm& Algorithm::operator+=(const Algorithm& rhs) {
 
 size_t hash<Algorithm>::operator()(const Algorithm& algorithm) const noexcept {
     size_t result = algorithm.rotation;
-    for (int twist: algorithm.twists) {
+    for (int_fast8_t twist: algorithm.twists) {
         result = result * 31 + twist;
     }
     return result;

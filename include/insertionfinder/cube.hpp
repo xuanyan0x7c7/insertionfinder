@@ -91,7 +91,7 @@ namespace InsertionFinder {
         static void generate_corner_cycle_transform_table() noexcept;
         static void generate_edge_cycle_transform_table() noexcept;
     public:
-        void twist(int twist, std::byte flags = CubeTwist::full) {
+        void twist(std::int_fast8_t twist, std::byte flags = CubeTwist::full) {
             this->twist(Cube::twist_cube[twist], flags);
         }
         void twist(const Algorithm& algorithm, std::byte flags = CubeTwist::full) noexcept {
@@ -99,7 +99,7 @@ namespace InsertionFinder {
         }
         void twist(const Algorithm& algorithm, std::size_t begin, std::size_t end, std::byte flags = CubeTwist::full);
         void twist(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
-        void twist_before(int twist, std::byte flags = CubeTwist::full) {
+        void twist_before(std::int_fast8_t twist, std::byte flags = CubeTwist::full) {
             this->twist_before(Cube::twist_cube[twist], flags);
         }
         void twist_before(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
