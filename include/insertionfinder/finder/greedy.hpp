@@ -72,6 +72,16 @@ namespace InsertionFinder {
         std::mutex worker_mutex;
     public:
         GreedyFinder(
+            const Algorithm& scramble, const std::vector<Algorithm>& skeletons,
+            const std::vector<Case>& cases, Options options
+        ): Finder(scramble, skeletons, cases), options(options), partial_solution_list(1), partial_states(1) {}
+        GreedyFinder(
+            const Algorithm& scramble, std::vector<Algorithm>&& skeleton,
+            const std::vector<Case>& cases, Options options
+        ):
+            Finder(scramble, std::move(skeleton), cases),
+            options(options), partial_solution_list(1), partial_states(1) {}
+        GreedyFinder(
             const Algorithm& scramble, const Algorithm& skeleton,
             const std::vector<Case>& cases, Options options
         ): Finder(scramble, skeleton, cases), options(options), partial_solution_list(1), partial_states(1) {}
