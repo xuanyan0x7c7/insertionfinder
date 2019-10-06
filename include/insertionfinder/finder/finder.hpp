@@ -97,7 +97,7 @@ namespace InsertionFinder {
             scramble(scramble), skeletons({skeleton}), cases(cases) {
             this->init();
         }
-        virtual ~Finder() {}
+        virtual ~Finder() = default;
     public:
         void search(const SearchParams& params);
     protected:

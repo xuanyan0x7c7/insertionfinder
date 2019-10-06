@@ -74,7 +74,9 @@ namespace InsertionFinder {
         static void init();
     public:
         static int compare(const Cube& lhs, const Cube& rhs) noexcept;
-        bool operator==(const Cube& rhs) const noexcept;
+        bool operator==(const Cube& rhs) const noexcept {
+            return this->compare(*this, rhs) == 0;
+        }
         bool operator<(const Cube& rhs) const noexcept {
             return this->compare(*this, rhs) < 0;
         }

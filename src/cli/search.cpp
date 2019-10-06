@@ -5,13 +5,11 @@
 #include <limits>
 #include <memory>
 #include <string>
-#include <thread>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 #include <boost/program_options.hpp>
 #include <insertionfinder/fallbacks/filesystem.hpp>
-#include <config.h>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
@@ -216,7 +214,7 @@ namespace {
 };
 
 
-void CLI::find_insertions(const po::variables_map& vm) {
+void CLI::find_insertion(const po::variables_map& vm) {
     const vector<string> filenames = vm.count("file") ? vm["file"].as<vector<string>>() : vector<string>();
     const fs::path algorithms_directory = vm["algs-dir"].as<string>();
     vector<string> algfilenames = vm.count("algfile") ? vm["algfile"].as<vector<string>>() : vector<string>();
@@ -279,23 +277,15 @@ void CLI::find_insertions(const po::variables_map& vm) {
     }
     sort(cases.begin(), cases.end());
 
-    istream* in;
+    shared_ptr<istream> in;
     if (filenames.empty()) {
-        in = &cin;
+        in.reset(&cin, [](istream*) {});
     } else {
         const string& name = filenames.front();
-        ifstream* fin = new ifstream(name);
-        if (fin->fail()) {
-            throw CLI::CommandExecutionError("Failed to open input file" + name);
+        in = make_shared<ifstream>(name);
+        if (in->fail()) {
+            throw CLI::CommandExecutionError("Failed to open input file " + name);
         }
-        in = fin;
-    }
-
-    unique_ptr<Printer> printer;
-    if (vm.count("json")) {
-        printer = make_unique<JSONPrinter>();
-    } else {
-        printer = make_unique<StandardPrinter>();
     }
 
     string line;
@@ -313,9 +303,7 @@ void CLI::find_insertions(const po::variables_map& vm) {
     } catch (const AlgorithmError& e) {
         throw CLI::CommandExecutionError("Invalid skeleton " + line);
     }
-    if (in != &cin) {
-        delete in;
-    }
+    in.reset();
 
     scramble.simplify();
     skeleton.simplify();
@@ -327,6 +315,13 @@ void CLI::find_insertions(const po::variables_map& vm) {
     int corner_cycles = cube.corner_cycles();
     int edge_cycles = cube.edge_cycles();
     int center_cycles = Cube::center_cycles[cube.placement()];
+
+    unique_ptr<Printer> printer;
+    if (vm.count("json")) {
+        printer = make_unique<JSONPrinter>();
+    } else {
+        printer = make_unique<StandardPrinter>();
+    }
     printer->print_case_information(scramble, skeleton, {parity, corner_cycles, edge_cycles, center_cycles});
 
     unique_ptr<Finder> finder;

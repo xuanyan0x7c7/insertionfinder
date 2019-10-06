@@ -88,7 +88,7 @@ void CLI::parse(int argc, char** argv) try {
         return;
     }
     if (vm.count("solve")) {
-        CLI::find_insertions(vm);
+        CLI::find_insertion(vm);
         return;
     }
     if (vm.count("verify")) {

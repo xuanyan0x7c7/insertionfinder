@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -19,17 +20,6 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
     const vector<string> algfilenames = vm.count("algfile") ? vm["algfile"].as<vector<string>>() : vector<string>();
 
     unordered_map<Cube, Case> map;
-
-    ostream* out;
-    if (algfilenames.empty()) {
-        out = &cout;
-    } else {
-        const string& name = algfilenames.front();
-        out = new ofstream(name, ios::out | ios::binary);
-        if (out->fail()) {
-            throw CLI::CommandExecutionError("Failed to open output file" + name);
-        }
-    }
 
     for (const string& name: filenames) {
         ifstream fin(name);
@@ -81,13 +71,20 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
         cases.emplace_back(move(node.second));
     }
     sort(cases.begin(), cases.end());
+
+    shared_ptr<ostream> out;
+    if (algfilenames.empty()) {
+        out.reset(&cout, [](ostream*) {});
+    } else {
+        const string& name = algfilenames.front();
+        out = make_shared<ofstream>(name, ios::out | ios::binary);
+        if (out->fail()) {
+            throw CLI::CommandExecutionError("Failed to open output file" + name);
+        }
+    }
     out->write(reinterpret_cast<const char*>(&size), sizeof(size_t));
     for (auto& _case: cases) {
         _case.sort_algorithms();
         _case.save_to(*out);
-    }
-
-    if (out != &cout) {
-        delete out;
     }
 }

@@ -52,10 +52,6 @@ int Cube::compare(const Cube& lhs, const Cube& rhs) noexcept {
     return memcmp(&lhs, &rhs, sizeof(Cube));
 }
 
-bool Cube::operator==(const Cube& rhs) const noexcept {
-    return memcmp(this, &rhs, sizeof(Cube)) == 0;
-}
-
 
 void Cube::inverse() noexcept {
     unsigned corner[8];
