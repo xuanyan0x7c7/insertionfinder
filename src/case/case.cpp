@@ -11,8 +11,7 @@ Case::Case(const Cube& state):
     _state(state),
     _mask(state.mask()),
     _has_parity(state.has_parity()),
-    _corner_cycles(state.corner_cycles()), _edge_cycles(state.edge_cycles())
-    {}
+    _corner_cycles(state.corner_cycles()), _edge_cycles(state.edge_cycles()) {}
 
 
 void Case::save_to(ostream& out) const {
@@ -66,17 +65,17 @@ int Case::compare(const Case& lhs, const Case& rhs) noexcept {
     ) {
         return cycles_diff;
     }
-    if (lhs_center_cycles != rhs_center_cycles) {
-        return lhs_center_cycles - rhs_center_cycles;
+    if (int x = lhs_center_cycles - rhs_center_cycles) {
+        return x;
     }
-    if (lhs_rotation != rhs_rotation) {
-        return lhs_rotation - rhs_rotation;
+    if (int x = lhs_rotation - rhs_rotation) {
+        return x;
     }
-    if (lhs._has_parity != rhs._has_parity) {
-        return lhs._has_parity - rhs._has_parity;
+    if (int x = lhs._has_parity - rhs._has_parity) {
+        return x;
     }
-    if (lhs._corner_cycles != rhs._corner_cycles) {
-        return lhs._corner_cycles - rhs._corner_cycles;
+    if (int x = lhs._corner_cycles - rhs._corner_cycles) {
+        return x;
     }
     return Cube::compare(lhs._state, rhs._state);
 }

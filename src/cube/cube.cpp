@@ -49,37 +49,24 @@ void Cube::read_from(istream& in) {
 
 
 int Cube::compare(const Cube& lhs, const Cube& rhs) noexcept {
-    if (lhs._placement != rhs._placement) {
-        return lhs._placement - rhs._placement;
+    if (int x = lhs._placement - rhs._placement) {
+        return x;
     }
     for (size_t i = 0; i < 8; ++i) {
-        if (lhs.corner[i] != rhs.corner[i]) {
-            return lhs.corner[i] - rhs.corner[i];
+        if (int x = lhs.corner[i] - rhs.corner[i]) {
+            return x;
         }
     }
     for (size_t i = 0; i < 12; ++i) {
-        if (lhs.edge[i] != rhs.edge[i]) {
-            return lhs.edge[i] - rhs.edge[i];
+        if (int x = lhs.edge[i] - rhs.edge[i]) {
+            return x;
         }
     }
     return 0;
 }
 
 bool Cube::operator==(const Cube& rhs) const noexcept {
-    if (this->_placement != rhs._placement) {
-        return false;
-    }
-    for (size_t i = 0; i < 8; ++i) {
-        if (this->corner[i] != rhs.corner[i]) {
-            return false;
-        }
-    }
-    for (size_t i = 0; i < 12; ++i) {
-        if (this->edge[i] != rhs.edge[i]) {
-            return false;
-        }
-    }
-    return true;
+    return memcmp(this, &rhs, sizeof(Cube)) == 0;
 }
 
 

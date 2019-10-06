@@ -23,8 +23,7 @@ namespace InsertionFinder {
     public:
         template<class T> AlgorithmError(T&& algorithm_string):
             algorithm_string(std::forward<T>(algorithm_string)),
-            explanation_string("Invalid algorithm string: " + this->algorithm_string)
-            {}
+            explanation_string("Invalid algorithm string: " + this->algorithm_string) {}
     public:
         virtual const char* what() const noexcept override {
             return explanation_string.c_str();

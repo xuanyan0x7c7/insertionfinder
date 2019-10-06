@@ -19,15 +19,6 @@ using namespace Details;
 
 
 namespace {
-    constexpr const char* twist_string[24] = {
-        "", "U", "U2", "U'",
-        "", "D", "D2", "D'",
-        "", "R", "R2", "R'",
-        "", "L", "L2", "L'",
-        "", "F", "F2", "F'",
-        "", "B", "B2", "B'"
-    };
-
     int_fast8_t parse_twist(const string& twist_string) {
         int_fast8_t offset = 0;
         switch (twist_string[0]) {
@@ -180,15 +171,10 @@ int Algorithm::compare(const Algorithm& lhs, const Algorithm& rhs) noexcept {
     if (int x = static_cast<int>(t1.size()) - static_cast<int>(t2.size())) {
         return x;
     }
-    for (size_t i = 0, l = t1.size(); i < l; ++i) {
-        if (t1[i] != t2[i]) {
-            return t1[i] - t2[i];
-        }
+    if (int x = memcmp(t1.data(), t2.data(), t1.size() * sizeof(int_fast8_t))) {
+        return x;
     }
-    if (lhs.rotation != rhs.rotation) {
-        return lhs.rotation - rhs.rotation;
-    }
-    return 0;
+    return lhs.rotation - rhs.rotation;
 }
 
 
@@ -203,20 +189,27 @@ ostream& operator<<(ostream& out, const Algorithm& algorithm) {
     };
     algorithm.print(out, 0, algorithm.twists.size());
     if (algorithm.rotation && !algorithm.twists.empty()) {
-        out << ' ';
+        out << ' ' << rotation_string[algorithm.rotation];
     }
-    out << rotation_string[algorithm.rotation];
     return out;
 }
 
 void Algorithm::print(ostream& out, size_t begin, size_t end) const {
-    using namespace placeholders;
+    static constexpr const char* twist_string[24] = {
+        "", "U", "U2", "U'",
+        "", "D", "D2", "D'",
+        "", "R", "R2", "R'",
+        "", "L", "L2", "L'",
+        "", "F", "F2", "F'",
+        "", "B", "B2", "B'"
+    };
     if (begin >= end) {
         return;
     }
-    out << twist_string[this->twists[begin]];
-    for (size_t i = begin; ++i < end;) {
-        out << ' ' << twist_string[this->twists[i]];
+    auto iter = this->twists.cbegin() + begin;
+    out << twist_string[*iter];
+    for (auto iter_end = this->twists.cbegin() + end; ++iter < iter_end;) {
+        out << ' ' << twist_string[*iter];
     }
 }
 
@@ -247,19 +240,19 @@ void Algorithm::read_from(istream& in) {
     }
     auto data = make_unique<char[]>(length);
     in.read(data.get(), length);
-    if (static_cast<size_t>(in.gcount()) != length) {
+    if (in.gcount() != length) {
         throw AlgorithmStreamError();
     }
     this->twists = vector<int_fast8_t>(data.get(), data.get() + length);
     char rotation_data;
     in.read(&rotation_data, 1);
-    if (static_cast<size_t>(in.gcount()) != 1) {
+    if (in.gcount() != 1) {
         throw AlgorithmStreamError();
     }
     this->rotation = rotation_data;
 
     const int_fast8_t* transform = rotation_permutation[this->rotation];
-    auto& twists = this->twists;
+    const auto& twists = this->twists;
     this->begin_mask = twist_mask(Algorithm::inverse_twist[twists[0]]);
     if (length > 1 && twists[0] >> 3 == twists[1] >> 3) {
         this->begin_mask |= twist_mask(Algorithm::inverse_twist[twists[1]]);
