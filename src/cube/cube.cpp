@@ -49,20 +49,7 @@ void Cube::read_from(istream& in) {
 
 
 int Cube::compare(const Cube& lhs, const Cube& rhs) noexcept {
-    if (int x = lhs._placement - rhs._placement) {
-        return x;
-    }
-    for (size_t i = 0; i < 8; ++i) {
-        if (int x = lhs.corner[i] - rhs.corner[i]) {
-            return x;
-        }
-    }
-    for (size_t i = 0; i < 12; ++i) {
-        if (int x = lhs.edge[i] - rhs.edge[i]) {
-            return x;
-        }
-    }
-    return 0;
+    return memcmp(&lhs, &rhs, sizeof(Cube));
 }
 
 bool Cube::operator==(const Cube& rhs) const noexcept {
@@ -71,29 +58,29 @@ bool Cube::operator==(const Cube& rhs) const noexcept {
 
 
 void Cube::inverse() noexcept {
-    int corner[8];
-    int edge[12];
-    for (int i = 0; i < 8; ++i) {
-        int item = this->corner[i];
+    unsigned corner[8];
+    unsigned edge[12];
+    for (unsigned i = 0; i < 8; ++i) {
+        unsigned item = this->corner[i];
         corner[item / 3] = i * 3 + (24 - item) % 3;
     }
-    memcpy(this->corner, corner, 8 * sizeof(int));
-    for (int i = 0; i < 12; ++i) {
-        int item = this->edge[i];
+    memcpy(this->corner, corner, 8 * sizeof(unsigned));
+    for (unsigned i = 0; i < 12; ++i) {
+        unsigned item = this->edge[i];
         edge[item >> 1] = i << 1 | (item & 1);
     }
-    memcpy(this->edge, edge, 12 * sizeof(int));
+    memcpy(this->edge, edge, 12 * sizeof(unsigned));
     this->_placement = Cube::inverse_center[this->_placement];
 }
 
 Cube Cube::inverse(const Cube& cube) noexcept {
     Cube result(Cube::raw_construct);
-    for (int i = 0; i < 8; ++i) {
-        int item = cube.corner[i];
+    for (unsigned i = 0; i < 8; ++i) {
+        unsigned item = cube.corner[i];
         result.corner[item / 3] = i * 3 + (24 - item) % 3;
     }
-    for (int i = 0; i < 12; ++i) {
-        int item = cube.edge[i];
+    for (unsigned i = 0; i < 12; ++i) {
+        unsigned item = cube.edge[i];
         result.edge[item >> 1] = i << 1 | (item & 1);
     }
     result._placement = Cube::inverse_center[cube._placement];
@@ -104,12 +91,12 @@ Cube Cube::inverse(const Cube& cube) noexcept {
 uint32_t Cube::mask() const noexcept {
     static constexpr uint32_t center_mask[4] = {0, 3, 12, 15};
     uint32_t mask = 0;
-    for (int i = 0; i < 8; ++i) {
+    for (unsigned i = 0; i < 8; ++i) {
         if (this->corner[i] != i * 3) {
             mask |= 1 << i;
         }
     }
-    for (int i = 0; i < 12; ++i) {
+    for (unsigned i = 0; i < 12; ++i) {
         if (this->edge[i] != i << 1) {
             mask |= 1 << (i + 8);
         }

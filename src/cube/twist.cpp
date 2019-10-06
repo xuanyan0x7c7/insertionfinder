@@ -8,7 +8,7 @@ using namespace InsertionFinder;
 
 
 namespace {
-    constexpr int corner_twist_table[24][8] = {
+    constexpr unsigned corner_twist_table[24][8] = {
         {0, 3, 6, 9, 12, 15, 18, 21},
         {9, 0, 3, 6, 12, 15, 18, 21},
         {6, 9, 0, 3, 12, 15, 18, 21},
@@ -35,7 +35,7 @@ namespace {
         {10, 3, 6, 23, 2, 15, 18, 13}
     };
 
-    constexpr int edge_twist_table[24][12] = {
+    constexpr unsigned edge_twist_table[24][12] = {
         {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22},
         {6, 0, 2, 4, 8, 10, 12, 14, 16, 18, 20, 22},
         {4, 6, 0, 2, 8, 10, 12, 14, 16, 18, 20, 22},
@@ -67,8 +67,8 @@ namespace {
 array<Cube, 24> Cube::generate_twist_cube_table() noexcept {
     array<Cube, 24> twist_cube;
     for (size_t i = 0; i < 24; ++i) {
-        memcpy(twist_cube[i].corner, corner_twist_table[i], 8 * sizeof(int));
-        memcpy(twist_cube[i].edge, edge_twist_table[i], 12 * sizeof(int));
+        memcpy(twist_cube[i].corner, corner_twist_table[i], 8 * sizeof(unsigned));
+        memcpy(twist_cube[i].edge, edge_twist_table[i], 12 * sizeof(unsigned));
     }
     return twist_cube;
 }
@@ -96,13 +96,13 @@ void Cube::twist(const Cube& cube, byte flags) noexcept {
         return;
     }
     if (static_cast<bool>(flags & CubeTwist::corners)) {
-        for (int& item: this->corner) {
-            int transform = cube.corner[item / 3];
+        for (unsigned& item: this->corner) {
+            unsigned transform = cube.corner[item / 3];
             item = transform - transform % 3 + (item + transform) % 3;
         }
     }
     if (static_cast<bool>(flags & CubeTwist::edges)) {
-        for (int& item: this->edge) {
+        for (unsigned& item: this->edge) {
             item = cube.edge[item >> 1] ^ (item & 1);
         }
     }
@@ -114,21 +114,21 @@ void Cube::twist(const Cube& cube, byte flags) noexcept {
 
 void Cube::twist_before(const Cube& cube, byte flags) noexcept {
     if (static_cast<bool>(flags & CubeTwist::corners)) {
-        int corner[8];
+        unsigned corner[8];
         for (size_t i = 0; i < 8; ++i) {
-            int item = cube.corner[i];
-            int transform = this->corner[item / 3];
+            unsigned item = cube.corner[i];
+            unsigned transform = this->corner[item / 3];
             corner[i] = transform - transform % 3 + (item + transform) % 3;
         }
-        memcpy(this->corner, corner, 8 * sizeof(int));
+        memcpy(this->corner, corner, 8 * sizeof(unsigned));
     }
     if (static_cast<bool>(flags & CubeTwist::edges)) {
-        int edge[12];
+        unsigned edge[12];
         for (size_t i = 0; i < 12; ++i) {
-            int item = cube.edge[i];
+            unsigned item = cube.edge[i];
             edge[i] = this->edge[item >> 1] ^ (item & 1);
         }
-        memcpy(this->edge, edge, 12 * sizeof(int));
+        memcpy(this->edge, edge, 12 * sizeof(unsigned));
     }
     if (static_cast<bool>(flags & CubeTwist::centers)) {
         this->_placement = Cube::center_transform[cube._placement][this->_placement];
@@ -145,20 +145,20 @@ Cube Cube::twist(const Cube& lhs, const Cube& rhs, byte flags) noexcept {
     }
     if (static_cast<bool>(flags & CubeTwist::corners)) {
         for (size_t i = 0; i < 8; ++i) {
-            int item = lhs.corner[i];
-            int transform = rhs.corner[item / 3];
+            unsigned item = lhs.corner[i];
+            unsigned transform = rhs.corner[item / 3];
             result.corner[i] = transform - transform % 3 + (item + transform) % 3;
         }
     } else {
-        memcpy(result.corner, lhs.corner, 8 * sizeof(int));
+        memcpy(result.corner, lhs.corner, 8 * sizeof(unsigned));
     }
     if (static_cast<bool>(flags & CubeTwist::edges)) {
         for (size_t i = 0; i < 12; ++i) {
-            int item = lhs.edge[i];
+            unsigned item = lhs.edge[i];
             result.edge[i] = rhs.edge[item >> 1] ^ (item & 1);
         }
     } else {
-        memcpy(result.edge, lhs.edge, 12 * sizeof(int));
+        memcpy(result.edge, lhs.edge, 12 * sizeof(unsigned));
     }
     return result;
 }

@@ -6,14 +6,14 @@ using namespace InsertionFinder;
 
 
 namespace {
-    constexpr int rotation_corner_table[4][8] = {
+    constexpr unsigned rotation_corner_table[4][8] = {
         {0, 3, 6, 9, 12, 15, 18, 21},
         {14, 1, 11, 22, 16, 5, 7, 20},
         {9, 0, 3, 6, 21, 12, 15, 18},
         {10, 8, 19, 23, 2, 4, 17, 13}
     };
 
-    constexpr int rotation_edge_table[4][12] = {
+    constexpr unsigned rotation_edge_table[4][12] = {
         {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22},
         {9, 16, 1, 22, 13, 18, 5, 20, 10, 2, 6, 14},
         {6, 0, 2, 4, 14, 8, 10, 12, 23, 17, 19, 21},
@@ -72,8 +72,8 @@ array<Cube, 24> Cube::generate_rotation_cube_table() noexcept {
     array<Cube, 24> rotation_cube;
     array<Cube, 4> basic_rotation_cube;
     for (size_t i = 0; i < 4; ++i) {
-        memcpy(basic_rotation_cube[i].corner, rotation_corner_table[i], 8 * sizeof(int));
-        memcpy(basic_rotation_cube[i].edge, rotation_edge_table[i], 12 * sizeof(int));
+        memcpy(basic_rotation_cube[i].corner, rotation_corner_table[i], 8 * sizeof(unsigned));
+        memcpy(basic_rotation_cube[i].edge, rotation_edge_table[i], 12 * sizeof(unsigned));
     }
     for (size_t front = 0; front < 4; ++front) {
         rotation_cube[front | 4].twist(basic_rotation_cube[1]);
@@ -112,7 +112,7 @@ Cube Cube::best_placement() const noexcept {
     }
 
     Cube best_cube = original_cube;
-    for (int index: {
+    for (size_t index: {
         2, 8, 10,
         5, 7, 13, 15, 17, 19, 21, 23,
         1, 3, 4, 12, 16, 20,

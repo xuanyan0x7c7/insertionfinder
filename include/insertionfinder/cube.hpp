@@ -52,8 +52,8 @@ namespace InsertionFinder {
             2, 1, 3, 1
         };
     private:
-        int corner[8];
-        int edge[12];
+        unsigned corner[8];
+        unsigned edge[12];
         int _placement;
     public:
         Cube() noexcept:
@@ -91,7 +91,7 @@ namespace InsertionFinder {
         static void generate_corner_cycle_transform_table() noexcept;
         static void generate_edge_cycle_transform_table() noexcept;
     public:
-        void twist(std::int_fast8_t twist, std::byte flags = CubeTwist::full) {
+        void twist(std::uint_fast8_t twist, std::byte flags = CubeTwist::full) {
             this->twist(Cube::twist_cube[twist], flags);
         }
         void twist(const Algorithm& algorithm, std::byte flags = CubeTwist::full) noexcept {
@@ -99,7 +99,7 @@ namespace InsertionFinder {
         }
         void twist(const Algorithm& algorithm, std::size_t begin, std::size_t end, std::byte flags = CubeTwist::full);
         void twist(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
-        void twist_before(std::int_fast8_t twist, std::byte flags = CubeTwist::full) {
+        void twist_before(std::uint_fast8_t twist, std::byte flags = CubeTwist::full) {
             this->twist_before(Cube::twist_cube[twist], flags);
         }
         void twist_before(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
@@ -134,10 +134,10 @@ namespace InsertionFinder {
         int edge_cycle_index() const noexcept;
         Cube best_placement() const noexcept;
     public:
-        static int next_corner_cycle_index(int index, int twist) {
+        static int next_corner_cycle_index(int index, std::uint_fast8_t twist) {
             return Cube::corner_cycle_transform[index][twist];
         }
-        static int next_edge_cycle_index(int index, int twist) {
+        static int next_edge_cycle_index(int index, std::uint_fast8_t twist) {
             return Cube::edge_cycle_transform[index][twist];
         }
     };

@@ -39,7 +39,7 @@ namespace InsertionFinder {
     class Algorithm {
         friend struct std::hash<Algorithm>;
     public:
-        static constexpr std::int_fast8_t inverse_twist[24] = {
+        static constexpr std::uint_fast8_t inverse_twist[24] = {
             0, 3, 2, 1,
             4, 7, 6, 5,
             8, 11, 10, 9,
@@ -48,7 +48,7 @@ namespace InsertionFinder {
             20, 23, 22, 21
         };
     private:
-        std::vector<std::int_fast8_t> twists;
+        std::vector<std::uint_fast8_t> twists;
         int rotation;
     private:
         std::uint32_t begin_mask;
@@ -67,7 +67,7 @@ namespace InsertionFinder {
         std::size_t length() const noexcept {
             return this->twists.size();
         }
-        std::int_fast8_t operator[](std::size_t index) const {
+        std::uint_fast8_t operator[](std::size_t index) const {
             return this->twists[index];
         }
         int cube_rotation() const noexcept {

@@ -18,8 +18,8 @@ void Algorithm::normalize() noexcept {
 
 
 void Algorithm::rotate(int rotation) {
-    const int_fast8_t* table = rotation_permutation[rotation];
-    for (int_fast8_t& twist: this->twists) {
+    const uint_fast8_t* table = rotation_permutation[rotation];
+    for (uint_fast8_t& twist: this->twists) {
         twist = transform_twist(table, twist);
     }
 }
@@ -32,11 +32,11 @@ vector<Algorithm> Algorithm::generate_isomorphisms() const {
         result[i].twists.resize(length);
     }
     for (size_t i = 0; i < 24; ++i) {
-        const int_fast8_t* table = rotation_permutation[i];
+        const uint_fast8_t* table = rotation_permutation[i];
         for (size_t index = 0; index < length; ++index) {
             size_t inversed_index = length - 1 - index;
-            int_fast8_t twist = this->twists[index];
-            int_fast8_t result_twist = transform_twist(table, twist);
+            uint_fast8_t twist = this->twists[index];
+            uint_fast8_t result_twist = transform_twist(table, twist);
             result[i].twists[index] = result_twist;
             result[i + 24].twists[inversed_index] = Algorithm::inverse_twist[result_twist];
             result[i + 48].twists[index] = result_twist < 16

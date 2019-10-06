@@ -19,8 +19,8 @@ using namespace Details;
 
 
 namespace {
-    int_fast8_t parse_twist(const string& twist_string) {
-        int_fast8_t offset = 0;
+    uint_fast8_t parse_twist(const string& twist_string) {
+        uint_fast8_t offset = 0;
         switch (twist_string[0]) {
         case 'U':
             offset = 0;
@@ -51,38 +51,38 @@ namespace {
     }
 
     struct Transform {
-        int_fast8_t transform[3];
-        int_fast8_t additional_twist;
+        uint_fast8_t transform[3];
+        uint_fast8_t additional_twist;
     };
 
     const unordered_map<string, Transform> pattern_table = {
-        {"x", {{4, 2, 1}, -1}},
-        {"[r]", {{4, 2, 1}, -1}},
-        {"[l']", {{4, 2, 1}, -1}},
-        {"x2", {{1, 2, 5}, -1}},
-        {"[r2]", {{1, 2, 5}, -1}},
-        {"[l2]", {{1, 2, 5}, -1}},
-        {"x'", {{5, 2, 0}, -1}},
-        {"[r']", {{5, 2, 0}, -1}},
-        {"[l]", {{5, 2, 0}, -1}},
-        {"y", {{0, 5, 2}, -1}},
-        {"[u]", {{0, 5, 2}, -1}},
-        {"[d']", {{0, 5, 2}, -1}},
-        {"y2", {{0, 3, 5}, -1}},
-        {"[u2]", {{0, 3, 5}, -1}},
-        {"[d2]", {{0, 3, 5}, -1}},
-        {"y'", {{0, 4, 3}, -1}},
-        {"[u']", {{0, 4, 3}, -1}},
-        {"[d]", {{0, 4, 3}, -1}},
-        {"z", {{3, 0, 4}, -1}},
-        {"[f]", {{3, 0, 4}, -1}},
-        {"[b']", {{3, 0, 4}, -1}},
-        {"z2", {{1, 3, 4}, -1}},
-        {"[f2]", {{1, 3, 4}, -1}},
-        {"[b2]", {{1, 3, 4}, -1}},
-        {"z'", {{2, 1, 4}, -1}},
-        {"[f']", {{2, 1, 4}, -1}},
-        {"[b]", {{2, 1, 4}, -1}},
+        {"x", {{4, 2, 1}, 0xff}},
+        {"[r]", {{4, 2, 1}, 0xff}},
+        {"[l']", {{4, 2, 1}, 0xff}},
+        {"x2", {{1, 2, 5}, 0xff}},
+        {"[r2]", {{1, 2, 5}, 0xff}},
+        {"[l2]", {{1, 2, 5}, 0xff}},
+        {"x'", {{5, 2, 0}, 0xff}},
+        {"[r']", {{5, 2, 0}, 0xff}},
+        {"[l]", {{5, 2, 0}, 0xff}},
+        {"y", {{0, 5, 2}, 0xff}},
+        {"[u]", {{0, 5, 2}, 0xff}},
+        {"[d']", {{0, 5, 2}, 0xff}},
+        {"y2", {{0, 3, 5}, 0xff}},
+        {"[u2]", {{0, 3, 5}, 0xff}},
+        {"[d2]", {{0, 3, 5}, 0xff}},
+        {"y'", {{0, 4, 3}, 0xff}},
+        {"[u']", {{0, 4, 3}, 0xff}},
+        {"[d]", {{0, 4, 3}, 0xff}},
+        {"z", {{3, 0, 4}, 0xff}},
+        {"[f]", {{3, 0, 4}, 0xff}},
+        {"[b']", {{3, 0, 4}, 0xff}},
+        {"z2", {{1, 3, 4}, 0xff}},
+        {"[f2]", {{1, 3, 4}, 0xff}},
+        {"[b2]", {{1, 3, 4}, 0xff}},
+        {"z'", {{2, 1, 4}, 0xff}},
+        {"[f']", {{2, 1, 4}, 0xff}},
+        {"[b]", {{2, 1, 4}, 0xff}},
         {"Uw", {{0, 5, 2}, 5}},
         {"2Uw", {{0, 5, 2}, 5}},
         {"Uw2", {{0, 3, 5}, 6}},
@@ -128,7 +128,7 @@ Algorithm::Algorithm(const char* algorithm_string) {
         R"(\s*((?:2?[UDRLFB]w|[UDRLFB])[2']?|[xyz][2']?|\[[udrlfb][2']?\])\s*)",
         regex_constants::ECMAScript | regex_constants::optimize
     );
-    int_fast8_t transform[3] = {0, 2, 4};
+    uint_fast8_t transform[3] = {0, 2, 4};
     cmatch match_result;
     const char* temp_string = algorithm_string;
     while (regex_search(temp_string, match_result, twists_regex)) {
@@ -140,23 +140,23 @@ Algorithm::Algorithm(const char* algorithm_string) {
             this->twists.push_back(transform_twist(transform, parse_twist(match_string)));
         } else {
             const auto& [pattern_transform, twist] = find_result->second;
-            if (twist != -1) {
+            if (twist != 0xff) {
                 this->twists.push_back(transform_twist(transform, twist));
             }
-            int_fast8_t new_transform[3];
+            uint_fast8_t new_transform[3];
             for (size_t i = 0; i < 3; ++i) {
-                int_fast8_t temp = pattern_transform[i];
+                uint_fast8_t temp = pattern_transform[i];
                 new_transform[i] = transform[temp >> 1] ^ (temp & 1);
             }
-            memcpy(transform, new_transform, 3 * sizeof(int_fast8_t));
+            memcpy(transform, new_transform, 3 * sizeof(uint_fast8_t));
         }
         temp_string += match_result.length();
     }
     if (*temp_string) {
         throw AlgorithmError(algorithm_string);
     }
-    for (int i = 0; i < 24; ++i) {
-        const int_fast8_t* permutation = rotation_permutation[Cube::inverse_center[i]];
+    for (unsigned i = 0; i < 24; ++i) {
+        const uint_fast8_t* permutation = rotation_permutation[Cube::inverse_center[i]];
         if (permutation[0] == transform[0] && permutation[1] == transform[1]) {
             this->rotation = i;
             break;
@@ -171,7 +171,7 @@ int Algorithm::compare(const Algorithm& lhs, const Algorithm& rhs) noexcept {
     if (int x = static_cast<int>(t1.size()) - static_cast<int>(t2.size())) {
         return x;
     }
-    if (int x = memcmp(t1.data(), t2.data(), t1.size() * sizeof(int_fast8_t))) {
+    if (int x = memcmp(t1.data(), t2.data(), t1.size() * sizeof(uint_fast8_t))) {
         return x;
     }
     return lhs.rotation - rhs.rotation;
@@ -243,7 +243,7 @@ void Algorithm::read_from(istream& in) {
     if (in.gcount() != length) {
         throw AlgorithmStreamError();
     }
-    this->twists = vector<int_fast8_t>(data.get(), data.get() + length);
+    this->twists = vector<uint_fast8_t>(data.get(), data.get() + length);
     char rotation_data;
     in.read(&rotation_data, 1);
     if (in.gcount() != 1) {
@@ -251,7 +251,7 @@ void Algorithm::read_from(istream& in) {
     }
     this->rotation = rotation_data;
 
-    const int_fast8_t* transform = rotation_permutation[this->rotation];
+    const uint_fast8_t* transform = rotation_permutation[this->rotation];
     const auto& twists = this->twists;
     this->begin_mask = twist_mask(Algorithm::inverse_twist[twists[0]]);
     if (length > 1 && twists[0] >> 3 == twists[1] >> 3) {
@@ -305,7 +305,7 @@ Algorithm& Algorithm::operator+=(const Algorithm& rhs) {
 
 size_t hash<Algorithm>::operator()(const Algorithm& algorithm) const noexcept {
     size_t result = algorithm.rotation;
-    for (int_fast8_t twist: algorithm.twists) {
+    for (uint_fast8_t twist: algorithm.twists) {
         result = result * 31 + twist;
     }
     return result;

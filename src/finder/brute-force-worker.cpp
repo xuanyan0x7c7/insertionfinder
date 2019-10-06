@@ -65,15 +65,15 @@ void BruteForceFinder::Worker::search(const CycleStatus& cycle_status, size_t be
             state.twist(this->finder.scramble_cube, twist_flag);
             state.twist(skeleton, 0, insert_place, twist_flag);
         } else {
-            int_fast8_t twist = skeleton[insert_place - 1];
+            uint_fast8_t twist = skeleton[insert_place - 1];
             state.twist_before(Algorithm::inverse_twist[twist], twist_flag);
             state.twist(twist, twist_flag);
         }
         this->try_insertion(insert_place, state, cycle_status);
 
         if (skeleton.swappable(insert_place)) {
-            int_fast8_t twist0 = skeleton[insert_place - 1];
-            int_fast8_t twist1 = skeleton[insert_place];
+            uint_fast8_t twist0 = skeleton[insert_place - 1];
+            uint_fast8_t twist1 = skeleton[insert_place];
             Cube swapped_state;
             swapped_state.twist(twist0, twist_flag);
             swapped_state.twist(Algorithm::inverse_twist[twist1], twist_flag);

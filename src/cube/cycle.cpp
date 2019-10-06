@@ -6,14 +6,14 @@ using namespace InsertionFinder;
 
 
 bool Cube::has_parity() const noexcept {
-    bool visited[8] = {false, false, false, false, false, false, false, false};
+    unsigned visited_mask = 0;
     bool parity = false;
-    for (int x = 0; x < 8; ++x) {
-        if (!visited[x]) {
+    for (unsigned x = 0; x < 8; ++x) {
+        if ((visited_mask & (1 << x)) == 0) {
             parity = !parity;
-            int y = x;
+            unsigned y = x;
             do {
-                visited[y] = true;
+                visited_mask |= 1 << y;
                 y = this->corner[y] / 3;
             } while (y != x);
         }
@@ -23,18 +23,18 @@ bool Cube::has_parity() const noexcept {
 
 
 int Cube::corner_cycles() const noexcept {
-    bool visited[8] = {false, false, false, false, false, false, false, false};
+    unsigned visited_mask = 0;
     int small_cycles[7] = {0, 0, 0, 0, 0, 0, 0};
     int cycles = 0;
     bool parity = false;
 
-    for (int x = 0; x < 8; ++x) {
-        if (!visited[x]) {
+    for (unsigned x = 0; x < 8; ++x) {
+        if ((visited_mask & (1 << x)) == 0) {
             int length = -1;
-            int orientation = 0;
-            int y = x;
+            unsigned orientation = 0;
+            unsigned y = x;
             do {
-                visited[y] = true;
+                visited_mask |= 1 << y;
                 ++length;
                 orientation += this->corner[y];
                 y = this->corner[y] / 3;
@@ -83,21 +83,18 @@ int Cube::corner_cycles() const noexcept {
 
 
 int Cube::edge_cycles() const noexcept {
-    bool visited[12] = {
-        false, false, false, false, false, false,
-        false, false, false, false, false, false
-    };
+    unsigned visited_mask = 0;
     int small_cycles[3] = {0, 0, 0};
     int cycles = 0;
     bool parity = false;
 
-    for (int x = 0; x < 12; ++x) {
-        if (!visited[x]) {
+    for (unsigned x = 0; x < 12; ++x) {
+        if ((visited_mask & (1 << x)) == 0) {
             int length = -1;
             bool flip = false;
-            int y = x;
+            unsigned y = x;
             do {
-                visited[y] = true;
+                visited_mask |= 1 << y;
                 ++length;
                 flip ^= this->edge[y] & 1;
                 y = this->edge[y] >> 1;
@@ -133,9 +130,9 @@ int Cube::edge_cycles() const noexcept {
 
 Cube Cube::corner_cycle_cube(int index) {
     Cube cube;
-    int x = index / 24 / 24;
-    int y = index / 24 % 24;
-    int z = index % 24;
+    unsigned x = index / 24 / 24;
+    unsigned y = index / 24 % 24;
+    unsigned z = index % 24;
     if (x < y / 3 && x < z / 3 && y / 3 != z / 3) {
         cube.corner[x] = y;
         cube.corner[y / 3] = z;
@@ -146,9 +143,9 @@ Cube Cube::corner_cycle_cube(int index) {
 
 Cube Cube::edge_cycle_cube(int index) {
     Cube cube;
-    int x = index / 24 / 24;
-    int y = index / 24 % 24;
-    int z = index % 24;
+    unsigned x = index / 24 / 24;
+    unsigned y = index / 24 % 24;
+    unsigned z = index % 24;
     if (x < y >> 1 && x < z >> 1 && y >> 1 != z >> 1) {
         cube.edge[x] = y;
         cube.edge[y >> 1] = z;
@@ -159,10 +156,10 @@ Cube Cube::edge_cycle_cube(int index) {
 
 
 int Cube::corner_cycle_index() const noexcept {
-    for (int i = 0; i < 8; ++i) {
-        int j = this->corner[i];
+    for (unsigned i = 0; i < 8; ++i) {
+        unsigned j = this->corner[i];
         if (j != i * 3) {
-            int k = this->corner[j / 3];
+            unsigned k = this->corner[j / 3];
             return k / 3 == i ? -1 : i * 24 * 24 + j * 24 + k;
         }
     }
@@ -170,10 +167,10 @@ int Cube::corner_cycle_index() const noexcept {
 }
 
 int Cube::edge_cycle_index() const noexcept {
-    for (int i = 0; i < 12; ++i) {
-        int j = this->edge[i];
+    for (unsigned i = 0; i < 12; ++i) {
+        unsigned j = this->edge[i];
         if (j != i << 1) {
-            int k = this->edge[j >> 1];
+            unsigned k = this->edge[j >> 1];
             return k >> 1 == i ? -1 : i * 24 * 24 + j * 24 + k;
         }
     }
