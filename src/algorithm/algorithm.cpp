@@ -319,6 +319,21 @@ void Algorithm::detect_rotation() noexcept {
 }
 
 
+void Algorithm::normalize() noexcept {
+    for (size_t i = 1, length = this->twists.size(); i < length; ++i) {
+        if (this->swappable(i) && this->twists[i - 1] > this->twists[i]) {
+            this->swap_adjacent(i++);
+        }
+    }
+}
+
+void Algorithm::rotate(int rotation) {
+    const uint_fast8_t* table = rotation_permutation[rotation];
+    for (uint_fast8_t& twist: this->twists) {
+        twist = transform_twist(table, twist);
+    }
+}
+
 void Algorithm::inverse() {
     reverse(this->twists.begin(), this->twists.end());
     this->rotate(this->rotation);
