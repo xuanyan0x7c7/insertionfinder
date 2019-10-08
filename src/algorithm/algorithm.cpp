@@ -286,7 +286,7 @@ Algorithm Algorithm::operator+(const Algorithm& rhs) const {
         back_inserter(result.twists),
         bind(transform_twist, rotation_permutation[Cube::inverse_center[this->rotation]], _1)
     );
-    result.rotation = Cube::center_transform[this->rotation][rhs.rotation];
+    result.rotation = Cube::placement_twist(this->rotation, rhs.rotation);
     return result;
 }
 
@@ -298,7 +298,7 @@ Algorithm& Algorithm::operator+=(const Algorithm& rhs) {
         back_inserter(this->twists),
         bind(transform_twist, rotation_permutation[Cube::inverse_center[this->rotation]], _1)
     );
-    this->rotation = Cube::center_transform[this->rotation][rhs.rotation];
+    this->rotation = Cube::placement_twist(this->rotation, rhs.rotation);
     return *this;
 }
 

@@ -5,6 +5,7 @@
 #include <exception>
 #include <functional>
 #include <istream>
+#include <optional>
 #include <ostream>
 #include <vector>
 #include <insertionfinder/algorithm.hpp>
@@ -71,39 +72,30 @@ namespace InsertionFinder {
         void save_to(std::ostream& out) const;
         void read_from(std::istream& in);
     public:
-        static void init();
-    public:
         static int compare(const Cube& lhs, const Cube& rhs) noexcept;
         bool operator==(const Cube& rhs) const noexcept {
-            return this->compare(*this, rhs) == 0;
+            return Cube::compare(*this, rhs) == 0;
         }
         bool operator<(const Cube& rhs) const noexcept {
-            return this->compare(*this, rhs) < 0;
+            return Cube::compare(*this, rhs) < 0;
         }
     private:
-        static const std::array<Cube, 24> twist_cube;
         static const std::array<Cube, 24> rotation_cube;
-        static std::vector<std::array<int, 24>> corner_cycle_transform;
-        static std::vector<std::array<int, 24>> edge_cycle_transform;
-    public:
+        static const std::vector<std::array<int, 24>> corner_cycle_transform;
+        static const std::vector<std::array<int, 24>> edge_cycle_transform;
         static const std::array<std::array<int, 24>, 24> center_transform;
     private:
-        static std::array<Cube, 24> generate_twist_cube_table() noexcept;
         static std::array<Cube, 24> generate_rotation_cube_table() noexcept;
-        static void generate_corner_cycle_transform_table() noexcept;
-        static void generate_edge_cycle_transform_table() noexcept;
+        static std::vector<std::array<int, 24>> generate_corner_cycle_transform_table();
+        static std::vector<std::array<int, 24>> generate_edge_cycle_transform_table();
     public:
-        void twist(std::uint_fast8_t twist, std::byte flags = CubeTwist::full) {
-            this->twist(Cube::twist_cube[twist], flags);
-        }
         void twist(const Algorithm& algorithm, std::byte flags = CubeTwist::full) noexcept {
             this->twist(algorithm, 0, algorithm.length(), flags);
         }
         void twist(const Algorithm& algorithm, std::size_t begin, std::size_t end, std::byte flags = CubeTwist::full);
+        void twist(std::uint_fast8_t twist, std::byte flags = CubeTwist::full);
         void twist(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
-        void twist_before(std::uint_fast8_t twist, std::byte flags = CubeTwist::full) {
-            this->twist_before(Cube::twist_cube[twist], flags);
-        }
+        void twist_before(std::uint_fast8_t twist, std::byte flags = CubeTwist::full);
         void twist_before(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
         static Cube twist(const Cube& lhs, const Cube& rhs, std::byte flags = CubeTwist::full) noexcept;
         void rotate(int rotation) {
@@ -129,8 +121,8 @@ namespace InsertionFinder {
             return this->_placement;
         }
     private:
-        static Cube corner_cycle_cube(int index);
-        static Cube edge_cycle_cube(int index);
+        static std::optional<Cube> corner_cycle_cube(int index);
+        static std::optional<Cube> edge_cycle_cube(int index);
     public:
         int corner_cycle_index() const noexcept;
         int edge_cycle_index() const noexcept;

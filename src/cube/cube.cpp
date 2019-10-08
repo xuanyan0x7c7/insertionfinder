@@ -11,15 +11,6 @@ using namespace std;
 using namespace InsertionFinder;
 
 
-vector<array<int, 24>> Cube::corner_cycle_transform(6 * 24 * 24);
-vector<array<int, 24>> Cube::edge_cycle_transform(10 * 24 * 24);
-
-void Cube::init() {
-    Cube::generate_corner_cycle_transform_table();
-    Cube::generate_edge_cycle_transform_table();
-}
-
-
 void Cube::save_to(ostream& out) const {
     char data[21];
     for (size_t i = 0; i < 8; ++i) {

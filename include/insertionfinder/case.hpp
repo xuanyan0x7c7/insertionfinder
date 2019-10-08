@@ -39,7 +39,7 @@ namespace InsertionFinder {
             return this->_state == rhs._state;
         }
         bool operator<(const Case& rhs) const noexcept {
-            return this->compare(*this, rhs) < 0;
+            return Case::compare(*this, rhs) < 0;
         }
     public:
         const Cube& state() const noexcept {

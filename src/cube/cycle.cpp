@@ -1,4 +1,5 @@
 #include <array>
+#include <optional>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 using namespace std;
@@ -128,37 +129,41 @@ int Cube::edge_cycles() const noexcept {
 }
 
 
-Cube Cube::corner_cycle_cube(int index) {
-    Cube cube;
+optional<Cube> Cube::corner_cycle_cube(int index) {
     unsigned x = index / 24 / 24;
     unsigned y = index / 24 % 24;
     unsigned z = index % 24;
     if (x < y / 3 && x < z / 3 && y / 3 != z / 3) {
+        Cube cube;
         cube.corner[x] = y;
         cube.corner[y / 3] = z;
         cube.corner[z / 3] = x * 3 + (48 - y - z) % 3;
+        return cube;
+    } else {
+        return nullopt;
     }
-    return cube;
 }
 
-Cube Cube::edge_cycle_cube(int index) {
-    Cube cube;
+optional<Cube> Cube::edge_cycle_cube(int index) {
     unsigned x = index / 24 / 24;
     unsigned y = index / 24 % 24;
     unsigned z = index % 24;
     if (x < y >> 1 && x < z >> 1 && y >> 1 != z >> 1) {
+        Cube cube;
         cube.edge[x] = y;
         cube.edge[y >> 1] = z;
         cube.edge[z >> 1] = x << 1 | ((y ^ z) & 1);
+        return cube;
+    } else {
+        return nullopt;
     }
-    return cube;
 }
 
 
 int Cube::corner_cycle_index() const noexcept {
     for (unsigned i = 0; i < 8; ++i) {
         unsigned j = this->corner[i];
-        if (j != i * 3) {
+        if (i != j / 3) {
             unsigned k = this->corner[j / 3];
             return k / 3 == i ? -1 : i * 24 * 24 + j * 24 + k;
         }
@@ -169,7 +174,7 @@ int Cube::corner_cycle_index() const noexcept {
 int Cube::edge_cycle_index() const noexcept {
     for (unsigned i = 0; i < 12; ++i) {
         unsigned j = this->edge[i];
-        if (j != i << 1) {
+        if (i != j >> 1) {
             unsigned k = this->edge[j >> 1];
             return k >> 1 == i ? -1 : i * 24 * 24 + j * 24 + k;
         }
@@ -178,48 +183,41 @@ int Cube::edge_cycle_index() const noexcept {
 }
 
 
-void Cube::generate_corner_cycle_transform_table() noexcept {
-   auto& table = Cube::corner_cycle_transform;
+const vector<array<int, 24>> Cube::corner_cycle_transform = generate_corner_cycle_transform_table();
+const vector<array<int, 24>> Cube::edge_cycle_transform = generate_edge_cycle_transform_table();
+
+vector<array<int, 24>> Cube::generate_corner_cycle_transform_table() {
+    vector<array<int, 24>> corner_cycle_transform(6 * 24 * 24);
     for (size_t i = 0; i < 6 * 24 * 24; ++i) {
-        Cube cube = Cube::corner_cycle_cube(i);
-        if (cube.mask() == 0) {
-            for (size_t j = 0; j < 24; ++j) {
-                table[i][j] = i;
-            }
-        } else {
+        auto& table = corner_cycle_transform[i];
+        if (auto cube = Cube::corner_cycle_cube(i)) {
             for (size_t j = 0; j < 24; ++j) {
                 if (j & 3) {
-                    Cube new_cube = cube;
+                    Cube new_cube = *cube;
                     new_cube.twist_before(Algorithm::inverse_twist[j], CubeTwist::corners);
                     new_cube.twist(j, CubeTwist::corners);
-                    table[i][j] = new_cube.corner_cycle_index();
-                } else {
-                    table[i][j] = i;
+                    table[j] = new_cube.corner_cycle_index();
                 }
             }
         }
     }
+    return corner_cycle_transform;
 }
 
-void Cube::generate_edge_cycle_transform_table() noexcept {
-    auto& table = Cube::edge_cycle_transform;
+vector<array<int, 24>> Cube::generate_edge_cycle_transform_table() {
+    vector<array<int, 24>> edge_cycle_transform(10 * 24 * 24);
     for (size_t i = 0; i < 10 * 24 * 24; ++i) {
-        Cube cube = Cube::edge_cycle_cube(i);
-        if (cube.mask() == 0) {
-            for (size_t j = 0; j < 24; ++j) {
-                table[i][j] = i;
-            }
-        } else {
+        auto& table = edge_cycle_transform[i];
+        if (auto cube = Cube::edge_cycle_cube(i)) {
             for (size_t j = 0; j < 24; ++j) {
                 if (j & 3) {
-                    Cube new_cube = cube;
+                    Cube new_cube = *cube;
                     new_cube.twist_before(Algorithm::inverse_twist[j], CubeTwist::edges);
                     new_cube.twist(j, CubeTwist::edges);
-                    table[i][j] = new_cube.edge_cycle_index();
-                } else {
-                    table[i][j] = i;
+                    table[j] = new_cube.edge_cycle_index();
                 }
             }
         }
     }
+    return edge_cycle_transform;
 }
