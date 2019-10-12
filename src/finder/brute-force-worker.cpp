@@ -12,11 +12,7 @@ using namespace Details;
 
 
 namespace {
-    bool not_searched(
-        const Algorithm& algorithm, size_t insert_place,
-        size_t new_begin,
-        bool swapped
-    ) {
+    bool not_searched(const Algorithm& algorithm, size_t insert_place, size_t new_begin, bool swapped) {
         if (swapped || insert_place < 2 || algorithm.swappable(insert_place - 1)) {
             return new_begin >= insert_place;
         } else {
@@ -192,11 +188,7 @@ void BruteForceFinder::Worker::try_insertion(
         int new_corner_cycles = corner_changed ? cube.corner_cycles() : corner_cycles;
         int new_edge_cycles = edge_changed ? cube.edge_cycles() : edge_cycles;
         int new_placement = Cube::placement_twist(_case.rotation(), placement);
-        if (
-            !new_parity
-            && new_corner_cycles == 0 && new_edge_cycles == 0
-            && new_placement == 0
-        ) {
+        if (!new_parity && new_corner_cycles == 0 && new_edge_cycles == 0 && new_placement == 0) {
             this->solution_found(insert_place, _case);
         } else if (
             this->finder.get_total_cycles(new_parity, new_corner_cycles, new_edge_cycles, new_placement)

@@ -50,7 +50,11 @@ namespace InsertionFinder {
             void search_last_edge_cycle();
             void search_last_placement(int placement);
             void try_insertion(std::size_t insert_place, const Cube& state, bool swapped = false);
-            void try_last_insertion(std::size_t insert_place, int case_index, bool swapped = false);
+            void try_last_insertion(std::size_t insert_place, int case_index, bool swapped = false) {
+                if (case_index != -1) {
+                    this->solution_found(insert_place, swapped, this->finder.cases[case_index]);
+                }
+            }
             void solution_found(std::size_t insert_place, bool swapped, const Case& _case);
         };
     public:

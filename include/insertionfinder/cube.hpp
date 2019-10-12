@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <array>
 #include <exception>
 #include <functional>
@@ -72,12 +73,17 @@ namespace InsertionFinder {
         void save_to(std::ostream& out) const;
         void read_from(std::istream& in);
     public:
-        static int compare(const Cube& lhs, const Cube& rhs) noexcept;
+        static int compare(const Cube& lhs, const Cube& rhs) noexcept {
+            return std::memcmp(&lhs, &rhs, sizeof(Cube));
+        }
         bool operator==(const Cube& rhs) const noexcept {
-            return Cube::compare(*this, rhs) == 0;
+            return std::memcmp(this, &rhs, sizeof(Cube)) == 0;
+        }
+        bool operator!=(const Cube& rhs) const noexcept {
+            return std::memcmp(this, &rhs, sizeof(Cube)) != 0;
         }
         bool operator<(const Cube& rhs) const noexcept {
-            return Cube::compare(*this, rhs) < 0;
+            return std::memcmp(this, &rhs, sizeof(Cube)) < 0;
         }
     private:
         static const std::array<Cube, 24> rotation_cube;

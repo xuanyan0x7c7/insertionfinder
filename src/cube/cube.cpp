@@ -39,11 +39,6 @@ void Cube::read_from(istream& in) {
 }
 
 
-int Cube::compare(const Cube& lhs, const Cube& rhs) noexcept {
-    return memcmp(&lhs, &rhs, sizeof(Cube));
-}
-
-
 void Cube::inverse() noexcept {
     unsigned corner[8];
     unsigned edge[12];

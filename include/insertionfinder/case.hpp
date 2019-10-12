@@ -38,6 +38,9 @@ namespace InsertionFinder {
         bool operator==(const Case& rhs) const noexcept {
             return this->_state == rhs._state;
         }
+        bool operator!=(const Case& rhs) const noexcept {
+            return this->_state != rhs._state;
+        }
         bool operator<(const Case& rhs) const noexcept {
             return Case::compare(*this, rhs) < 0;
         }
