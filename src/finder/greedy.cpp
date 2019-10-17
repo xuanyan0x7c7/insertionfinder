@@ -19,8 +19,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
     size_t max_threshold = max<size_t>(this->options.greedy_threshold, this->options.replacement_threshold);
     this->partial_states[0].fewest_moves = numeric_limits<size_t>::max() - max_threshold;
     for (const Algorithm& skeleton: this->skeletons) {
-        Cube original_cube = this->scramble_cube;
-        original_cube.twist(skeleton);
+        Cube original_cube = this->scramble_cube * skeleton;
         Cube cube = original_cube.best_placement();
         bool parity = cube.has_parity();
         int corner_cycles = cube.corner_cycles();

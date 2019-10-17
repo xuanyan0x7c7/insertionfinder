@@ -27,9 +27,7 @@ namespace {
         Algorithm skeleton(skeleton_string);
         scramble.simplify();
         skeleton.simplify();
-        Cube cube;
-        cube.twist(scramble);
-        cube.twist(skeleton);
+        Cube cube = Cube() * scramble * skeleton;
         const Cube placed_cube = cube.best_placement();
         return {
             scramble, skeleton,

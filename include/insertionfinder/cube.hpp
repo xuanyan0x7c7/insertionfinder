@@ -97,6 +97,7 @@ namespace InsertionFinder {
     public:
         void twist(const Algorithm& algorithm, std::byte flags = CubeTwist::full) noexcept {
             this->twist(algorithm, 0, algorithm.length(), flags);
+            this->rotate(algorithm.cube_rotation());
         }
         void twist(const Algorithm& algorithm, std::size_t begin, std::size_t end, std::byte flags = CubeTwist::full);
         void twist(std::uint_fast8_t twist, std::byte flags = CubeTwist::full);
@@ -111,6 +112,51 @@ namespace InsertionFinder {
         }
         static int placement_twist(int placement, int rotation) {
             return Cube::center_transform[placement][rotation];
+        }
+    public:
+        Cube operator*(const Algorithm& algorithm) const noexcept {
+            Cube cube = *this;
+            cube.twist(algorithm);
+            return cube;
+        }
+        Cube operator*(std::uint_fast8_t twist) const noexcept {
+            Cube cube = *this;
+            cube.twist(twist);
+            return cube;
+        }
+        Cube operator*(const Cube& rhs) const noexcept {
+            return Cube::twist(*this, rhs);
+        }
+        friend Cube operator*(Cube&& lhs, const Algorithm& algorithm) noexcept {
+            lhs.twist(algorithm);
+            return std::move(lhs);
+        }
+        friend Cube operator*(Cube&& lhs, std::uint_fast8_t twist) noexcept {
+            lhs.twist(twist);
+            return std::move(lhs);
+        }
+        friend Cube operator*(Cube&& lhs, const Cube& rhs) noexcept {
+            lhs.twist(rhs);
+            return std::move(lhs);
+        }
+        friend Cube operator*(const Algorithm& algorithm, const Cube& rhs) noexcept {
+            Cube cube;
+            cube.twist(algorithm);
+            cube.twist(rhs);
+            return cube;
+        }
+        friend Cube operator*(std::uint_fast8_t twist, const Cube& rhs) noexcept;
+        Cube& operator*=(const Algorithm& algorithm) noexcept {
+            this->twist(algorithm);
+            return *this;
+        }
+        Cube& operator*=(std::uint_fast8_t twist) noexcept {
+            this->twist(twist);
+            return *this;
+        }
+        Cube& operator*=(const Cube& rhs) noexcept {
+            this->twist(rhs);
+            return *this;
         }
     public:
         void inverse() noexcept;

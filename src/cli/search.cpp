@@ -307,9 +307,7 @@ void CLI::find_insertion(const po::variables_map& vm) {
 
     scramble.simplify();
     skeleton.simplify();
-    Cube original_cube;
-    original_cube.twist(scramble);
-    original_cube.twist(skeleton);
+    Cube original_cube = Cube() * scramble * skeleton;
     Cube cube = original_cube.best_placement();
     bool parity = cube.has_parity();
     int corner_cycles = cube.corner_cycles();

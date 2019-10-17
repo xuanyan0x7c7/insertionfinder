@@ -86,15 +86,18 @@ namespace InsertionFinder {
         Cube inverse_scramble_cube;
     public:
         Finder(const Algorithm& scramble, const std::vector<Algorithm>& skeletons, const std::vector<Case>& cases):
-            scramble(scramble), skeletons(skeletons), cases(cases) {
+            scramble(scramble), skeletons(skeletons), cases(cases),
+            scramble_cube(Cube() * scramble), inverse_scramble_cube(Cube::inverse(this->scramble_cube)) {
             this->init();
         }
         Finder(const Algorithm& scramble, std::vector<Algorithm>&& skeletons, const std::vector<Case>& cases):
-            scramble(scramble), skeletons(std::move(skeletons)), cases(cases) {
+            scramble(scramble), skeletons(std::move(skeletons)), cases(cases),
+            scramble_cube(Cube() * scramble), inverse_scramble_cube(Cube::inverse(this->scramble_cube)) {
             this->init();
         }
         Finder(const Algorithm& scramble, const Algorithm& skeleton, const std::vector<Case>& cases):
-            scramble(scramble), skeletons({skeleton}), cases(cases) {
+            scramble(scramble), skeletons({skeleton}), cases(cases),
+            scramble_cube(Cube() * scramble), inverse_scramble_cube(Cube::inverse(this->scramble_cube)) {
             this->init();
         }
         virtual ~Finder() = default;

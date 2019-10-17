@@ -12,8 +12,7 @@ using namespace InsertionFinder;
 
 void BruteForceFinder::search_core(const SearchParams& params) {
     for (const Algorithm& skeleton: this->skeletons) {
-        Cube original_cube = this->scramble_cube;
-        original_cube.twist(skeleton);
+        Cube original_cube = this->scramble_cube * skeleton;
         Cube cube = original_cube.best_placement();
         bool parity = cube.has_parity();
         int corner_cycles = cube.corner_cycles();

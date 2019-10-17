@@ -40,8 +40,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
             algorithm.simplify();
             algorithm.normalize();
             algorithm.detect_rotation();
-            Cube cube;
-            cube.twist(algorithm);
+            Cube cube = Cube() * algorithm;
             if (cube.mask() == 0) {
                 continue;
             }
@@ -51,8 +50,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
             }
             auto isomorphism_list = algorithm.generate_isomorphisms();
             for (Algorithm& algorithm: isomorphism_list) {
-                Cube cube;
-                cube.twist(algorithm);
+                Cube cube = Cube() * algorithm;
                 if (auto node = map.find(cube); node != map.end()) {
                     node->second.add_algorithm(move(algorithm));
                 } else {

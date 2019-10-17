@@ -313,8 +313,7 @@ size_t hash<Algorithm>::operator()(const Algorithm& algorithm) const noexcept {
 
 
 void Algorithm::detect_rotation() noexcept {
-    Cube cube;
-    cube.twist(*this);
+    Cube cube = Cube() * *this;
     this->rotation = cube.best_placement().placement();
 }
 
