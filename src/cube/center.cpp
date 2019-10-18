@@ -105,31 +105,30 @@ const array<Cube, 24> Cube::rotation_cube = Cube::generate_rotation_cube_table()
 
 Cube Cube::best_placement() const noexcept {
     Cube original_cube = *this;
-    original_cube.rotate(Cube::inverse_center[original_cube._placement]);
+    original_cube.rotate(Cube::inverse_center[this->_placement]);
     int best_cycles = original_cube.corner_cycles() + original_cube.edge_cycles() + original_cube.has_parity();
     if (best_cycles <= 4) {
         return original_cube;
     }
 
     Cube best_cube = original_cube;
-    for (size_t index: {
+    for (size_t rotation: {
         2, 8, 10,
         5, 7, 13, 15, 17, 19, 21, 23,
         1, 3, 4, 12, 16, 20,
         6, 9, 11, 14, 18, 22
     }) {
-        Cube cube = original_cube;
-        cube.rotate(index);
+        Cube cube = original_cube * Cube::rotation_cube[rotation];
         int cycles = cube.corner_cycles() + cube.edge_cycles();
-        if (Cube::center_cycles[index] <= 1) {
+        if (Cube::center_cycles[rotation] <= 1) {
             cycles += cube.has_parity();
         }
-        if (cycles + Cube::center_cycles[index] < best_cycles) {
+        if (cycles <= 4) {
+            return cube;
+        }
+        if (cycles + Cube::center_cycles[rotation] < best_cycles) {
             best_cube = cube;
-            best_cycles = cycles + Cube::center_cycles[index];
-            if (cycles <= 4) {
-                return best_cube;
-            }
+            best_cycles = cycles + Cube::center_cycles[rotation];
         }
     }
     return best_cube;
