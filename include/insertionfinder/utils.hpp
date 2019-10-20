@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Insertionfinder::Details {
+namespace InsertionFinder::Details {
     template<class T> struct remove_cvref {
         typedef std::remove_cv_t<std::remove_reference_t<T>> type;
     };

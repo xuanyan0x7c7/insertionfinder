@@ -6,8 +6,11 @@
 #include <vector>
 #include <insertionfinder/finder/finder.hpp>
 #include <insertionfinder/finder/brute-force.hpp>
-using namespace std;
-using namespace InsertionFinder;
+using std::size_t;
+using InsertionFinder::Algorithm;
+using InsertionFinder::Cube;
+using InsertionFinder::BruteForceFinder;
+namespace FinderStatus = InsertionFinder::FinderStatus;
 
 
 void BruteForceFinder::search_core(const SearchParams& params) {
@@ -45,7 +48,7 @@ void BruteForceFinder::search_core(const SearchParams& params) {
                     this->solutions.clear();
                     this->fewest_moves = twists;
                     if (this->verbose) {
-                        cerr << skeleton << " (" << twists << "f)" << endl;
+                        std::cerr << skeleton << " (" << twists << "f)" << std::endl;
                     }
                 }
                 this->solutions.emplace_back(Solution({Insertion(skeleton)}));
@@ -53,10 +56,10 @@ void BruteForceFinder::search_core(const SearchParams& params) {
             continue;
         }
 
-        size_t thread_count = min(skeleton.length() + 1, params.max_threads);
-        vector<size_t> split_points(thread_count + 1);
+        size_t thread_count = std::min(skeleton.length() + 1, params.max_threads);
+        std::vector<size_t> split_points(thread_count + 1);
         for (size_t i = 1; i <= thread_count; ++i) {
-            split_points[i] = max(
+            split_points[i] = std::max(
                 static_cast<size_t>(
                     (skeleton.length() + 1) * (1 - sqrt(1 - static_cast<double>(i) / thread_count)) + 0.5
                 ),
@@ -64,17 +67,17 @@ void BruteForceFinder::search_core(const SearchParams& params) {
             );
         }
 
-        vector<thread> worker_threads;
+        std::vector<std::thread> worker_threads;
         for (size_t i = 0; i < thread_count; ++i) {
             worker_threads.emplace_back(
-                mem_fn(&BruteForceFinder::run_worker),
-                ref(*this),
+                std::mem_fn(&BruteForceFinder::run_worker),
+                std::ref(*this),
                 skeleton,
                 CycleStatus {parity, corner_cycles, edge_cycles, placement},
                 split_points[i], split_points[i + 1] - 1
             );
         }
-        for (thread& thread: worker_threads) {
+        for (std::thread& thread: worker_threads) {
             thread.join();
         }
     }

@@ -10,31 +10,37 @@
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
 #include "commands.hpp"
-using namespace std;
+using std::size_t;
 namespace po = boost::program_options;
-using namespace InsertionFinder;
+using InsertionFinder::Algorithm;
+using InsertionFinder::AlgorithmError;
+using InsertionFinder::Case;
+using InsertionFinder::Cube;
+namespace CLI = InsertionFinder::CLI;
 
 
 void CLI::generate_algorithms(const po::variables_map& vm) {
-    const vector<string> filenames = vm.count("file") ? vm["file"].as<vector<string>>() : vector<string>();
-    const vector<string> algfilenames = vm.count("algfile") ? vm["algfile"].as<vector<string>>() : vector<string>();
+    const std::vector<std::string> filenames =
+        vm.count("file") ? vm["file"].as<std::vector<std::string>>() : std::vector<std::string>();
+    const std::vector<std::string> algfilenames =
+        vm.count("algfile") ? vm["algfile"].as<std::vector<std::string>>() : std::vector<std::string>();
 
-    unordered_map<Cube, Case> map;
+    std::unordered_map<Cube, Case> map;
 
-    for (const string& name: filenames) {
-        ifstream fin(name);
+    for (const std::string& name: filenames) {
+        std::ifstream fin(name);
         if (fin.fail()) {
-            cerr << "Failed to open file " << name << endl;
+            std::cerr << "Failed to open file " << name << std::endl;
             continue;
         }
         while (!fin.eof()) {
-            string line;
-            getline(fin, line);
+            std::string line;
+            std::getline(fin, line);
             Algorithm algorithm;
             try {
                 algorithm = Algorithm(line);
             } catch (const AlgorithmError& e) {
-                cerr << "Invalid algorithm: " << e.what() << endl;
+                std::cerr << "Invalid algorithm: " << e.what() << std::endl;
                 continue;
             }
             algorithm.simplify();
@@ -52,30 +58,30 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
             for (Algorithm& algorithm: isomorphism_list) {
                 Cube cube = Cube() * algorithm;
                 if (auto node = map.find(cube); node != map.end()) {
-                    node->second.add_algorithm(move(algorithm));
+                    node->second.add_algorithm(std::move(algorithm));
                 } else {
                     Case _case(cube);
-                    _case.add_algorithm(move(algorithm));
-                    map.emplace(cube, move(_case));
+                    _case.add_algorithm(std::move(algorithm));
+                    map.emplace(cube, std::move(_case));
                 }
             }
         }
     }
 
-    const size_t size = map.size();
-    vector<Case> cases;
+    size_t size = map.size();
+    std::vector<Case> cases;
     cases.reserve(size);
     for (auto& node: map) {
-        cases.emplace_back(move(node.second));
+        cases.emplace_back(std::move(node.second));
     }
-    sort(cases.begin(), cases.end());
+    std::sort(cases.begin(), cases.end());
 
-    shared_ptr<ostream> out;
+    std::shared_ptr<std::ostream> out;
     if (algfilenames.empty()) {
-        out.reset(&cout, [](ostream*) {});
+        out.reset(&std::cout, [](std::ostream*) {});
     } else {
-        const string& name = algfilenames.front();
-        out = make_shared<ofstream>(name, ios::out | ios::binary);
+        const std::string& name = algfilenames.front();
+        out = std::make_shared<std::ofstream>(name, std::ios::out | std::ios::binary);
         if (out->fail()) {
             throw CLI::CommandExecutionError("Failed to open output file" + name);
         }

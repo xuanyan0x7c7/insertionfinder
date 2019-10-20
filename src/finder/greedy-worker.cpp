@@ -8,9 +8,13 @@
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/finder/greedy.hpp>
 #include "utils.hpp"
-using namespace std;
-using namespace InsertionFinder;
-using namespace Details;
+using std::size_t;
+using std::uint32_t;
+using std::uint_fast8_t;
+using InsertionFinder::Algorithm;
+using InsertionFinder::Cube;
+using InsertionFinder::GreedyFinder;
+namespace Details = InsertionFinder::Details;
 
 
 void GreedyFinder::Worker::search() {
@@ -34,7 +38,7 @@ void GreedyFinder::Worker::search() {
         }
     }
 
-    byte twist_flag{0};
+    std::byte twist_flag{0};
     if (this->finder.change_corner) {
         twist_flag |= CubeTwist::corners;
     }
@@ -73,8 +77,8 @@ void GreedyFinder::Worker::search() {
 }
 
 void GreedyFinder::Worker::search_last_corner_cycle() {
-    static constexpr byte twist_flag = CubeTwist::corners | CubeTwist::reversed;
-    const auto& corner_cycle_index = this->finder.corner_cycle_index;
+    static constexpr std::byte twist_flag = CubeTwist::corners | CubeTwist::reversed;
+    const int* corner_cycle_index = this->finder.corner_cycle_index;
 
     int index = -1;
     for (size_t insert_place = 0; insert_place <= this->skeleton.length(); ++insert_place) {
@@ -99,8 +103,8 @@ void GreedyFinder::Worker::search_last_corner_cycle() {
 }
 
 void GreedyFinder::Worker::search_last_edge_cycle() {
-    static constexpr byte twist_flag = CubeTwist::edges | CubeTwist::reversed;
-    const auto& edge_cycle_index = this->finder.edge_cycle_index;
+    static constexpr std::byte twist_flag = CubeTwist::edges | CubeTwist::reversed;
+    const int* edge_cycle_index = this->finder.edge_cycle_index;
 
     int index = -1;
     for (size_t insert_place = 0; insert_place <= this->skeleton.length(); ++insert_place) {
@@ -149,13 +153,13 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
     int total_cycles = this->finder.get_total_cycles(parity, corner_cycles, edge_cycles, placement);
 
     for (const Case& _case: this->finder.cases) {
-        if (bitcount_less_than_2(mask & _case.mask())) {
+        if (Details::bitcount_less_than_2(mask & _case.mask())) {
             continue;
         }
         bool corner_changed = _case.mask() & 0xff;
         bool edge_changed = _case.mask() & 0xfff00;
         bool center_changed = _case.mask() & 0xf00000;
-        byte twist_flag {0};
+        std::byte twist_flag {0};
         if (corner_changed) {
             twist_flag |= CubeTwist::corners;
         }
@@ -188,12 +192,12 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
                     continue;
                 }
                 new_skeleton.normalize();
-                lock_guard<mutex> lock(partial_state.fewest_moves_mutex);
+                std::lock_guard<std::mutex> lock(partial_state.fewest_moves_mutex);
                 if (new_skeleton.length() < partial_state.fewest_moves) {
                     partial_state.fewest_moves = new_skeleton.length();
                 }
                 partial_solution.emplace_back(
-                    move(new_skeleton),
+                    std::move(new_skeleton),
                     SolvingStep {
                         &this->skeleton, insert_place, &algorithm, swapped,
                         CycleStatus(new_parity, new_corner_cycles, new_edge_cycles, new_placement),
@@ -213,13 +217,13 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
                     continue;
                 }
                 new_skeleton.normalize();
-                lock_guard<mutex> lock(partial_state.fewest_moves_mutex);
+                std::lock_guard<std::mutex> lock(partial_state.fewest_moves_mutex);
                 if (new_skeleton.length() < partial_state.fewest_moves) {
                     partial_state.fewest_moves = new_skeleton.length();
                 }
                 this->finder.run_worker(
                     pool,
-                    move(new_skeleton),
+                    std::move(new_skeleton),
                     SolvingStep {
                         &this->skeleton, insert_place, &algorithm, swapped,
                         CycleStatus(new_parity, new_corner_cycles, new_edge_cycles, new_placement),
@@ -245,7 +249,7 @@ void GreedyFinder::Worker::solution_found(size_t insert_place, bool swapped, con
         Algorithm new_skeleton = skeleton.insert(algorithm, insert_place).first;
         if (new_skeleton.length() <= this->finder.fewest_moves) {
             new_skeleton.normalize();
-            lock_guard<mutex> lock(this->finder.partial_states[0].fewest_moves_mutex);
+            std::lock_guard<std::mutex> lock(this->finder.partial_states[0].fewest_moves_mutex);
             if (new_skeleton.length() > this->finder.fewest_moves) {
                 continue;
             }
@@ -254,7 +258,7 @@ void GreedyFinder::Worker::solution_found(size_t insert_place, bool swapped, con
                 this->finder.fewest_moves = new_skeleton.length();
             }
             partial_solution.emplace_back(
-                move(new_skeleton),
+                std::move(new_skeleton),
                 SolvingStep {
                     &this->skeleton, insert_place, &algorithm, swapped,
                     {false, 0, 0, 0},

@@ -7,11 +7,13 @@
 #include <ostream>
 #include <vector>
 #include <insertionfinder/cube.hpp>
-using namespace std;
-using namespace InsertionFinder;
+using std::size_t;
+using std::uint32_t;
+using InsertionFinder::Cube;
+using InsertionFinder::CubeStreamError;
 
 
-void Cube::save_to(ostream& out) const {
+void Cube::save_to(std::ostream& out) const {
     char data[21];
     for (size_t i = 0; i < 8; ++i) {
         data[i] = this->corner[i];
@@ -23,7 +25,7 @@ void Cube::save_to(ostream& out) const {
     out.write(data, 21);
 }
 
-void Cube::read_from(istream& in) {
+void Cube::read_from(std::istream& in) {
     char data[21];
     in.read(data, 21);
     if (in.gcount() != 21) {
@@ -46,12 +48,12 @@ void Cube::inverse() noexcept {
         unsigned item = this->corner[i];
         corner[item / 3] = i * 3 + (24 - item) % 3;
     }
-    memcpy(this->corner, corner, 8 * sizeof(unsigned));
+    std::memcpy(this->corner, corner, 8 * sizeof(unsigned));
     for (unsigned i = 0; i < 12; ++i) {
         unsigned item = this->edge[i];
         edge[item >> 1] = i << 1 | (item & 1);
     }
-    memcpy(this->edge, edge, 12 * sizeof(unsigned));
+    std::memcpy(this->edge, edge, 12 * sizeof(unsigned));
     this->_placement = Cube::inverse_center[this->_placement];
 }
 
@@ -88,7 +90,7 @@ uint32_t Cube::mask() const noexcept {
 }
 
 
-size_t hash<Cube>::operator()(const Cube& cube) const noexcept {
+size_t std::hash<Cube>::operator()(const Cube& cube) const noexcept {
     size_t result = 0;
     for (size_t i = 0; i < 8; ++i) {
         result = result * 31 + cube.corner[i];

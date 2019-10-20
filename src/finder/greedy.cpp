@@ -10,14 +10,16 @@
 #include <insertionfinder/finder/finder.hpp>
 #include <insertionfinder/finder/greedy.hpp>
 #include "utils.hpp"
-using namespace std;
-using namespace InsertionFinder;
-using namespace Details;
+using std::size_t;
+using InsertionFinder::Algorithm;
+using InsertionFinder::Cube;
+using InsertionFinder::GreedyFinder;
+namespace Details = InsertionFinder::Details;
 
 
 void GreedyFinder::search_core(const SearchParams& params) {
-    size_t max_threshold = max<size_t>(this->options.greedy_threshold, this->options.replacement_threshold);
-    this->partial_states[0].fewest_moves = numeric_limits<size_t>::max() - max_threshold;
+    size_t max_threshold = std::max<size_t>(this->options.greedy_threshold, this->options.replacement_threshold);
+    this->partial_states[0].fewest_moves = std::numeric_limits<size_t>::max() - max_threshold;
     for (const Algorithm& skeleton: this->skeletons) {
         Cube original_cube = this->scramble_cube * skeleton;
         Cube cube = original_cube.best_placement();
@@ -51,7 +53,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
             this->partial_solution_list.resize(cycles + 1);
             this->partial_states.resize(cycles + 1);
             for (int depth = previous_cycles; ++depth <= cycles;) {
-                this->partial_states[depth].fewest_moves = numeric_limits<size_t>::max() - max_threshold;
+                this->partial_states[depth].fewest_moves = std::numeric_limits<size_t>::max() - max_threshold;
             }
         }
         if (this->partial_states[cycles].fewest_moves > skeleton.length()) {
@@ -67,7 +69,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
         auto& solution_list = this->partial_solution_list[depth];
         auto& state = this->partial_states[depth];
         solution_list.erase(
-            remove_if(
+            std::remove_if(
                 solution_list.begin(), solution_list.end(),
                 [&state, this](const auto& x) {
                     return x.first.length() > state.fewest_moves + this->options.greedy_threshold;
@@ -75,7 +77,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
             ),
             solution_list.end()
         );
-        sort(solution_list.begin(), solution_list.end(), [](const auto& x, const auto& y) {
+        std::sort(solution_list.begin(), solution_list.end(), [](const auto& x, const auto& y) {
             if (int comparison = Algorithm::compare(x.first, y.first); comparison < 0) {
                 return true;
             } else if (comparison > 0) {
@@ -84,7 +86,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
             return x.second.cancellation < y.second.cancellation;
         });
         solution_list.erase(
-            unique(
+            std::unique(
                 solution_list.begin(), solution_list.end(),
                 [](const auto& x, const auto& y) {return x.first == y.first;}
             ),
@@ -92,21 +94,21 @@ void GreedyFinder::search_core(const SearchParams& params) {
         );
 
         if (this->verbose && (!solution_list.empty() || (depth & 1) == 0)) {
-            cerr << "Searching depth " << depth / 2.0 << ": "
+            std::cerr << "Searching depth " << depth / 2.0 << ": "
                 << solution_list.size() << " case"
                 << (solution_list.size() == 1 ? "" : "s")
-                << '.' << endl;
+                << '.' << std::endl;
         }
         boost::asio::thread_pool pool(params.max_threads);
         for (auto& [skeleton, step]: solution_list) {
-            this->run_worker(pool, move(skeleton), step);
+            this->run_worker(pool, std::move(skeleton), step);
         }
         pool.join();
     }
 
-    vector<const Algorithm*> skeletons;
+    std::vector<const Algorithm*> skeletons;
     for (auto& [skeleton, step]: this->partial_solution_list[0]) {
-        auto [iter, inserted] = this->partial_solution_map.try_emplace(move(skeleton), step);
+        auto [iter, inserted] = this->partial_solution_map.try_emplace(std::move(skeleton), step);
         const Algorithm& old_skeleton = iter->first;
         auto& old_step = iter->second;
         if (inserted) {
@@ -116,8 +118,8 @@ void GreedyFinder::search_core(const SearchParams& params) {
         }
     }
     for (const Algorithm* current_skeleton: skeletons) {
-        vector<Insertion> result({Insertion(*current_skeleton)});
-        while (all_of(
+        std::vector<Insertion> result({Insertion(*current_skeleton)});
+        while (std::all_of(
             this->skeletons.cbegin(), this->skeletons.cend(),
             [&](const Algorithm& x) {return x != *current_skeleton;}
         )) {
@@ -127,16 +129,16 @@ void GreedyFinder::search_core(const SearchParams& params) {
             if (step.swapped) {
                 previous_skeleton.swap_adjacent(step.insert_place);
             }
-            result.emplace_back(move(previous_skeleton), step.insert_place, step.insertion);
+            result.emplace_back(std::move(previous_skeleton), step.insert_place, step.insertion);
         }
-        reverse(result.begin(), result.end());
+        std::reverse(result.begin(), result.end());
         this->solutions.emplace_back(move(result));
     }
 }
 
 void GreedyFinder::run_worker(boost::asio::thread_pool& pool, Algorithm&& skeleton, const SolvingStep& step) {
-    lock_guard<mutex> lock(this->worker_mutex);
-    auto [iter, inserted] = this->partial_solution_map.try_emplace(move(skeleton), step);
+    std::lock_guard<std::mutex> lock(this->worker_mutex);
+    auto [iter, inserted] = this->partial_solution_map.try_emplace(std::move(skeleton), step);
     const auto& old_skeleton = iter->first;
     auto& old_step = iter->second;
     if (inserted) {

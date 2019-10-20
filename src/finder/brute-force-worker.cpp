@@ -6,9 +6,13 @@
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/finder/brute-force.hpp>
 #include "utils.hpp"
-using namespace std;
-using namespace InsertionFinder;
-using namespace Details;
+using std::size_t;
+using std::uint32_t;
+using std::uint_fast8_t;
+using InsertionFinder::Algorithm;
+using InsertionFinder::Cube;
+using InsertionFinder::BruteForceFinder;
+namespace Details = InsertionFinder::Details;
 
 
 namespace {
@@ -42,7 +46,7 @@ void BruteForceFinder::Worker::search(const CycleStatus& cycle_status, size_t be
     }
 
     const Algorithm skeleton = this->solving_step.back().skeleton;
-    byte twist_flag{0};
+    std::byte twist_flag{0};
     if (this->finder.change_corner) {
         twist_flag |= CubeTwist::corners;
     }
@@ -83,8 +87,8 @@ void BruteForceFinder::Worker::search(const CycleStatus& cycle_status, size_t be
 
 void BruteForceFinder::Worker::search_last_corner_cycle(size_t begin, size_t end) {
     const Algorithm skeleton = this->solving_step.back().skeleton;
-    static constexpr byte twist_flag = CubeTwist::corners | CubeTwist::reversed;
-    const auto& corner_cycle_index = this->finder.corner_cycle_index;
+    static constexpr std::byte twist_flag = CubeTwist::corners | CubeTwist::reversed;
+    const int* corner_cycle_index = this->finder.corner_cycle_index;
 
     int index = -1;
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
@@ -111,8 +115,8 @@ void BruteForceFinder::Worker::search_last_corner_cycle(size_t begin, size_t end
 
 void BruteForceFinder::Worker::search_last_edge_cycle(size_t begin, size_t end) {
     const Algorithm skeleton = this->solving_step.back().skeleton;
-    static constexpr byte twist_flag = CubeTwist::edges | CubeTwist::reversed;
-    const auto& edge_cycle_index = this->finder.edge_cycle_index;
+    static constexpr std::byte twist_flag = CubeTwist::edges | CubeTwist::reversed;
+    const int* edge_cycle_index = this->finder.edge_cycle_index;
 
     int index = -1;
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
@@ -167,13 +171,13 @@ void BruteForceFinder::Worker::try_insertion(
     int placement = cycle_status.placement;
 
     for (const Case& _case: this->finder.cases) {
-        if (bitcount_less_than_2(mask & _case.mask())) {
+        if (Details::bitcount_less_than_2(mask & _case.mask())) {
             continue;
         }
         bool corner_changed = _case.mask() & 0xff;
         bool edge_changed = _case.mask() & 0xfff00;
         bool center_changed = _case.mask() & 0xf00000;
-        byte twist_flag {0};
+        std::byte twist_flag {0};
         if (corner_changed) {
             twist_flag |= CubeTwist::corners;
         }
@@ -210,7 +214,7 @@ void BruteForceFinder::Worker::try_insertion(
                     && new_skeleton.length() <= this->finder.fewest_moves
                 ) {
                     size_t new_end = new_skeleton.length();
-                    this->solving_step.emplace_back(move(new_skeleton));
+                    this->solving_step.emplace_back(std::move(new_skeleton));
                     this->search(
                         {new_parity, new_corner_cycles, new_edge_cycles, new_placement},
                         new_begin, new_end
@@ -263,7 +267,7 @@ void BruteForceFinder::Worker::update_fewest_moves() {
     if (twists > this->finder.fewest_moves) {
         return;
     }
-    lock_guard<mutex> lock(this->finder.fewest_moves_mutex);
+    std::lock_guard<std::mutex> lock(this->finder.fewest_moves_mutex);
     if (twists > this->finder.fewest_moves) {
         return;
     }
@@ -271,7 +275,7 @@ void BruteForceFinder::Worker::update_fewest_moves() {
         this->finder.solutions.clear();
         this->finder.fewest_moves = twists;
         if (this->finder.verbose) {
-            cerr << this->solving_step.back().skeleton << " (" << twists << "f)" << endl;
+            std::cerr << this->solving_step.back().skeleton << " (" << twists << "f)" << std::endl;
         }
     }
     this->finder.solutions.emplace_back(this->solving_step);

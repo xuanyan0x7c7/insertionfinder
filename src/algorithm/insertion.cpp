@@ -6,9 +6,11 @@
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 #include "utils.hpp"
-using namespace std;
-using namespace InsertionFinder;
-using namespace Details;
+using std::size_t;
+using std::uint32_t;
+using std::uint_fast8_t;
+using InsertionFinder::Algorithm;
+namespace Details = InsertionFinder::Details;
 
 
 size_t Algorithm::cancel_moves() {
@@ -53,45 +55,48 @@ size_t Algorithm::cancel_moves() {
 }
 
 
-pair<uint32_t, uint32_t> Algorithm::get_insert_place_mask(size_t insert_place) const {
+std::pair<uint32_t, uint32_t> Algorithm::get_insert_place_mask(size_t insert_place) const {
     const auto& twists = this->twists;
     uint32_t mask_before = 0;
     uint32_t mask_after = 0;
     if (insert_place > 0) {
-        mask_before = twist_mask(twists[insert_place - 1]);
+        mask_before = Details::twist_mask(twists[insert_place - 1]);
         if (insert_place > 1 && twists[insert_place - 1] >> 3 == twists[insert_place - 2] >> 3) {
-            mask_before |= twist_mask(twists[insert_place - 2]);
+            mask_before |= Details::twist_mask(twists[insert_place - 2]);
         }
     }
     if (insert_place < twists.size()) {
-        mask_after = twist_mask(twists[insert_place]);
+        mask_after = Details::twist_mask(twists[insert_place]);
         if (insert_place + 1 < twists.size() && twists[insert_place] >> 3 == twists[insert_place + 1] >> 3) {
-            mask_after |= twist_mask(twists[insert_place + 1]);
+            mask_after |= Details::twist_mask(twists[insert_place + 1]);
         }
     }
     return {mask_before, mask_after};
 }
 
 
-pair<Algorithm, size_t> Algorithm::insert(const Algorithm& insertion, size_t insert_place) const {
-    using namespace placeholders;
+std::pair<Algorithm, size_t> Algorithm::insert(const Algorithm& insertion, size_t insert_place) const {
     Algorithm result;
     result.twists.reserve(this->twists.size() + insertion.twists.size());
     result.twists.assign(this->twists.cbegin(), this->twists.cbegin() + insert_place);
     result.twists.insert(result.twists.end(), insertion.twists.cbegin(), insertion.twists.cend());
-    transform(
+    std::transform(
         this->twists.cbegin() + insert_place, this->twists.cend(),
-        back_inserter(result.twists),
-        bind(transform_twist, rotation_permutation[Cube::inverse_center[insertion.rotation]], _1)
+        std::back_inserter(result.twists),
+        std::bind(
+            Details::transform_twist,
+            Details::rotation_permutation[Cube::inverse_center[insertion.rotation]],
+            std::placeholders::_1
+        )
     );
     size_t place = result.cancel_moves();
-    return {result, min(place, insert_place + 1)};
+    return {result, std::min(place, insert_place + 1)};
 }
 
 
 bool Algorithm::is_worthy_insertion(
     const Algorithm& insertion, size_t insert_place,
-    pair<uint32_t, uint32_t> insert_place_mask,
+    std::pair<uint32_t, uint32_t> insert_place_mask,
     size_t fewest_twists
 ) const {
     size_t length = this->twists.size();
@@ -123,6 +128,6 @@ bool Algorithm::is_worthy_insertion(
             ++cancellation;
         }
     }
-    return fewest_twists == numeric_limits<size_t>::max()
+    return fewest_twists == std::numeric_limits<size_t>::max()
         || length + insertion.twists.size() <= fewest_twists + cancellation;
 }

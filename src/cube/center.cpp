@@ -1,8 +1,8 @@
 #include <cstring>
 #include <array>
 #include <insertionfinder/cube.hpp>
-using namespace std;
-using namespace InsertionFinder;
+using std::size_t;
+using InsertionFinder::Cube;
 
 
 namespace {
@@ -47,8 +47,8 @@ namespace {
         {4, 5, 0, 1, 2, 3}
     };
 
-    array<array<int, 24>, 24> generate_center_transform_table() noexcept {
-        array<array<int, 24>, 24> center_transform;
+    std::array<std::array<int, 24>, 24> generate_center_transform_table() noexcept {
+        std::array<std::array<int, 24>, 24> center_transform;
         for (size_t i = 0; i < 24; ++i) {
             for (size_t j = 0; j < 24; ++j) {
                 int center0 = rotation_permutation[j][rotation_permutation[i][0]];
@@ -66,14 +66,14 @@ namespace {
 }
 
 
-const array<array<int, 24>, 24> Cube::center_transform = generate_center_transform_table();
+const std::array<std::array<int, 24>, 24> Cube::center_transform = generate_center_transform_table();
 
-array<Cube, 24> Cube::generate_rotation_cube_table() noexcept {
-    array<Cube, 24> rotation_cube;
-    array<Cube, 4> basic_rotation_cube;
+std::array<Cube, 24> Cube::generate_rotation_cube_table() noexcept {
+    std::array<Cube, 24> rotation_cube;
+    std::array<Cube, 4> basic_rotation_cube;
     for (size_t i = 0; i < 4; ++i) {
-        memcpy(basic_rotation_cube[i].corner, rotation_corner_table[i], 8 * sizeof(unsigned));
-        memcpy(basic_rotation_cube[i].edge, rotation_edge_table[i], 12 * sizeof(unsigned));
+        std::memcpy(basic_rotation_cube[i].corner, rotation_corner_table[i], 8 * sizeof(unsigned));
+        std::memcpy(basic_rotation_cube[i].edge, rotation_edge_table[i], 12 * sizeof(unsigned));
     }
     for (size_t front = 0; front < 4; ++front) {
         rotation_cube[front | 4].twist(basic_rotation_cube[1]);
@@ -100,7 +100,7 @@ array<Cube, 24> Cube::generate_rotation_cube_table() noexcept {
     return rotation_cube;
 }
 
-const array<Cube, 24> Cube::rotation_cube = Cube::generate_rotation_cube_table();
+const std::array<Cube, 24> Cube::rotation_cube = Cube::generate_rotation_cube_table();
 
 
 Cube Cube::best_placement() const noexcept {

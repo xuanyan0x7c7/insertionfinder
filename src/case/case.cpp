@@ -3,8 +3,12 @@
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/case.hpp>
-using namespace std;
-using namespace InsertionFinder;
+using std::size_t;
+using InsertionFinder::AlgorithmStreamError;
+using InsertionFinder::Case;
+using InsertionFinder::CaseStreamError;
+using InsertionFinder::Cube;
+using InsertionFinder::CubeStreamError;
 
 
 Case::Case(const Cube& state):
@@ -14,7 +18,7 @@ Case::Case(const Cube& state):
     _corner_cycles(state.corner_cycles()), _edge_cycles(state.edge_cycles()) {}
 
 
-void Case::save_to(ostream& out) const {
+void Case::save_to(std::ostream& out) const {
     this->_state.save_to(out);
     size_t size = this->list.size();
     out.write(reinterpret_cast<char*>(&size), sizeof(size_t));
@@ -23,7 +27,7 @@ void Case::save_to(ostream& out) const {
     }
 }
 
-void Case::read_from(istream& in) {
+void Case::read_from(std::istream& in) {
     try {
         this->_state.read_from(in);
     } catch (const CubeStreamError& e) {

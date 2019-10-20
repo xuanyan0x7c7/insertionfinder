@@ -1,16 +1,19 @@
+#include <cstring>
 #include <chrono>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/finder/finder.hpp>
-using namespace std;
-using namespace chrono;
-using namespace InsertionFinder;
+using std::size_t;
+using InsertionFinder::Case;
+using InsertionFinder::Cube;
+using InsertionFinder::Finder;
+namespace FinderStatus = InsertionFinder::FinderStatus;
 
 
 void Finder::init() {
-    this->corner_cycle_index.fill(-1);
-    this->edge_cycle_index.fill(-1);
-    this->center_index.fill(-1);
+    std::memset(this->corner_cycle_index, 0xff, sizeof(this->corner_cycle_index));
+    std::memset(this->edge_cycle_index, 0xff, sizeof(this->edge_cycle_index));
+    std::memset(this->center_index, 0xff, sizeof(this->center_index));
 
     for (size_t index = 0; index < this->cases.size(); ++index) {
         const Case& _case = this->cases[index];
@@ -55,7 +58,7 @@ void Finder::init() {
 void Finder::search(const SearchParams& params) {
     this->fewest_moves = params.search_target;
     this->parity_multiplier = params.parity_multiplier * 2;
-    auto begin = high_resolution_clock::now();
+    auto begin = std::chrono::high_resolution_clock::now();
     this->search_core(params);
     if (this->result.status == FinderStatus::success) {
         for (auto& solution: this->solutions) {
@@ -71,6 +74,6 @@ void Finder::search(const SearchParams& params) {
             [](const auto& x, const auto& y) {return x.cancellation < y.cancellation;}
         );
     }
-    auto end = high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
     this->result.duration = (end - begin).count();
 }

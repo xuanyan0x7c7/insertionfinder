@@ -18,10 +18,16 @@
 #include <insertionfinder/finder/finder.hpp>
 #include "commands.hpp"
 #include "univalue/univalue.h"
-using namespace std;
+using std::int64_t;
+using std::size_t;
 namespace fs = std::filesystem;
 namespace po = boost::program_options;
-using namespace InsertionFinder;
+using InsertionFinder::Algorithm;
+using InsertionFinder::Case;
+using InsertionFinder::Cube;
+using InsertionFinder::Finder;
+namespace FinderStatus = InsertionFinder::FinderStatus;
+namespace CLI = InsertionFinder::CLI;
 
 
 namespace {
@@ -50,45 +56,45 @@ namespace {
             const Algorithm& scramble, const Algorithm& skeleton,
             const CycleStatus& status
         ) override {
-            cout << "Scramble: " << scramble << endl;
-            cout << "Skeleton: " << skeleton << endl;
-            cout << "The cube ";
+            std::cout << "Scramble: " << scramble << std::endl;
+            std::cout << "Skeleton: " << skeleton << std::endl;
+            std::cout << "The cube ";
             if (!status.parity && status.corner_cycles == 0 && status.edge_cycles == 0 && status.center_cycles == 0) {
-                cout << "is already solved";
+                std::cout << "is already solved";
             } else {
-                cout << "has ";
+                std::cout << "has ";
                 if (status.center_cycles) {
                     if (status.center_cycles > 1) {
-                        cout << "parity center rotation";
+                        std::cout << "parity center rotation";
                     } else {
-                        cout << "center rotation";
+                        std::cout << "center rotation";
                     }
                     if (status.corner_cycles || status.edge_cycles) {
-                        cout << " with ";
+                        std::cout << " with ";
                     }
                 }
                 if (status.corner_cycles == 1) {
-                    cout << "1 corner-3-cycle";
+                    std::cout << "1 corner-3-cycle";
                 } else if (status.corner_cycles > 1) {
-                    cout << status.corner_cycles << " corner-3-cycles";
+                    std::cout << status.corner_cycles << " corner-3-cycles";
                 }
                 if (status.corner_cycles && status.edge_cycles) {
-                    cout << " and ";
+                    std::cout << " and ";
                 }
                 if (status.edge_cycles == 1) {
-                    cout << "1 edge-3-cycle";
+                    std::cout << "1 edge-3-cycle";
                 } else if (status.edge_cycles > 1) {
-                    cout << status.edge_cycles << " edge-3-cycles";
+                    std::cout << status.edge_cycles << " edge-3-cycles";
                 }
                 if (status.center_cycles <= 1 && status.parity) {
                     if (status.corner_cycles || status.edge_cycles) {
-                        cout << " with parity";
+                        std::cout << " with parity";
                     } else {
-                        cout << "parity";
+                        std::cout << "parity";
                     }
                 }
             }
-            cout << '.' << endl;
+            std::cout << '.' << std::endl;
         }
 
         void print_result(
@@ -99,69 +105,69 @@ namespace {
             if (result.status == FinderStatus::success) {
                 const auto& solutions = finder.get_solutions();
                 if (solutions.empty()) {
-                    cout << "No solution found." << endl;
+                    std::cout << "No solution found." << std::endl;
                 }
                 for (size_t index = 0; index < solutions.size(); ++index) {
                     const auto& solution = solutions[index];
-                    cout << endl << "Solution #" << index + 1 << endl;
+                    std::cout << std::endl << "Solution #" << index + 1 << std::endl;
                     for (size_t i = 0; i < solution.insertions.size() - 1; ++i) {
                         const auto& insertion = solution.insertions[i];
                         const Algorithm& skeleton = insertion.skeleton;
                         size_t insert_place = insertion.insert_place;
                         if (insert_place > 0) {
-                            skeleton.print(cout, 0, insert_place);
-                            cout << ' ';
+                            skeleton.print(std::cout, 0, insert_place);
+                            std::cout << ' ';
                         }
-                        cout << "[@" << i + 1 << ']';
+                        std::cout << "[@" << i + 1 << ']';
                         if (insert_place < skeleton.length()) {
-                            cout << ' ';
-                            skeleton.print(cout, insert_place, skeleton.length());
+                            std::cout << ' ';
+                            skeleton.print(std::cout, insert_place, skeleton.length());
                         }
-                        cout << endl;
-                        cout << "Insert at @" << i + 1 << ": " << *insertion.insertion << endl;
+                        std::cout << std::endl;
+                        std::cout << "Insert at @" << i + 1 << ": " << *insertion.insertion << std::endl;
                     }
-                    cout
+                    std::cout
                         << "Total moves: " << finder.get_fewest_moves() << ", "
                         << solution.cancellation << " move" << (solution.cancellation == 1 ? "" : "s")
-                        << " cancelled." << endl
-                        << "Full solution: " << solution.insertions.back().skeleton << endl;
+                        << " cancelled." << std::endl
+                        << "Full solution: " << solution.insertions.back().skeleton << std::endl;
                 }
             } else {
                 if (result.status == FinderStatus::parity_algorithms_needed) {
-                    cout << "Parity algorithms needed." << endl;
+                    std::cout << "Parity algorithms needed." << std::endl;
                 }
                 if (result.status == FinderStatus::corner_cycle_algorithms_needed) {
-                    cout << "Corner cycle algorithms needed." << endl;
+                    std::cout << "Corner cycle algorithms needed." << std::endl;
                 }
                 if (result.status == FinderStatus::edge_cycle_algorithms_needed) {
-                    cout << "Edge cycle algorithms needed." << endl;
+                    std::cout << "Edge cycle algorithms needed." << std::endl;
                 }
                 if (result.status == FinderStatus::center_algorithms_needed) {
-                    cout << "Center algorithms needed." << endl;
+                    std::cout << "Center algorithms needed." << std::endl;
                 }
             }
-            cout << "Time usage: " << fixed << setprecision(3);
+            std::cout << "Time usage: " << std::fixed << std::setprecision(3);
             if (result.duration < 1000) {
-                cout << result.duration << " nanoseconds." << endl;
+                std::cout << result.duration << " nanoseconds." << std::endl;
             } else if (result.duration < 1'000'000) {
-                cout << result.duration / 1e3 << " microseconds." << endl;
+                std::cout << result.duration / 1e3 << " microseconds." << std::endl;
             } else if (result.duration < 1'000'000'000) {
-                cout << result.duration / 1e6 << " milliseconds." << endl;
+                std::cout << result.duration / 1e6 << " milliseconds." << std::endl;
             } else if (result.duration < 60 * static_cast<int64_t>(1'000'000'000)) {
-                cout << result.duration / 1e9 << " seconds." << endl;
+                std::cout << result.duration / 1e9 << " seconds." << std::endl;
             } else if (result.duration < 60 * 60 * static_cast<int64_t>(1'000'000'000)) {
                 int64_t duration = (result.duration + 500'000) / 1'000'000;
-                cout << duration / (60 * 1000)
-                    << right << setfill('0')
-                    << ':' << setw(2) << duration / 1000 % 60
-                     << '.'<< setw(3) << duration % 1000 << endl;
+                std::cout << duration / (60 * 1000)
+                    << std::right << std::setfill('0')
+                    << ':' << std::setw(2) << duration / 1000 % 60
+                     << '.'<< std::setw(3) << duration % 1000 << std::endl;
             } else {
                 int64_t duration = (result.duration + 500'000) / 1'000'000;
-                cout << duration / (60 * 60 * 1000)
-                    << right << setfill('0')
-                    << ':' << setw(2) << duration / (60 * 1000) % 60
-                    << ':' << setw(2) << duration / 1000 % 60
-                    << ':' << setw(3) << duration % 1000 << '.' << endl;
+                std::cout << duration / (60 * 60 * 1000)
+                    << std::right << std::setfill('0')
+                    << ':' << std::setw(2) << duration / (60 * 1000) % 60
+                    << ':' << std::setw(2) << duration / 1000 % 60
+                    << ':' << std::setw(3) << duration % 1000 << '.' << std::endl;
             }
         }
     };
@@ -208,52 +214,54 @@ namespace {
             map.pushKV("solutions", solution_list);
 
             map.pushKV("duration", result.duration);
-            cout << map.write() << flush;
+            std::cout << map.write() << std::flush;
         }
     };
 };
 
 
 void CLI::find_insertion(const po::variables_map& vm) {
-    const vector<string> filenames = vm.count("file") ? vm["file"].as<vector<string>>() : vector<string>();
-    const fs::path algorithms_directory = vm["algs-dir"].as<string>();
-    vector<string> algfilenames = vm.count("algfile") ? vm["algfile"].as<vector<string>>() : vector<string>();
+    const std::vector<std::string> filenames =
+        vm.count("file") ? vm["file"].as<std::vector<std::string>>() : std::vector<std::string>();
+    const fs::path algorithms_directory = vm["algs-dir"].as<std::string>();
+    std::vector<std::string> algfilenames =
+        vm.count("algfile") ? vm["algfile"].as<std::vector<std::string>>() : std::vector<std::string>();
     if (vm.count("all-algs")) {
         try {
-            for (auto& file: fs::directory_iterator(algorithms_directory)) {
+            for (const auto& file: fs::directory_iterator(algorithms_directory)) {
                 if (fs::is_regular_file(file) && file.path().extension() == ".algs") {
                     algfilenames.emplace_back(file.path().string());
                 }
             }
         } catch (const fs::filesystem_error& e) {
-            cerr << e.what() << endl;
+            std::cerr << e.what() << std::endl;
         }
     }
     if (vm.count("all-extra-algs")) {
         try {
-            for (auto &file : fs::directory_iterator(algorithms_directory / "extras")) {
+            for (const auto &file : fs::directory_iterator(algorithms_directory / "extras")) {
                 if (fs::is_regular_file(file) && file.path().extension() == ".algs") {
                     algfilenames.emplace_back(file.path().string());
                 }
             }
         } catch (const fs::filesystem_error &e) {
-            cerr << e.what() << endl;
+            std::cerr << e.what() << std::endl;
         }
     }
 
-    unordered_map<Cube, Case> map;
-    for (const string& name: algfilenames) {
-        ifstream fin(name, ios::in | ios::binary);
+    std::unordered_map<Cube, Case> map;
+    for (const std::string& name: algfilenames) {
+        std::ifstream fin(name, std::ios::in | std::ios::binary);
         if (fin.fail()) {
-            fin = ifstream((algorithms_directory / (name + ".algs")).string(), ios::in | ios::binary);
+            fin = std::ifstream((algorithms_directory / (name + ".algs")).string(), std::ios::in | std::ios::binary);
             if (fin.fail()) {
-                cerr << "Failed to open algorithm file " << name << endl;
+                std::cerr << "Failed to open algorithm file " << name << std::endl;
                 continue;
             }
         }
         size_t size;
         if (!fin.read(reinterpret_cast<char*>(&size), sizeof(size_t))) {
-            cerr << "Invalid algorithm file " << name << endl;
+            std::cerr << "Invalid algorithm file " << name << std::endl;
             continue;
         }
         for (size_t i = 0; i < size; ++i) {
@@ -261,42 +269,43 @@ void CLI::find_insertion(const po::variables_map& vm) {
             try {
                 _case.read_from(fin);
             } catch (...) {
-                cerr << "Invalid algorithm file " << name << endl;
+                std::cerr << "Invalid algorithm file " << name << std::endl;
                 break;
             }
-            auto [node, inserted] = map.try_emplace(_case.state(), move(_case));
+            auto [node, inserted] = map.try_emplace(_case.state(), std::move(_case));
             if (!inserted) {
-                node->second.merge_algorithms(move(_case));
+                node->second.merge_algorithms(std::move(_case));
             }
         }
     }
 
-    vector<Case> cases;
+    std::vector<Case> cases;
+    cases.reserve(map.size());
     for (auto& node: map) {
-        cases.emplace_back(move(node.second));
+        cases.emplace_back(std::move(node.second));
     }
     sort(cases.begin(), cases.end());
 
-    shared_ptr<istream> in;
+    std::shared_ptr<std::istream> in;
     if (filenames.empty()) {
-        in.reset(&cin, [](istream*) {});
+        in.reset(&std::cin, [](std::istream*) {});
     } else {
-        const string& name = filenames.front();
-        in = make_shared<ifstream>(name);
+        const std::string& name = filenames.front();
+        in = std::make_shared<std::ifstream>(name);
         if (in->fail()) {
             throw CLI::CommandExecutionError("Failed to open input file " + name);
         }
     }
 
-    string line;
-    getline(*in, line);
+    std::string line;
+    std::getline(*in, line);
     Algorithm scramble;
     try {
         scramble = Algorithm(line);
     } catch (const AlgorithmError& e) {
         throw CLI::CommandExecutionError("Invalid scramble " + line);
     }
-    getline(*in, line);
+    std::getline(*in, line);
     Algorithm skeleton;
     try {
         skeleton = Algorithm(line);
@@ -314,19 +323,19 @@ void CLI::find_insertion(const po::variables_map& vm) {
     int edge_cycles = cube.edge_cycles();
     int center_cycles = Cube::center_cycles[cube.placement()];
 
-    unique_ptr<Printer> printer;
+    std::unique_ptr<Printer> printer;
     if (vm.count("json")) {
-        printer = make_unique<JSONPrinter>();
+        printer = std::make_unique<JSONPrinter>();
     } else {
-        printer = make_unique<StandardPrinter>();
+        printer = std::make_unique<StandardPrinter>();
     }
     printer->print_case_information(scramble, skeleton, {parity, corner_cycles, edge_cycles, center_cycles});
 
-    unique_ptr<Finder> finder;
+    std::unique_ptr<Finder> finder;
     if (vm.count("optimal")) {
-        finder = make_unique<BruteForceFinder>(scramble, skeleton, cases);
+        finder = std::make_unique<BruteForceFinder>(scramble, skeleton, cases);
     } else {
-        finder = make_unique<GreedyFinder>(
+        finder = std::make_unique<GreedyFinder>(
             scramble, skeleton, cases,
             GreedyFinder::Options {
                 static_cast<bool>(vm.count("enable-replacement")),
@@ -339,7 +348,7 @@ void CLI::find_insertion(const po::variables_map& vm) {
     if (vm.count("verbose")) {
         finder->set_verbose();
     }
-    size_t search_target = numeric_limits<size_t>::max();
+    size_t search_target = std::numeric_limits<size_t>::max();
     if (vm.count("target")) {
         search_target = vm["target"].as<size_t>();
     }

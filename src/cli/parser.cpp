@@ -8,14 +8,14 @@
 #include <config.h>
 #include "parser.hpp"
 #include "commands.hpp"
-using namespace std;
+using std::size_t;
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;
-using namespace InsertionFinder;
+namespace CLI = InsertionFinder::CLI;
 
 
 namespace {
-    const char* version_string = PACKAGE_NAME " v" VERSION;
+    constexpr const char* version_string = PACKAGE_NAME " v" VERSION;
 };
 
 
@@ -37,15 +37,15 @@ void CLI::parse(int argc, char** argv) try {
 
     po::options_description configuration_options("Configurations");
     configuration_options.add_options()
-        ("algfile,a", po::value<vector<string>>(), "algorithm file")
+        ("algfile,a", po::value<std::vector<std::string>>(), "algorithm file")
         (
             "algs-dir",
-            po::value<string>()->default_value(ALGORITHMSDIR),
+            po::value<std::string>()->default_value(ALGORITHMSDIR),
             "algorithms directory"
         )
         ("all-algs", "all algorithms")
         ("all-extra-algs", "all extra algorithms")
-        ("file,f", po::value<vector<string>>(), "input file")
+        ("file,f", po::value<std::vector<std::string>>(), "input file")
         ("optimal,o", "search for optimal solutions")
         ("target", po::value<size_t>(), "search target")
         ("enable-replacement", "enable replacement")
@@ -68,7 +68,7 @@ void CLI::parse(int argc, char** argv) try {
             "jobs,j",
             po::value<size_t>()
                 ->default_value(1)
-                ->implicit_value(thread::hardware_concurrency()),
+                ->implicit_value(std::thread::hardware_concurrency()),
             "multiple threads"
         )
         ("json", "use JSON output")
@@ -80,11 +80,11 @@ void CLI::parse(int argc, char** argv) try {
     po::notify(vm);
 
     if (vm.count("help")) {
-        cout << version_string << endl << cli_options << endl;
+        std::cout << version_string << std::endl << cli_options << std::endl;
         return;
     }
     if (vm.count("version")) {
-        cout << version_string << endl;
+        std::cout << version_string << std::endl;
         return;
     }
     if (vm.count("solve")) {
@@ -99,11 +99,11 @@ void CLI::parse(int argc, char** argv) try {
         CLI::generate_algorithms(vm);
         return;
     }
-    cout << version_string << endl << cli_options << endl;
+    std::cout << version_string << std::endl << cli_options << std::endl;
 } catch (const po::error& e) {
-    cerr << e.what() << endl;
-    exit(EXIT_FAILURE);
+    std::cerr << e.what() << std::endl;
+    std::exit(EXIT_FAILURE);
 } catch (const CLI::CommandExecutionError& e) {
-    cerr << e.what() << endl;
-    exit(EXIT_FAILURE);
+    std::cerr << e.what() << std::endl;
+    std::exit(EXIT_FAILURE);
 }

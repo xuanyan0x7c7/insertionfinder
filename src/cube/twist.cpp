@@ -4,8 +4,11 @@
 #include <array>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
-using namespace std;
-using namespace InsertionFinder;
+using std::size_t;
+using std::uint_fast8_t;
+using InsertionFinder::Algorithm;
+using InsertionFinder::Cube;
+namespace CubeTwist = InsertionFinder::CubeTwist;
 
 
 namespace {
@@ -65,7 +68,7 @@ namespace {
 };
 
 
-void Cube::twist(const Algorithm& algorithm, size_t begin, size_t end, byte flags) {
+void Cube::twist(const Algorithm& algorithm, size_t begin, size_t end, std::byte flags) {
     if (static_cast<bool>(flags & CubeTwist::reversed)) {
         this->rotate(Cube::inverse_center[algorithm.cube_rotation()]);
         for (size_t i = end; i-- != begin;) {
@@ -79,7 +82,7 @@ void Cube::twist(const Algorithm& algorithm, size_t begin, size_t end, byte flag
     }
 }
 
-void Cube::twist(uint_fast8_t twist, byte flags) {
+void Cube::twist(uint_fast8_t twist, std::byte flags) {
     if (static_cast<bool>(flags & CubeTwist::corners)) {
         const unsigned* table = corner_twist_table[twist];
         for (unsigned& item: this->corner) {
@@ -95,7 +98,7 @@ void Cube::twist(uint_fast8_t twist, byte flags) {
     }
 }
 
-void Cube::twist(const Cube& cube, byte flags) noexcept {
+void Cube::twist(const Cube& cube, std::byte flags) noexcept {
     if (this == &cube) {
         this->twist_before(*this, flags);
         return;
@@ -117,7 +120,7 @@ void Cube::twist(const Cube& cube, byte flags) noexcept {
 }
 
 
-void Cube::twist_before(uint_fast8_t twist, byte flags) {
+void Cube::twist_before(uint_fast8_t twist, std::byte flags) {
     if (static_cast<bool>(flags & CubeTwist::corners)) {
         const unsigned* table = corner_twist_table[twist];
         unsigned corner[8];
@@ -126,7 +129,7 @@ void Cube::twist_before(uint_fast8_t twist, byte flags) {
             unsigned transform = this->corner[item / 3];
             corner[i] = transform - transform % 3 + (item + transform) % 3;
         }
-        memcpy(this->corner, corner, 8 * sizeof(unsigned));
+        std::memcpy(this->corner, corner, 8 * sizeof(unsigned));
     }
     if (static_cast<bool>(flags & CubeTwist::edges)) {
         const unsigned* table = edge_twist_table[twist];
@@ -135,11 +138,11 @@ void Cube::twist_before(uint_fast8_t twist, byte flags) {
             unsigned item = table[i];
             edge[i] = this->edge[item >> 1] ^ (item & 1);
         }
-        memcpy(this->edge, edge, 12 * sizeof(unsigned));
+        std::memcpy(this->edge, edge, 12 * sizeof(unsigned));
     }
 }
 
-void Cube::twist_before(const Cube& cube, byte flags) noexcept {
+void Cube::twist_before(const Cube& cube, std::byte flags) noexcept {
     if (static_cast<bool>(flags & CubeTwist::corners)) {
         unsigned corner[8];
         for (size_t i = 0; i < 8; ++i) {
@@ -147,7 +150,7 @@ void Cube::twist_before(const Cube& cube, byte flags) noexcept {
             unsigned transform = this->corner[item / 3];
             corner[i] = transform - transform % 3 + (item + transform) % 3;
         }
-        memcpy(this->corner, corner, 8 * sizeof(unsigned));
+        std::memcpy(this->corner, corner, 8 * sizeof(unsigned));
     }
     if (static_cast<bool>(flags & CubeTwist::edges)) {
         unsigned edge[12];
@@ -155,7 +158,7 @@ void Cube::twist_before(const Cube& cube, byte flags) noexcept {
             unsigned item = cube.edge[i];
             edge[i] = this->edge[item >> 1] ^ (item & 1);
         }
-        memcpy(this->edge, edge, 12 * sizeof(unsigned));
+        std::memcpy(this->edge, edge, 12 * sizeof(unsigned));
     }
     if (static_cast<bool>(flags & CubeTwist::centers)) {
         this->_placement = Cube::center_transform[cube._placement][this->_placement];
@@ -163,7 +166,7 @@ void Cube::twist_before(const Cube& cube, byte flags) noexcept {
 }
 
 
-Cube Cube::twist(const Cube& lhs, const Cube& rhs, byte flags) noexcept {
+Cube Cube::twist(const Cube& lhs, const Cube& rhs, std::byte flags) noexcept {
     Cube result(Cube::raw_construct);
     if (static_cast<bool>(flags & CubeTwist::corners)) {
         for (size_t i = 0; i < 8; ++i) {
@@ -172,7 +175,7 @@ Cube Cube::twist(const Cube& lhs, const Cube& rhs, byte flags) noexcept {
             result.corner[i] = transform - transform % 3 + (item + transform) % 3;
         }
     } else {
-        memcpy(result.corner, lhs.corner, 8 * sizeof(unsigned));
+        std::memcpy(result.corner, lhs.corner, 8 * sizeof(unsigned));
     }
     if (static_cast<bool>(flags & CubeTwist::edges)) {
         for (size_t i = 0; i < 12; ++i) {
@@ -180,7 +183,7 @@ Cube Cube::twist(const Cube& lhs, const Cube& rhs, byte flags) noexcept {
             result.edge[i] = rhs.edge[item >> 1] ^ (item & 1);
         }
     } else {
-        memcpy(result.edge, lhs.edge, 12 * sizeof(unsigned));
+        std::memcpy(result.edge, lhs.edge, 12 * sizeof(unsigned));
     }
     if (static_cast<bool>(flags & CubeTwist::centers)) {
         result._placement = Cube::center_transform[lhs._placement][rhs._placement];

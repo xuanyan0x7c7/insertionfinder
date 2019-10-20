@@ -2,8 +2,10 @@
 #include <optional>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
-using namespace std;
-using namespace InsertionFinder;
+using std::size_t;
+using InsertionFinder::Algorithm;
+using InsertionFinder::Cube;
+namespace CubeTwist = InsertionFinder::CubeTwist;
 
 
 bool Cube::has_parity() const noexcept {
@@ -129,7 +131,7 @@ int Cube::edge_cycles() const noexcept {
 }
 
 
-optional<Cube> Cube::corner_cycle_cube(int index) {
+std::optional<Cube> Cube::corner_cycle_cube(int index) {
     unsigned x = index / 24 / 24;
     unsigned y = index / 24 % 24;
     unsigned z = index % 24;
@@ -140,11 +142,11 @@ optional<Cube> Cube::corner_cycle_cube(int index) {
         cube.corner[z / 3] = x * 3 + (48 - y - z) % 3;
         return cube;
     } else {
-        return nullopt;
+        return std::nullopt;
     }
 }
 
-optional<Cube> Cube::edge_cycle_cube(int index) {
+std::optional<Cube> Cube::edge_cycle_cube(int index) {
     unsigned x = index / 24 / 24;
     unsigned y = index / 24 % 24;
     unsigned z = index % 24;
@@ -155,7 +157,7 @@ optional<Cube> Cube::edge_cycle_cube(int index) {
         cube.edge[z >> 1] = x << 1 | ((y ^ z) & 1);
         return cube;
     } else {
-        return nullopt;
+        return std::nullopt;
     }
 }
 
@@ -183,11 +185,11 @@ int Cube::edge_cycle_index() const noexcept {
 }
 
 
-const vector<array<int, 24>> Cube::corner_cycle_transform = generate_corner_cycle_transform_table();
-const vector<array<int, 24>> Cube::edge_cycle_transform = generate_edge_cycle_transform_table();
+const std::vector<std::array<int, 24>> Cube::corner_cycle_transform = generate_corner_cycle_transform_table();
+const std::vector<std::array<int, 24>> Cube::edge_cycle_transform = generate_edge_cycle_transform_table();
 
-vector<array<int, 24>> Cube::generate_corner_cycle_transform_table() {
-    vector<array<int, 24>> corner_cycle_transform(6 * 24 * 24);
+std::vector<std::array<int, 24>> Cube::generate_corner_cycle_transform_table() {
+    std::vector<std::array<int, 24>> corner_cycle_transform(6 * 24 * 24);
     for (size_t i = 0; i < 6 * 24 * 24; ++i) {
         auto& table = corner_cycle_transform[i];
         if (auto cube = Cube::corner_cycle_cube(i)) {
@@ -204,8 +206,8 @@ vector<array<int, 24>> Cube::generate_corner_cycle_transform_table() {
     return corner_cycle_transform;
 }
 
-vector<array<int, 24>> Cube::generate_edge_cycle_transform_table() {
-    vector<array<int, 24>> edge_cycle_transform(10 * 24 * 24);
+std::vector<std::array<int, 24>> Cube::generate_edge_cycle_transform_table() {
+    std::vector<std::array<int, 24>> edge_cycle_transform(10 * 24 * 24);
     for (size_t i = 0; i < 10 * 24 * 24; ++i) {
         auto& table = edge_cycle_transform[i];
         if (auto cube = Cube::edge_cycle_cube(i)) {

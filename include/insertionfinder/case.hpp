@@ -74,7 +74,7 @@ namespace InsertionFinder {
             return std::find(this->list.cbegin(), this->list.cend(), algorithm) != this->list.cend();
         }
         template<class T> void add_algorithm(T&& algorithm) {
-            static_assert(std::is_same_v<Insertionfinder::Details::remove_cvref_t<T>, Algorithm>);
+            static_assert(std::is_same_v<InsertionFinder::Details::remove_cvref_t<T>, Algorithm>);
             if (!this->contains_algorithm(algorithm)) {
                 this->list.emplace_back(std::forward<T>(algorithm));
             }

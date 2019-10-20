@@ -75,9 +75,9 @@ namespace InsertionFinder {
         int parity_multiplier = 3;
         bool verbose = false;
     protected:
-        std::array<int, 6 * 24 * 24> corner_cycle_index;
-        std::array<int, 10 * 24 * 24> edge_cycle_index;
-        std::array<int, 24> center_index;
+        int corner_cycle_index[6 * 24 * 24];
+        int edge_cycle_index[10 * 24 * 24];
+        int center_index[24];
         bool change_parity = false;
         bool change_corner = false;
         bool change_edge = false;

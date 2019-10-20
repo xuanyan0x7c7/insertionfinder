@@ -13,13 +13,18 @@
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 #include "utils.hpp"
-using namespace std;
-using namespace InsertionFinder;
-using namespace Details;
+using std::size_t;
+using std::uint32_t;
+using std::uint_fast8_t;
+using InsertionFinder::Algorithm;
+using InsertionFinder::AlgorithmError;
+using InsertionFinder::AlgorithmStreamError;
+using InsertionFinder::Cube;
+namespace Details = InsertionFinder::Details;
 
 
 namespace {
-    uint_fast8_t parse_twist(const string& twist_string) {
+    uint_fast8_t parse_twist(const std::string& twist_string) {
         uint_fast8_t offset = 0;
         switch (twist_string[0]) {
         case 'U':
@@ -55,7 +60,7 @@ namespace {
         uint_fast8_t additional_twist;
     };
 
-    const unordered_map<string, Transform> pattern_table = {
+    const std::unordered_map<std::string, Transform> pattern_table = {
         {"x", {{4, 2, 1}, 0xff}},
         {"[r]", {{4, 2, 1}, 0xff}},
         {"[l']", {{4, 2, 1}, 0xff}},
@@ -124,31 +129,31 @@ namespace {
 
 
 Algorithm::Algorithm(const char* algorithm_string) {
-    static const regex twists_regex(
+    static const std::regex twists_regex(
         R"(\s*((?:2?[UDRLFB]w|[UDRLFB])[2']?|[xyz][2']?|\[[udrlfb][2']?\])\s*)",
-        regex_constants::ECMAScript | regex_constants::optimize
+        std::regex_constants::ECMAScript | std::regex_constants::optimize
     );
     uint_fast8_t transform[3] = {0, 2, 4};
-    cmatch match_result;
+    std::cmatch match_result;
     const char* temp_string = algorithm_string;
-    while (regex_search(temp_string, match_result, twists_regex)) {
+    while (std::regex_search(temp_string, match_result, twists_regex)) {
         if (match_result.position()) {
             throw AlgorithmError(algorithm_string);
         }
-        const string match_string = match_result.str(1);
+        const std::string match_string = match_result.str(1);
         if (auto find_result = pattern_table.find(match_string); find_result == pattern_table.cend()) {
-            this->twists.push_back(transform_twist(transform, parse_twist(match_string)));
+            this->twists.push_back(Details::transform_twist(transform, parse_twist(match_string)));
         } else {
-            const auto& [pattern_transform, twist] = find_result->second;
+            auto [pattern_transform, twist] = find_result->second;
             if (twist != 0xff) {
-                this->twists.push_back(transform_twist(transform, twist));
+                this->twists.push_back(Details::transform_twist(transform, twist));
             }
             uint_fast8_t new_transform[3];
             for (size_t i = 0; i < 3; ++i) {
                 uint_fast8_t temp = pattern_transform[i];
                 new_transform[i] = transform[temp >> 1] ^ (temp & 1);
             }
-            memcpy(transform, new_transform, 3 * sizeof(uint_fast8_t));
+            std::memcpy(transform, new_transform, 3 * sizeof(uint_fast8_t));
         }
         temp_string += match_result.length();
     }
@@ -156,7 +161,7 @@ Algorithm::Algorithm(const char* algorithm_string) {
         throw AlgorithmError(algorithm_string);
     }
     for (unsigned i = 0; i < 24; ++i) {
-        const uint_fast8_t* permutation = rotation_permutation[Cube::inverse_center[i]];
+        const uint_fast8_t* permutation = Details::rotation_permutation[Cube::inverse_center[i]];
         if (permutation[0] == transform[0] && permutation[1] == transform[1]) {
             this->rotation = i;
             break;
@@ -171,14 +176,14 @@ int Algorithm::compare(const Algorithm& lhs, const Algorithm& rhs) noexcept {
     if (int x = static_cast<int>(t1.size()) - static_cast<int>(t2.size())) {
         return x;
     }
-    if (int x = memcmp(t1.data(), t2.data(), t1.size() * sizeof(uint_fast8_t))) {
+    if (int x = std::memcmp(t1.data(), t2.data(), t1.size() * sizeof(uint_fast8_t))) {
         return x;
     }
     return lhs.rotation - rhs.rotation;
 }
 
 
-ostream& operator<<(ostream& out, const Algorithm& algorithm) {
+std::ostream& operator<<(std::ostream& out, const Algorithm& algorithm) {
     static constexpr const char* rotation_string[24] = {
         "", "y", "y2", "y'",
         "x", "x y", "x y2", "x y'",
@@ -194,7 +199,7 @@ ostream& operator<<(ostream& out, const Algorithm& algorithm) {
     return out;
 }
 
-void Algorithm::print(ostream& out, size_t begin, size_t end) const {
+void Algorithm::print(std::ostream& out, size_t begin, size_t end) const {
     static constexpr const char* twist_string[24] = {
         "", "U", "U2", "U'",
         "", "D", "D2", "D'",
@@ -213,17 +218,17 @@ void Algorithm::print(ostream& out, size_t begin, size_t end) const {
     }
 }
 
-string Algorithm::str() const {
-    stringstream stream;
+std::string Algorithm::str() const {
+    std::stringstream stream;
     stream << *this;
     return stream.str();
 }
 
 
-void Algorithm::save_to(ostream& out) const {
+void Algorithm::save_to(std::ostream& out) const {
     size_t length = this->twists.size();
     out.write(reinterpret_cast<char*>(&length), sizeof(size_t));
-    auto data = make_unique<char[]>(length);
+    auto data = std::make_unique<char[]>(length);
     for (size_t i = 0; i < length; ++i) {
         data[i] = this->twists[i];
     }
@@ -232,18 +237,18 @@ void Algorithm::save_to(ostream& out) const {
     out.write(&rotation_data, 1);
 }
 
-void Algorithm::read_from(istream& in) {
+void Algorithm::read_from(std::istream& in) {
     size_t length;
     in.read(reinterpret_cast<char*>(&length), sizeof(size_t));
     if (in.gcount() != sizeof(size_t)) {
         throw AlgorithmStreamError();
     }
-    auto data = make_unique<char[]>(length);
+    auto data = std::make_unique<char[]>(length);
     in.read(data.get(), length);
     if (in.gcount() != length) {
         throw AlgorithmStreamError();
     }
-    this->twists = vector<uint_fast8_t>(data.get(), data.get() + length);
+    this->twists.assign(data.get(), data.get() + length);
     char rotation_data;
     in.read(&rotation_data, 1);
     if (in.gcount() != 1) {
@@ -251,15 +256,19 @@ void Algorithm::read_from(istream& in) {
     }
     this->rotation = rotation_data;
 
-    const uint_fast8_t* transform = rotation_permutation[this->rotation];
+    const uint_fast8_t* transform = Details::rotation_permutation[this->rotation];
     const auto& twists = this->twists;
-    this->begin_mask = twist_mask(Algorithm::inverse_twist[twists[0]]);
+    this->begin_mask = Details::twist_mask(Algorithm::inverse_twist[twists[0]]);
     if (length > 1 && twists[0] >> 3 == twists[1] >> 3) {
-        this->begin_mask |= twist_mask(Algorithm::inverse_twist[twists[1]]);
+        this->begin_mask |= Details::twist_mask(Algorithm::inverse_twist[twists[1]]);
     }
-    this->end_mask = twist_mask(Algorithm::inverse_twist[transform_twist(transform, twists[length - 1])]);
+    this->end_mask = Details::twist_mask(
+        Algorithm::inverse_twist[Details::transform_twist(transform, twists[length - 1])]
+    );
     if (length > 1 && twists[length - 1] >> 3 == twists[length - 2] >> 3) {
-        this->end_mask |= twist_mask(Algorithm::inverse_twist[transform_twist(transform, twists[length - 2])]);
+        this->end_mask |= Details::twist_mask(
+            Algorithm::inverse_twist[Details::transform_twist(transform, twists[length - 2])]
+        );
     }
     if (length > 2 && this->begin_mask & this->end_mask) {
         this->set_up_mask = 0;
@@ -277,33 +286,39 @@ void Algorithm::read_from(istream& in) {
 
 
 Algorithm Algorithm::operator+(const Algorithm& rhs) const {
-    using namespace placeholders;
     Algorithm result;
     result.twists.reserve(this->twists.size() + rhs.twists.size());
     result.twists.assign(this->twists.cbegin(), this->twists.cend());
-    transform(
+    std::transform(
         rhs.twists.cbegin(), rhs.twists.cend(),
-        back_inserter(result.twists),
-        bind(transform_twist, rotation_permutation[Cube::inverse_center[this->rotation]], _1)
+        std::back_inserter(result.twists),
+        std::bind(
+            Details::transform_twist,
+            Details::rotation_permutation[Cube::inverse_center[this->rotation]],
+            std::placeholders::_1
+        )
     );
     result.rotation = Cube::placement_twist(this->rotation, rhs.rotation);
     return result;
 }
 
 Algorithm& Algorithm::operator+=(const Algorithm& rhs) {
-    using namespace placeholders;
     this->twists.reserve(this->twists.size() + rhs.twists.size());
-    transform(
+    std::transform(
         rhs.twists.cbegin(), rhs.twists.cend(),
-        back_inserter(this->twists),
-        bind(transform_twist, rotation_permutation[Cube::inverse_center[this->rotation]], _1)
+        std::back_inserter(this->twists),
+        std::bind(
+            Details::transform_twist,
+            Details::rotation_permutation[Cube::inverse_center[this->rotation]],
+            std::placeholders::_1
+        )
     );
     this->rotation = Cube::placement_twist(this->rotation, rhs.rotation);
     return *this;
 }
 
 
-size_t hash<Algorithm>::operator()(const Algorithm& algorithm) const noexcept {
+size_t std::hash<Algorithm>::operator()(const Algorithm& algorithm) const noexcept {
     size_t result = algorithm.rotation;
     for (uint_fast8_t twist: algorithm.twists) {
         result = result * 31 + twist;
@@ -327,26 +342,25 @@ void Algorithm::normalize() noexcept {
 }
 
 void Algorithm::rotate(int rotation) {
-    const uint_fast8_t* table = rotation_permutation[rotation];
+    const uint_fast8_t* table = Details::rotation_permutation[rotation];
     for (uint_fast8_t& twist: this->twists) {
-        twist = transform_twist(table, twist);
+        twist = Details::transform_twist(table, twist);
     }
 }
 
 void Algorithm::inverse() {
-    reverse(this->twists.begin(), this->twists.end());
+    std::reverse(this->twists.begin(), this->twists.end());
     this->rotate(this->rotation);
     this->rotation = Cube::inverse_center[this->rotation];
 }
 
 Algorithm Algorithm::inverse(const Algorithm& algorithm) {
-    using namespace placeholders;
     Algorithm result;
     result.twists.reserve(algorithm.twists.size());
-    transform(
+    std::transform(
         algorithm.twists.crbegin(), algorithm.twists.crend(),
-        back_inserter(result.twists),
-        bind(transform_twist, rotation_permutation[algorithm.rotation], _1)
+        std::back_inserter(result.twists),
+        std::bind(Details::transform_twist, Details::rotation_permutation[algorithm.rotation], std::placeholders::_1)
     );
     result.rotation = Cube::inverse_center[algorithm.rotation];
     return result;

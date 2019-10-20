@@ -6,9 +6,11 @@
 #include <insertionfinder/cube.hpp>
 #include "commands.hpp"
 #include "univalue/univalue.h"
-using namespace std;
 namespace po = boost::program_options;
-using namespace InsertionFinder;
+using InsertionFinder::Algorithm;
+using InsertionFinder::AlgorithmError;
+using InsertionFinder::Cube;
+namespace CLI = InsertionFinder::CLI;
 
 
 namespace {
@@ -21,8 +23,7 @@ namespace {
         int center_cycles;
     };
 
-    CycleStatus
-    verify(const string& scramble_string, const string& skeleton_string) try {
+    CycleStatus verify(const std::string& scramble_string, const std::string& skeleton_string) try {
         Algorithm scramble(scramble_string);
         Algorithm skeleton(skeleton_string);
         scramble.simplify();
@@ -50,45 +51,45 @@ namespace {
 
     struct StandardPrinter: Printer {
         void print_result(const CycleStatus& status) override {
-            cout << "Scramble: " << status.scramble << endl;
-            cout << "Skeleton: " << status.skeleton << endl;
-            cout << "The cube ";
+            std::cout << "Scramble: " << status.scramble << std::endl;
+            std::cout << "Skeleton: " << status.skeleton << std::endl;
+            std::cout << "The cube ";
             if (!status.parity && status.corner_cycles == 0 && status.edge_cycles == 0 && status.center_cycles == 0) {
-                cout << "is already solved";
+                std::cout << "is already solved";
             } else {
-                cout << "has ";
+                std::cout << "has ";
                 if (status.center_cycles) {
                     if (status.center_cycles > 1) {
-                        cout << "parity center rotation";
+                        std::cout << "parity center rotation";
                     } else {
-                        cout << "center rotation";
+                        std::cout << "center rotation";
                     }
                     if (status.corner_cycles || status.edge_cycles) {
-                        cout << " with ";
+                        std::cout << " with ";
                     }
                 }
                 if (status.corner_cycles == 1) {
-                    cout << "1 corner-3-cycle";
+                    std::cout << "1 corner-3-cycle";
                 } else if (status.corner_cycles > 1) {
-                    cout << status.corner_cycles << " corner-3-cycles";
+                    std::cout << status.corner_cycles << " corner-3-cycles";
                 }
                 if (status.corner_cycles && status.edge_cycles) {
-                    cout << " and ";
+                    std::cout << " and ";
                 }
                 if (status.edge_cycles == 1) {
-                    cout << "1 edge-3-cycle";
+                    std::cout << "1 edge-3-cycle";
                 } else if (status.edge_cycles > 1) {
-                    cout << status.edge_cycles << " edge-3-cycles";
+                    std::cout << status.edge_cycles << " edge-3-cycles";
                 }
                 if (status.center_cycles <= 1 && status.parity) {
                     if (status.corner_cycles || status.edge_cycles) {
-                        cout << " with parity";
+                        std::cout << " with parity";
                     } else {
-                        cout << "parity";
+                        std::cout << "parity";
                     }
                 }
             }
-            cout << '.' << endl;
+            std::cout << '.' << std::endl;
         }
     };
 
@@ -101,23 +102,23 @@ namespace {
             map.pushKV("corner_cycles", status.corner_cycles);
             map.pushKV("edge_cycles", status.edge_cycles);
             map.pushKV("center_cycles", status.center_cycles);
-            cout << map.write() << flush;
+            std::cout << map.write() << std::flush;
         }
     };
 };
 
 
 void CLI::verify_cube(const po::variables_map& vm) {
-    unique_ptr<Printer> printer;
+    std::unique_ptr<Printer> printer;
     if (vm.count("json")) {
-        printer = make_unique<JSONPrinter>();
+        printer = std::make_unique<JSONPrinter>();
     } else {
-        printer = make_unique<StandardPrinter>();
+        printer = std::make_unique<StandardPrinter>();
     }
-    string scramble_string;
-    string skeleton_string;
-    getline(cin, scramble_string);
-    getline(cin, skeleton_string);
+    std::string scramble_string;
+    std::string skeleton_string;
+    std::getline(std::cin, scramble_string);
+    std::getline(std::cin, skeleton_string);
     auto status = verify(scramble_string, skeleton_string);
     printer->print_result(status);
 }
