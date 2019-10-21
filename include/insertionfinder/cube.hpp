@@ -94,7 +94,9 @@ namespace InsertionFinder {
     public:
         void twist(const Algorithm& algorithm, std::byte flags = CubeTwist::full) noexcept {
             this->twist(algorithm, 0, algorithm.length(), flags);
-            this->rotate(algorithm.cube_rotation());
+            if (static_cast<bool>(flags & CubeTwist::centers)) {
+                this->rotate(algorithm.cube_rotation());
+            }
         }
         void twist(const Algorithm& algorithm, std::size_t begin, std::size_t end, std::byte flags = CubeTwist::full);
         void twist(std::uint_fast8_t twist, std::byte flags = CubeTwist::full);

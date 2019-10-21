@@ -69,7 +69,7 @@ void Finder::search(const SearchParams& params) {
             cancellation -= solution.insertions.back().skeleton.length();
             solution.cancellation = cancellation;
         }
-        sort(
+        std::sort(
             this->solutions.begin(), this->solutions.end(),
             [](const auto& x, const auto& y) {return x.cancellation < y.cancellation;}
         );

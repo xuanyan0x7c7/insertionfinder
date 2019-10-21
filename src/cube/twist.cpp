@@ -78,7 +78,6 @@ void Cube::twist(const Algorithm& algorithm, size_t begin, size_t end, std::byte
         for (size_t i = begin; i < end; ++i) {
             this->twist(algorithm[i], flags);
         }
-        this->rotate(algorithm.cube_rotation());
     }
 }
 
