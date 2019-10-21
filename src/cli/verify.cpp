@@ -2,10 +2,10 @@
 #include <memory>
 #include <string>
 #include <boost/program_options.hpp>
+#include <univalue.h>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 #include "commands.hpp"
-#include "univalue/univalue.h"
 namespace po = boost::program_options;
 using InsertionFinder::Algorithm;
 using InsertionFinder::AlgorithmError;

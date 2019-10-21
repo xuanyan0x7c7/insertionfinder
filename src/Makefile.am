@@ -4,7 +4,6 @@ bin_PROGRAMS = insertionfinder
 insertionfinder_SOURCES = main.cpp
 insertionfinder_LDADD = \
     cli/libcli.la \
-    cli/univalue/libunivalue.la \
     finder/libfinder.la \
     case/libcase.la \
     cube/libcube.la \
@@ -12,7 +11,8 @@ insertionfinder_LDADD = \
     ${PTHREAD_CFLAGS} \
     ${BOOST_SYSTEM_LIBS} \
     ${BOOST_FILESYSTEM_LIBS} \
-    ${BOOST_PROGRAM_OPTIONS_LIBS}
+    ${BOOST_PROGRAM_OPTIONS_LIBS} \
+    -lunivalue
 lib_LTLIBRARIES = libinsertionfinder.la
 libinsertionfinder_la_SOURCES =
 libinsertionfinder_la_LIBADD = \

@@ -11,7 +11,7 @@ AC_LANG([C++])
 AX_CXX_COMPILE_STDCXX([17])
 AX_PTHREAD
 
-AC_CHECK_HEADERS([optional], [], [Missing header file])
+AC_CHECK_HEADERS([univalue.h], [], [AC_MSG_ERROR([unable to find header univalue.h])])
 AC_CHECK_HEADERS([filesystem], [HAVE_FILESYSTEM=yes])
 
 BOOST_REQUIRE([1.66.0])
@@ -32,7 +32,6 @@ AC_CONFIG_FILES([
     src/algorithm/Makefile
     src/case/Makefile
     src/cli/Makefile
-    src/cli/univalue/Makefile
     src/cube/Makefile
     src/finder/Makefile
     test/Makefile

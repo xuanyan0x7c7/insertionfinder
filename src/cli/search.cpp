@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 #include <boost/program_options.hpp>
+#include <univalue.h>
 #include <insertionfinder/fallbacks/filesystem.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
@@ -17,7 +18,6 @@
 #include <insertionfinder/finder/greedy.hpp>
 #include <insertionfinder/finder/finder.hpp>
 #include "commands.hpp"
-#include "univalue/univalue.h"
 using std::int64_t;
 using std::size_t;
 namespace fs = std::filesystem;
