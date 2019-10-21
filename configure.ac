@@ -12,6 +12,7 @@ AX_CXX_COMPILE_STDCXX([17])
 AX_PTHREAD
 
 AC_CHECK_HEADERS([univalue.h], [], [AC_MSG_ERROR([unable to find header univalue.h])])
+AC_CHECK_HEADERS([range/v3/all.hpp], [], [AC_MSG_ERROR([unable to find library range-v3])])
 AC_CHECK_HEADERS([filesystem], [HAVE_FILESYSTEM=yes])
 
 BOOST_REQUIRE([1.66.0])

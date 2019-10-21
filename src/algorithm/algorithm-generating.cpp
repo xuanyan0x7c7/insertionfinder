@@ -1,6 +1,6 @@
 #include <cstdint>
-#include <algorithm>
 #include <vector>
+#include <range/v3/all.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include "utils.hpp"
 using std::size_t;
@@ -33,7 +33,6 @@ std::vector<Algorithm> Algorithm::generate_isomorphisms() const {
         algorithm.normalize();
         algorithm.detect_rotation();
     }
-    std::sort(result.begin(), result.end());
-    result.erase(std::unique(result.begin(), result.end()), result.end());
+    result |= ranges::actions::sort | ranges::actions::unique;
     return result;
 }

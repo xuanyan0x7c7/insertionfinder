@@ -1,6 +1,5 @@
 #include <cstdint>
 #include <cstring>
-#include <algorithm>
 #include <array>
 #include <functional>
 #include <istream>
@@ -10,6 +9,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <range/v3/all.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 #include "utils.hpp"
@@ -289,14 +289,15 @@ Algorithm Algorithm::operator+(const Algorithm& rhs) const {
     Algorithm result;
     result.twists.reserve(this->twists.size() + rhs.twists.size());
     result.twists.assign(this->twists.cbegin(), this->twists.cend());
-    std::transform(
-        rhs.twists.cbegin(), rhs.twists.cend(),
-        std::back_inserter(result.twists),
-        std::bind(
-            Details::transform_twist,
-            Details::rotation_permutation[Cube::inverse_center[this->rotation]],
-            std::placeholders::_1
-        )
+    ranges::move(
+        rhs.twists | ranges::views::transform(
+            std::bind(
+                Details::transform_twist,
+                Details::rotation_permutation[Cube::inverse_center[this->rotation]],
+                std::placeholders::_1
+            )
+        ),
+        ranges::back_inserter(result.twists)
     );
     result.rotation = Cube::placement_twist(this->rotation, rhs.rotation);
     return result;
@@ -304,14 +305,15 @@ Algorithm Algorithm::operator+(const Algorithm& rhs) const {
 
 Algorithm& Algorithm::operator+=(const Algorithm& rhs) {
     this->twists.reserve(this->twists.size() + rhs.twists.size());
-    std::transform(
-        rhs.twists.cbegin(), rhs.twists.cend(),
-        std::back_inserter(this->twists),
-        std::bind(
-            Details::transform_twist,
-            Details::rotation_permutation[Cube::inverse_center[this->rotation]],
-            std::placeholders::_1
-        )
+    ranges::move(
+        rhs.twists | ranges::views::transform(
+            std::bind(
+                Details::transform_twist,
+                Details::rotation_permutation[Cube::inverse_center[this->rotation]],
+                std::placeholders::_1
+            )
+        ),
+        ranges::back_inserter(this->twists)
     );
     this->rotation = Cube::placement_twist(this->rotation, rhs.rotation);
     return *this;
@@ -349,7 +351,7 @@ void Algorithm::rotate(int rotation) {
 }
 
 void Algorithm::inverse() {
-    std::reverse(this->twists.begin(), this->twists.end());
+    ranges::reverse(this->twists);
     this->rotate(this->rotation);
     this->rotation = Cube::inverse_center[this->rotation];
 }
@@ -357,10 +359,13 @@ void Algorithm::inverse() {
 Algorithm Algorithm::inverse(const Algorithm& algorithm) {
     Algorithm result;
     result.twists.reserve(algorithm.twists.size());
-    std::transform(
-        algorithm.twists.crbegin(), algorithm.twists.crend(),
-        std::back_inserter(result.twists),
-        std::bind(Details::transform_twist, Details::rotation_permutation[algorithm.rotation], std::placeholders::_1)
+    ranges::move(
+        algorithm.twists
+            | ranges::views::reverse
+            | ranges::views::transform(
+                std::bind(Details::transform_twist, Details::rotation_permutation[algorithm.rotation], std::placeholders::_1)
+            ),
+        ranges::back_inserter(result.twists)
     );
     result.rotation = Cube::inverse_center[algorithm.rotation];
     return result;

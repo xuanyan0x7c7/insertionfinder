@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -8,6 +7,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <range/v3/all.hpp>
 #include <boost/program_options.hpp>
 #include <univalue.h>
 #include <insertionfinder/fallbacks/filesystem.hpp>
@@ -284,7 +284,7 @@ void CLI::find_insertion(const po::variables_map& vm) {
     for (auto& node: map) {
         cases.emplace_back(std::move(node.second));
     }
-    std::sort(cases.begin(), cases.end(), [](const Case& x, const Case& y) {return Case::compare(x, y) < 0;});
+    ranges::sort(cases, [](const Case& x, const Case& y) {return Case::compare(x, y) < 0;});
 
     std::shared_ptr<std::istream> in;
     if (filenames.empty()) {

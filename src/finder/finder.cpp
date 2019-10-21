@@ -1,5 +1,6 @@
 #include <cstring>
 #include <chrono>
+#include <range/v3/all.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/finder/finder.hpp>
@@ -69,10 +70,7 @@ void Finder::search(const SearchParams& params) {
             cancellation -= solution.insertions.back().skeleton.length();
             solution.cancellation = cancellation;
         }
-        std::sort(
-            this->solutions.begin(), this->solutions.end(),
-            [](const auto& x, const auto& y) {return x.cancellation < y.cancellation;}
-        );
+        ranges::sort(this->solutions, [](const auto& x, const auto& y) {return x.cancellation < y.cancellation;});
     }
     auto end = std::chrono::high_resolution_clock::now();
     this->result.duration = (end - begin).count();

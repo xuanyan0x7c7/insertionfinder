@@ -3,6 +3,7 @@
 #include <functional>
 #include <limits>
 #include <utility>
+#include <range/v3/all.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 #include "utils.hpp"
@@ -80,14 +81,17 @@ std::pair<Algorithm, size_t> Algorithm::insert(const Algorithm& insertion, size_
     result.twists.reserve(this->twists.size() + insertion.twists.size());
     result.twists.assign(this->twists.cbegin(), this->twists.cbegin() + insert_place);
     result.twists.insert(result.twists.end(), insertion.twists.cbegin(), insertion.twists.cend());
-    std::transform(
-        this->twists.cbegin() + insert_place, this->twists.cend(),
-        std::back_inserter(result.twists),
-        std::bind(
-            Details::transform_twist,
-            Details::rotation_permutation[Cube::inverse_center[insertion.rotation]],
-            std::placeholders::_1
-        )
+    ranges::move(
+        this->twists
+            | ranges::views::slice(insert_place, ranges::end)
+            | ranges::views::transform(
+                std::bind(
+                    Details::transform_twist,
+                    Details::rotation_permutation[Cube::inverse_center[insertion.rotation]],
+                    std::placeholders::_1
+                )
+            ),
+        ranges::back_inserter(result.twists)
     );
     size_t place = result.cancel_moves();
     return {result, std::min(place, insert_place + 1)};

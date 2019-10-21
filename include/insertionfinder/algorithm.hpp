@@ -84,6 +84,15 @@ namespace InsertionFinder {
         bool operator<(const Algorithm& rhs) const noexcept {
             return Algorithm::compare(*this, rhs) < 0;
         }
+        bool operator<=(const Algorithm& rhs) const noexcept {
+            return Algorithm::compare(*this, rhs) <= 0;
+        }
+        bool operator>(const Algorithm& rhs) const noexcept {
+            return Algorithm::compare(*this, rhs) > 0;
+        }
+        bool operator>=(const Algorithm& rhs) const noexcept {
+            return Algorithm::compare(*this, rhs) >= 0;
+        }
     public:
         friend std::ostream& ::operator<<(std::ostream& out, const Algorithm& algorithm);
         void print(std::ostream& out, std::size_t begin, std::size_t end) const;

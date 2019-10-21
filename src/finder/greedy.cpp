@@ -1,10 +1,10 @@
-#include <algorithm>
 #include <atomic>
 #include <functional>
 #include <iostream>
 #include <mutex>
 #include <utility>
 #include <vector>
+#include <range/v3/all.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/finder/finder.hpp>
@@ -68,30 +68,19 @@ void GreedyFinder::search_core(const SearchParams& params) {
     for (int depth = this->partial_states.size(); --depth > 0;) {
         auto& solution_list = this->partial_solution_list[depth];
         auto& state = this->partial_states[depth];
-        solution_list.erase(
-            std::remove_if(
-                solution_list.begin(), solution_list.end(),
-                [&state, this](const auto& x) {
-                    return x.first.length() > state.fewest_moves + this->options.greedy_threshold;
+        solution_list |=
+            ranges::actions::remove_if([&state, this](const auto& x) {
+                return x.first.length() > state.fewest_moves + this->options.greedy_threshold;
+            })
+            | ranges::actions::sort([](const auto& x, const auto& y) {
+                if (int comparison = Algorithm::compare(x.first, y.first); comparison < 0) {
+                    return true;
+                } else if (comparison > 0) {
+                    return false;
                 }
-            ),
-            solution_list.end()
-        );
-        std::sort(solution_list.begin(), solution_list.end(), [](const auto& x, const auto& y) {
-            if (int comparison = Algorithm::compare(x.first, y.first); comparison < 0) {
-                return true;
-            } else if (comparison > 0) {
-                return false;
-            }
-            return x.second.cancellation < y.second.cancellation;
-        });
-        solution_list.erase(
-            std::unique(
-                solution_list.begin(), solution_list.end(),
-                [](const auto& x, const auto& y) {return x.first == y.first;}
-            ),
-            solution_list.end()
-        );
+                return x.second.cancellation < y.second.cancellation;
+            })
+            | ranges::actions::unique([](const auto& x, const auto& y) {return x.first == y.first;});
 
         if (this->verbose && (!solution_list.empty() || (depth & 1) == 0)) {
             std::cerr << "Searching depth " << depth / 2.0 << ": "
@@ -119,10 +108,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
     }
     for (const Algorithm* current_skeleton: skeletons) {
         std::vector<Insertion> result({Insertion(*current_skeleton)});
-        while (std::all_of(
-            this->skeletons.cbegin(), this->skeletons.cend(),
-            [&](const Algorithm& x) {return x != *current_skeleton;}
-        )) {
+        while (ranges::all_of(this->skeletons, [&](const Algorithm& x) {return x != *current_skeleton;})) {
             const auto& step = this->partial_solution_map[*current_skeleton];
             current_skeleton = step.skeleton;
             Algorithm previous_skeleton = *step.skeleton;
@@ -131,7 +117,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
             }
             result.emplace_back(std::move(previous_skeleton), step.insert_place, step.insertion);
         }
-        std::reverse(result.begin(), result.end());
+        ranges::actions::reverse(result);
         this->solutions.emplace_back(move(result));
     }
 }
