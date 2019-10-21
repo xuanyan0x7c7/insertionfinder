@@ -284,7 +284,7 @@ void CLI::find_insertion(const po::variables_map& vm) {
     for (auto& node: map) {
         cases.emplace_back(std::move(node.second));
     }
-    sort(cases.begin(), cases.end());
+    sort(cases.begin(), cases.end(), [](const Case& x, const Case& y) {return Case::compare(x, y) < 0;});
 
     std::shared_ptr<std::istream> in;
     if (filenames.empty()) {

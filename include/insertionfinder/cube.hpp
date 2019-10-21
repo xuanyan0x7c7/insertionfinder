@@ -82,9 +82,6 @@ namespace InsertionFinder {
         bool operator!=(const Cube& rhs) const noexcept {
             return std::memcmp(this, &rhs, sizeof(Cube)) != 0;
         }
-        bool operator<(const Cube& rhs) const noexcept {
-            return std::memcmp(this, &rhs, sizeof(Cube)) < 0;
-        }
     private:
         static const std::array<Cube, 24> rotation_cube;
         static const std::vector<std::array<int, 24>> corner_cycle_transform;
