@@ -83,7 +83,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
         const std::string& name = algfilenames.front();
         out = std::make_shared<std::ofstream>(name, std::ios::out | std::ios::binary);
         if (out->fail()) {
-            throw CLI::CommandExecutionError("Failed to open output file" + name);
+            throw CLI::CommandExecutionError("Failed to open output file " + name);
         }
     }
     out->write(reinterpret_cast<const char*>(&size), sizeof(size_t));
