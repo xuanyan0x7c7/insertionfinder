@@ -68,19 +68,6 @@ namespace {
 };
 
 
-void Cube::twist(const Algorithm& algorithm, size_t begin, size_t end, std::byte flags) {
-    if (static_cast<bool>(flags & CubeTwist::reversed)) {
-        this->rotate(Cube::inverse_center[algorithm.cube_rotation()]);
-        for (size_t i = end; i-- != begin;) {
-            this->twist(Algorithm::inverse_twist[algorithm[i]], flags);
-        }
-    } else {
-        for (size_t i = begin; i < end; ++i) {
-            this->twist(algorithm[i], flags);
-        }
-    }
-}
-
 void Cube::twist(uint_fast8_t twist, std::byte flags) {
     if (static_cast<bool>(flags & CubeTwist::corners)) {
         const unsigned* table = corner_twist_table[twist];

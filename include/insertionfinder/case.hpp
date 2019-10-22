@@ -13,7 +13,7 @@
 
 namespace InsertionFinder {
     struct CaseStreamError: std::exception {
-        virtual const char* what() const noexcept override {
+        const char* what() const noexcept override {
             return "Failed to read case from stream";
         }
     };

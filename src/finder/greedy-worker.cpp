@@ -77,7 +77,7 @@ void GreedyFinder::Worker::search() {
 }
 
 void GreedyFinder::Worker::search_last_corner_cycle() {
-    static constexpr std::byte twist_flag = CubeTwist::corners | CubeTwist::reversed;
+    static constexpr std::byte twist_flag = CubeTwist::corners;
     const int* corner_cycle_index = this->finder.corner_cycle_index;
 
     int index = -1;
@@ -85,7 +85,7 @@ void GreedyFinder::Worker::search_last_corner_cycle() {
         if (insert_place == 0) {
             Cube state;
             state.twist(this->finder.inverse_scramble_cube, twist_flag);
-            state.twist(this->skeleton, twist_flag);
+            state.twist_inverse(this->skeleton, twist_flag);
             index = state.corner_cycle_index();
         } else {
             index = Cube::next_corner_cycle_index(index, this->skeleton[insert_place - 1]);
@@ -103,7 +103,7 @@ void GreedyFinder::Worker::search_last_corner_cycle() {
 }
 
 void GreedyFinder::Worker::search_last_edge_cycle() {
-    static constexpr std::byte twist_flag = CubeTwist::edges | CubeTwist::reversed;
+    static constexpr std::byte twist_flag = CubeTwist::edges;
     const int* edge_cycle_index = this->finder.edge_cycle_index;
 
     int index = -1;
@@ -111,7 +111,7 @@ void GreedyFinder::Worker::search_last_edge_cycle() {
         if (insert_place == 0) {
             Cube state;
             state.twist(this->finder.inverse_scramble_cube, twist_flag);
-            state.twist(this->skeleton, twist_flag);
+            state.twist_inverse(this->skeleton, twist_flag);
             index = state.edge_cycle_index();
         } else {
             index = Cube::next_edge_cycle_index(index, this->skeleton[insert_place - 1]);

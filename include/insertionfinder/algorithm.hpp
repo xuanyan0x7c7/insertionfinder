@@ -25,13 +25,13 @@ namespace InsertionFinder {
             algorithm_string(std::forward<T>(algorithm_string)),
             explanation_string("Invalid algorithm string: " + this->algorithm_string) {}
     public:
-        virtual const char* what() const noexcept override {
+        const char* what() const noexcept override {
             return explanation_string.c_str();
         }
     };
 
     struct AlgorithmStreamError: std::exception {
-        virtual const char* what() const noexcept override {
+        const char* what() const noexcept override {
             return "Failed to read algorithm from stream";
         }
     };

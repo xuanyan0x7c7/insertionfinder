@@ -18,7 +18,7 @@ template<> struct std::hash<InsertionFinder::Cube> {
 
 namespace InsertionFinder {
     struct CubeStreamError: std::exception {
-        virtual const char* what() const noexcept override {
+        const char* what() const noexcept override {
             return "Failed to read cube from stream";
         }
     };
@@ -27,7 +27,6 @@ namespace InsertionFinder {
         constexpr std::byte corners {1};
         constexpr std::byte edges {2};
         constexpr std::byte centers {4};
-        constexpr std::byte reversed {8};
         constexpr std::byte full = corners | edges | centers;
     };
 
@@ -98,7 +97,22 @@ namespace InsertionFinder {
                 this->rotate(algorithm.cube_rotation());
             }
         }
-        void twist(const Algorithm& algorithm, std::size_t begin, std::size_t end, std::byte flags = CubeTwist::full);
+        void twist_inverse(const Algorithm& algorithm, std::byte flags = CubeTwist::full) noexcept {
+            if (static_cast<bool>(flags & CubeTwist::centers)) {
+                this->rotate(Cube::inverse_center[algorithm.cube_rotation()]);
+            }
+            this->twist_inverse(algorithm, 0, algorithm.length(), flags);
+        }
+        void twist(const Algorithm& algorithm, std::size_t begin, std::size_t end, std::byte flags = CubeTwist::full) {
+            for (size_t i = begin; i < end; ++i) {
+                this->twist(algorithm[i], flags);
+            }
+        }
+        void twist_inverse(const Algorithm& algorithm, std::size_t begin, std::size_t end, std::byte flags = CubeTwist::full) {
+            for (size_t i = end; i-- != begin;) {
+                this->twist(Algorithm::inverse_twist[algorithm[i]], flags);
+            }
+        }
         void twist(std::uint_fast8_t twist, std::byte flags = CubeTwist::full);
         void twist(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
         void twist_before(std::uint_fast8_t twist, std::byte flags = CubeTwist::full);

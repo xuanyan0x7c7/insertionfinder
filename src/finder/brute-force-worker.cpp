@@ -87,16 +87,16 @@ void BruteForceFinder::Worker::search(const CycleStatus& cycle_status, size_t be
 
 void BruteForceFinder::Worker::search_last_corner_cycle(size_t begin, size_t end) {
     const Algorithm skeleton = this->solving_step.back().skeleton;
-    static constexpr std::byte twist_flag = CubeTwist::corners | CubeTwist::reversed;
+    static constexpr std::byte twist_flag = CubeTwist::corners;
     const int* corner_cycle_index = this->finder.corner_cycle_index;
 
     int index = -1;
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
         if (insert_place == begin) {
             Cube state;
-            state.twist(skeleton, 0, insert_place, twist_flag);
+            state.twist_inverse(skeleton, 0, insert_place, twist_flag);
             state.twist(this->finder.inverse_scramble_cube, twist_flag);
-            state.twist(skeleton, insert_place, skeleton.length(), twist_flag);
+            state.twist_inverse(skeleton, insert_place, skeleton.length(), twist_flag);
             index = state.corner_cycle_index();
         } else {
             index = Cube::next_corner_cycle_index(index, skeleton[insert_place - 1]);
@@ -115,16 +115,16 @@ void BruteForceFinder::Worker::search_last_corner_cycle(size_t begin, size_t end
 
 void BruteForceFinder::Worker::search_last_edge_cycle(size_t begin, size_t end) {
     const Algorithm skeleton = this->solving_step.back().skeleton;
-    static constexpr std::byte twist_flag = CubeTwist::edges | CubeTwist::reversed;
+    static constexpr std::byte twist_flag = CubeTwist::edges;
     const int* edge_cycle_index = this->finder.edge_cycle_index;
 
     int index = -1;
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
         if (insert_place == begin) {
             Cube state;
-            state.twist(skeleton, 0, insert_place, twist_flag);
+            state.twist_inverse(skeleton, 0, insert_place, twist_flag);
             state.twist(this->finder.inverse_scramble_cube, twist_flag);
-            state.twist(skeleton, insert_place, skeleton.length(), twist_flag);
+            state.twist_inverse(skeleton, insert_place, skeleton.length(), twist_flag);
             index = state.edge_cycle_index();
         } else {
             index = Cube::next_edge_cycle_index(index, skeleton[insert_place - 1]);
