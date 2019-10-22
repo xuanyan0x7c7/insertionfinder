@@ -34,9 +34,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
             std::cerr << "Failed to open file " << name << std::endl;
             continue;
         }
-        while (!fin.eof()) {
-            std::string line;
-            std::getline(fin, line);
+        for (std::string line: ranges::getlines(fin)) {
             Algorithm algorithm;
             try {
                 algorithm = Algorithm(line);
@@ -55,14 +53,13 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
             if (auto node = map.find(cube); node != map.end() && node->second.contains_algorithm(algorithm)) {
                 continue;
             }
-            auto isomorphism_list = algorithm.generate_isomorphisms();
-            for (Algorithm& algorithm: isomorphism_list) {
-                Cube cube = Cube() * algorithm;
+            for (Algorithm& alg: algorithm.generate_isomorphisms()) {
+                Cube cube = Cube() * alg;
                 if (auto node = map.find(cube); node != map.end()) {
-                    node->second.add_algorithm(std::move(algorithm));
+                    node->second.add_algorithm(std::move(alg));
                 } else {
                     Case _case(cube);
-                    _case.add_algorithm(std::move(algorithm));
+                    _case.add_algorithm(std::move(alg));
                     map.emplace(cube, std::move(_case));
                 }
             }

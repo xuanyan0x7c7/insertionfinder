@@ -55,82 +55,28 @@ namespace {
         }
     }
 
-    struct Transform {
-        uint_fast8_t transform[3];
-        uint_fast8_t additional_twist;
+    struct Pattern {
+        const char* pattern_string;
+        uint_fast8_t transform_table[3];
     };
 
-    const std::unordered_map<std::string, Transform> pattern_table = {
-        {"x", {{4, 2, 1}, 0xff}},
-        {"[r]", {{4, 2, 1}, 0xff}},
-        {"[l']", {{4, 2, 1}, 0xff}},
-        {"x2", {{1, 2, 5}, 0xff}},
-        {"[r2]", {{1, 2, 5}, 0xff}},
-        {"[l2]", {{1, 2, 5}, 0xff}},
-        {"x'", {{5, 2, 0}, 0xff}},
-        {"[r']", {{5, 2, 0}, 0xff}},
-        {"[l]", {{5, 2, 0}, 0xff}},
-        {"y", {{0, 5, 2}, 0xff}},
-        {"[u]", {{0, 5, 2}, 0xff}},
-        {"[d']", {{0, 5, 2}, 0xff}},
-        {"y2", {{0, 3, 5}, 0xff}},
-        {"[u2]", {{0, 3, 5}, 0xff}},
-        {"[d2]", {{0, 3, 5}, 0xff}},
-        {"y'", {{0, 4, 3}, 0xff}},
-        {"[u']", {{0, 4, 3}, 0xff}},
-        {"[d]", {{0, 4, 3}, 0xff}},
-        {"z", {{3, 0, 4}, 0xff}},
-        {"[f]", {{3, 0, 4}, 0xff}},
-        {"[b']", {{3, 0, 4}, 0xff}},
-        {"z2", {{1, 3, 4}, 0xff}},
-        {"[f2]", {{1, 3, 4}, 0xff}},
-        {"[b2]", {{1, 3, 4}, 0xff}},
-        {"z'", {{2, 1, 4}, 0xff}},
-        {"[f']", {{2, 1, 4}, 0xff}},
-        {"[b]", {{2, 1, 4}, 0xff}},
-        {"Uw", {{0, 5, 2}, 5}},
-        {"2Uw", {{0, 5, 2}, 5}},
-        {"Uw2", {{0, 3, 5}, 6}},
-        {"2Uw2", {{0, 3, 5}, 6}},
-        {"Uw'", {{0, 4, 3}, 7}},
-        {"2Uw'", {{0, 4, 3}, 7}},
-        {"Dw", {{0, 4, 3}, 1}},
-        {"2Dw", {{0, 4, 3}, 1}},
-        {"Dw2", {{0, 3, 5}, 2}},
-        {"2Dw2", {{0, 3, 5}, 2}},
-        {"Dw'", {{0, 5, 2}, 3}},
-        {"2Dw'", {{0, 5, 2}, 3}},
-        {"Rw", {{4, 2, 1}, 13}},
-        {"2Rw", {{4, 2, 1}, 13}},
-        {"Rw2", {{1, 2, 5}, 14}},
-        {"2Rw2", {{1, 2, 5}, 14}},
-        {"Rw'", {{5, 2, 0}, 15}},
-        {"2Rw'", {{5, 2, 0}, 15}},
-        {"Lw", {{5, 2, 0}, 9}},
-        {"2Lw", {{5, 2, 0}, 9}},
-        {"Lw2", {{1, 2, 5}, 10}},
-        {"2Lw2", {{1, 2, 5}, 10}},
-        {"Lw'", {{4, 2, 1}, 11}},
-        {"2Lw'", {{4, 2, 1}, 11}},
-        {"Fw", {{3, 0, 4}, 21}},
-        {"2Fw", {{3, 0, 4}, 21}},
-        {"Fw2", {{1, 3, 4}, 22}},
-        {"2Fw2", {{1, 3, 4}, 22}},
-        {"Fw'", {{2, 1, 4}, 23}},
-        {"2Fw'", {{2, 1, 4}, 23}},
-        {"Bw", {{2, 1, 4}, 17}},
-        {"2Bw", {{2, 1, 4}, 17}},
-        {"Bw2", {{1, 3, 4}, 18}},
-        {"2Bw2", {{1, 3, 4}, 18}},
-        {"Bw'", {{3, 0, 4}, 19}},
-        {"2Bw'", {{3, 0, 4}, 19}}
-    };
+    constexpr const std::array<Pattern, 9> pattern_table = {{
+        {"x", {4, 2, 1}},
+        {"x2", {1, 2, 5}},
+        {"x'", {5, 2, 0}},
+        {"y", {0, 5, 2}},
+        {"y2", {0, 3, 5}},
+        {"y'", {0, 4, 3}},
+        {"z", {3, 0, 4}},
+        {"z2", {1, 3, 4}},
+        {"z'", {2, 1, 4}}
+    }};
 };
 
 
 Algorithm::Algorithm(const char* algorithm_string) {
     static const std::regex twists_regex(
-        R"(\s*((?:2?[UDRLFB]w|[UDRLFB])[2']?|[xyz][2']?|\[[udrlfb][2']?\])\s*)",
+        R"(\s*([UDRLFBxyz][2']?)\s*)",
         std::regex_constants::ECMAScript | std::regex_constants::optimize
     );
     uint_fast8_t transform[3] = {0, 2, 4};
@@ -141,16 +87,17 @@ Algorithm::Algorithm(const char* algorithm_string) {
             throw AlgorithmError(algorithm_string);
         }
         const std::string match_string = match_result.str(1);
-        if (auto find_result = pattern_table.find(match_string); find_result == pattern_table.cend()) {
+        if (
+            auto pattern = ranges::find_if(pattern_table, [&](const Pattern& pattern) {
+                return pattern.pattern_string == match_string;
+            });
+            pattern == pattern_table.cend()
+        ) {
             this->twists.push_back(Details::transform_twist(transform, parse_twist(match_string)));
         } else {
-            auto [pattern_transform, twist] = find_result->second;
-            if (twist != 0xff) {
-                this->twists.push_back(Details::transform_twist(transform, twist));
-            }
             uint_fast8_t new_transform[3];
             for (size_t i = 0; i < 3; ++i) {
-                uint_fast8_t temp = pattern_transform[i];
+                uint_fast8_t temp = pattern->transform_table[i];
                 new_transform[i] = transform[temp >> 1] ^ (temp & 1);
             }
             std::memcpy(transform, new_transform, 3 * sizeof(uint_fast8_t));
@@ -363,7 +310,11 @@ Algorithm Algorithm::inverse(const Algorithm& algorithm) {
         algorithm.twists
             | ranges::views::reverse
             | ranges::views::transform(
-                std::bind(Details::transform_twist, Details::rotation_permutation[algorithm.rotation], std::placeholders::_1)
+                std::bind(
+                    Details::transform_twist,
+                    Details::rotation_permutation[algorithm.rotation],
+                    std::placeholders::_1
+                )
             ),
         ranges::back_inserter(result.twists)
     );
