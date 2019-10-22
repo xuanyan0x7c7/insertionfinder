@@ -3,6 +3,7 @@
 #include <array>
 #include <functional>
 #include <istream>
+#include <iterator>
 #include <ostream>
 #include <regex>
 #include <sstream>
@@ -57,20 +58,14 @@ namespace {
 
     struct Pattern {
         const char* pattern_string;
-        uint_fast8_t transform_table[3];
+        int rotation;
     };
 
-    constexpr const std::array<Pattern, 9> pattern_table = {{
-        {"x", {4, 2, 1}},
-        {"x2", {1, 2, 5}},
-        {"x'", {5, 2, 0}},
-        {"y", {0, 5, 2}},
-        {"y2", {0, 3, 5}},
-        {"y'", {0, 4, 3}},
-        {"z", {3, 0, 4}},
-        {"z2", {1, 3, 4}},
-        {"z'", {2, 1, 4}}
-    }};
+    constexpr Pattern pattern_table[9] = {
+        {"x", 12}, {"x2", 8}, {"x'", 4},
+        {"y", 3}, {"y2", 2}, {"y'", 1},
+        {"z", 20}, {"z2", 10}, {"z'", 16}
+    };
 };
 
 
@@ -79,10 +74,10 @@ Algorithm::Algorithm(const char* algorithm_string) {
         R"(\s*([UDRLFBxyz][2']?)\s*)",
         std::regex_constants::ECMAScript | std::regex_constants::optimize
     );
-    uint_fast8_t transform[3] = {0, 2, 4};
+    int rotation = 0;
     std::cmatch match_result;
-    const char* temp_string = algorithm_string;
-    while (std::regex_search(temp_string, match_result, twists_regex)) {
+    const char* string_view = algorithm_string;
+    while (std::regex_search(string_view, match_result, twists_regex)) {
         if (match_result.position()) {
             throw AlgorithmError(algorithm_string);
         }
@@ -91,29 +86,18 @@ Algorithm::Algorithm(const char* algorithm_string) {
             auto pattern = ranges::find_if(pattern_table, [&](const Pattern& pattern) {
                 return pattern.pattern_string == match_string;
             });
-            pattern == pattern_table.cend()
+            pattern == pattern_table + std::size(pattern_table)
         ) {
-            this->twists.push_back(Details::transform_twist(transform, parse_twist(match_string)));
+            this->twists.push_back(Details::rotate_twist(rotation, parse_twist(match_string)));
         } else {
-            uint_fast8_t new_transform[3];
-            for (size_t i = 0; i < 3; ++i) {
-                uint_fast8_t temp = pattern->transform_table[i];
-                new_transform[i] = transform[temp >> 1] ^ (temp & 1);
-            }
-            std::memcpy(transform, new_transform, 3 * sizeof(uint_fast8_t));
+            rotation = Cube::placement_twist(pattern->rotation, rotation);
         }
-        temp_string += match_result.length();
+        string_view += match_result.length();
     }
-    if (*temp_string) {
+    if (*string_view) {
         throw AlgorithmError(algorithm_string);
     }
-    for (unsigned i = 0; i < 24; ++i) {
-        const uint_fast8_t* permutation = Details::rotation_permutation[Cube::inverse_center[i]];
-        if (permutation[0] == transform[0] && permutation[1] == transform[1]) {
-            this->rotation = i;
-            break;
-        }
-    }
+    this->rotation = Cube::inverse_center[rotation];
 }
 
 
@@ -203,18 +187,17 @@ void Algorithm::read_from(std::istream& in) {
     }
     this->rotation = rotation_data;
 
-    const uint_fast8_t* transform = Details::rotation_permutation[this->rotation];
     const auto& twists = this->twists;
     this->begin_mask = Details::twist_mask(Algorithm::inverse_twist[twists[0]]);
     if (length > 1 && twists[0] >> 3 == twists[1] >> 3) {
         this->begin_mask |= Details::twist_mask(Algorithm::inverse_twist[twists[1]]);
     }
     this->end_mask = Details::twist_mask(
-        Algorithm::inverse_twist[Details::transform_twist(transform, twists[length - 1])]
+        Algorithm::inverse_twist[Details::rotate_twist(this->rotation, twists[length - 1])]
     );
     if (length > 1 && twists[length - 1] >> 3 == twists[length - 2] >> 3) {
         this->end_mask |= Details::twist_mask(
-            Algorithm::inverse_twist[Details::transform_twist(transform, twists[length - 2])]
+            Algorithm::inverse_twist[Details::rotate_twist(this->rotation, twists[length - 2])]
         );
     }
     if (length > 2 && this->begin_mask & this->end_mask) {
@@ -237,13 +220,7 @@ Algorithm Algorithm::operator+(const Algorithm& rhs) const {
     result.twists.reserve(this->twists.size() + rhs.twists.size());
     result.twists.assign(this->twists.cbegin(), this->twists.cend());
     ranges::move(
-        rhs.twists | ranges::views::transform(
-            std::bind(
-                Details::transform_twist,
-                Details::rotation_permutation[Cube::inverse_center[this->rotation]],
-                std::placeholders::_1
-            )
-        ),
+        rhs.twists | ranges::views::transform(Details::bind_rotate_twist(Cube::inverse_center[this->rotation])),
         ranges::back_inserter(result.twists)
     );
     result.rotation = Cube::placement_twist(this->rotation, rhs.rotation);
@@ -253,13 +230,7 @@ Algorithm Algorithm::operator+(const Algorithm& rhs) const {
 Algorithm& Algorithm::operator+=(const Algorithm& rhs) {
     this->twists.reserve(this->twists.size() + rhs.twists.size());
     ranges::move(
-        rhs.twists | ranges::views::transform(
-            std::bind(
-                Details::transform_twist,
-                Details::rotation_permutation[Cube::inverse_center[this->rotation]],
-                std::placeholders::_1
-            )
-        ),
+        rhs.twists | ranges::views::transform(Details::bind_rotate_twist(Cube::inverse_center[this->rotation])),
         ranges::back_inserter(this->twists)
     );
     this->rotation = Cube::placement_twist(this->rotation, rhs.rotation);
@@ -291,9 +262,8 @@ void Algorithm::normalize() noexcept {
 }
 
 void Algorithm::rotate(int rotation) {
-    const uint_fast8_t* table = Details::rotation_permutation[rotation];
     for (uint_fast8_t& twist: this->twists) {
-        twist = Details::transform_twist(table, twist);
+        twist = Details::rotate_twist(rotation, twist);
     }
 }
 
@@ -309,13 +279,7 @@ Algorithm Algorithm::inverse(const Algorithm& algorithm) {
     ranges::move(
         algorithm.twists
             | ranges::views::reverse
-            | ranges::views::transform(
-                std::bind(
-                    Details::transform_twist,
-                    Details::rotation_permutation[algorithm.rotation],
-                    std::placeholders::_1
-                )
-            ),
+            | ranges::views::transform(Details::bind_rotate_twist(algorithm.rotation)),
         ranges::back_inserter(result.twists)
     );
     result.rotation = Cube::inverse_center[algorithm.rotation];

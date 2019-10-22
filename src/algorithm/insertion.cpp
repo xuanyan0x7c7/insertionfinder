@@ -84,13 +84,7 @@ std::pair<Algorithm, size_t> Algorithm::insert(const Algorithm& insertion, size_
     ranges::move(
         this->twists
             | ranges::views::slice(insert_place, ranges::end)
-            | ranges::views::transform(
-                std::bind(
-                    Details::transform_twist,
-                    Details::rotation_permutation[Cube::inverse_center[insertion.rotation]],
-                    std::placeholders::_1
-                )
-            ),
+            | ranges::views::transform(Details::bind_rotate_twist(Cube::inverse_center[insertion.rotation])),
         ranges::back_inserter(result.twists)
     );
     size_t place = result.cancel_moves();
