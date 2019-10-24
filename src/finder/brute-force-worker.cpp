@@ -176,7 +176,7 @@ void BruteForceFinder::Worker::try_insertion(
         }
         bool corner_changed = _case.mask() & 0xff;
         bool edge_changed = _case.mask() & 0xfff00;
-        bool center_changed = _case.mask() & 0xf00000;
+        bool center_changed = _case.mask() & 0x3f00000;
         std::byte twist_flag {0};
         if (corner_changed) {
             twist_flag |= CubeTwist::corners;
