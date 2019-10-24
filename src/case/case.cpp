@@ -4,6 +4,7 @@
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/case.hpp>
 using std::size_t;
+using InsertionFinder::Algorithm;
 using InsertionFinder::AlgorithmStreamError;
 using InsertionFinder::Case;
 using InsertionFinder::CaseStreamError;
@@ -22,7 +23,7 @@ void Case::save_to(std::ostream& out) const {
     this->_state.save_to(out);
     size_t size = this->list.size();
     out.write(reinterpret_cast<char*>(&size), sizeof(size_t));
-    for (const auto& algorithm: this->list) {
+    for (const Algorithm& algorithm: this->list) {
         algorithm.save_to(out);
     }
 }
@@ -44,7 +45,7 @@ void Case::read_from(std::istream& in) {
     }
     this->list.resize(size);
     try {
-        for (auto& algorithm: this->list) {
+        for (Algorithm& algorithm: this->list) {
             algorithm.read_from(in);
         }
     } catch (const AlgorithmStreamError& e) {

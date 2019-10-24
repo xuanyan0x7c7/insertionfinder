@@ -119,6 +119,6 @@ void CLI::verify_cube(const po::variables_map& vm) {
     std::string skeleton_string;
     std::getline(std::cin, scramble_string);
     std::getline(std::cin, skeleton_string);
-    auto status = verify(scramble_string, skeleton_string);
+    CycleStatus status = verify(scramble_string, skeleton_string);
     printer->print_result(status);
 }

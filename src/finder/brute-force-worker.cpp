@@ -105,8 +105,8 @@ void BruteForceFinder::Worker::search_last_corner_cycle(size_t begin, size_t end
 
         if (skeleton.swappable(insert_place)) {
             int swapped_index = Cube::next_corner_cycle_index(
-                Cube::next_corner_cycle_index(index, skeleton[insert_place]),
-                Algorithm::inverse_twist[skeleton[insert_place - 1]]
+                index,
+                {skeleton[insert_place], Algorithm::inverse_twist[skeleton[insert_place - 1]]}
             );
             this->try_last_insertion(insert_place, corner_cycle_index[swapped_index], true);
         }
@@ -133,8 +133,8 @@ void BruteForceFinder::Worker::search_last_edge_cycle(size_t begin, size_t end) 
 
         if (skeleton.swappable(insert_place)) {
             int swapped_index = Cube::next_edge_cycle_index(
-                Cube::next_edge_cycle_index(index, skeleton[insert_place]),
-                Algorithm::inverse_twist[skeleton[insert_place - 1]]
+                index,
+                {skeleton[insert_place], Algorithm::inverse_twist[skeleton[insert_place - 1]]}
             );
             this->try_last_insertion(insert_place, edge_cycle_index[swapped_index], true);
         }

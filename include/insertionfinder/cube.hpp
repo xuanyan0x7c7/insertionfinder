@@ -5,6 +5,7 @@
 #include <array>
 #include <exception>
 #include <functional>
+#include <initializer_list>
 #include <istream>
 #include <optional>
 #include <ostream>
@@ -108,7 +109,11 @@ namespace InsertionFinder {
                 this->twist(algorithm[i], flags);
             }
         }
-        void twist_inverse(const Algorithm& algorithm, std::size_t begin, std::size_t end, std::byte flags = CubeTwist::full) {
+        void twist_inverse(
+            const Algorithm& algorithm,
+            std::size_t begin, std::size_t end,
+            std::byte flags = CubeTwist::full
+        ) {
             for (size_t i = end; i-- != begin;) {
                 this->twist(Algorithm::inverse_twist[algorithm[i]], flags);
             }
@@ -125,6 +130,12 @@ namespace InsertionFinder {
         }
         static int placement_twist(int placement, int rotation) {
             return Cube::center_transform[placement][rotation];
+        }
+        static int placement_twist(int placement, std::initializer_list<int> rotations) {
+            for (int rotation: rotations) {
+                placement = Cube::center_transform[placement][rotation];
+            }
+            return placement;
         }
     public:
         Cube operator*(const Algorithm& algorithm) const noexcept {
@@ -196,8 +207,20 @@ namespace InsertionFinder {
         static int next_corner_cycle_index(int index, std::uint_fast8_t twist) {
             return Cube::corner_cycle_transform[index][twist];
         }
+        static int next_corner_cycle_index(int index, std::initializer_list<std::uint_fast8_t> twists) {
+            for (std::uint_fast8_t twist: twists) {
+                index = Cube::corner_cycle_transform[index][twist];
+            }
+            return index;
+        }
         static int next_edge_cycle_index(int index, std::uint_fast8_t twist) {
             return Cube::edge_cycle_transform[index][twist];
+        }
+        static int next_edge_cycle_index(int index, std::initializer_list<std::uint_fast8_t> twists) {
+            for (std::uint_fast8_t twist: twists) {
+                index = Cube::edge_cycle_transform[index][twist];
+            }
+            return index;
         }
     };
 };

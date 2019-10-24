@@ -85,7 +85,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
         }
     }
     out->write(reinterpret_cast<const char*>(&size), sizeof(size_t));
-    for (auto& _case: cases) {
+    for (Case& _case: cases) {
         _case.sort_algorithms();
         _case.save_to(*out);
     }

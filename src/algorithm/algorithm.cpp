@@ -144,7 +144,7 @@ void Algorithm::print(std::ostream& out, size_t begin, size_t end) const {
     }
     auto iter = this->twists.cbegin() + begin;
     out << twist_string[*iter];
-    for (auto iter_end = this->twists.cbegin() + end; ++iter < iter_end;) {
+    for (auto iter_end = this->twists.cbegin() + end; ++iter != iter_end;) {
         out << ' ' << twist_string[*iter];
     }
 }
@@ -265,9 +265,10 @@ void Algorithm::rotate(int rotation) {
     for (uint_fast8_t& twist: this->twists) {
         twist = Details::rotate_twist(rotation, twist);
     }
+    this->rotation = Cube::placement_twist(Cube::inverse_center[rotation], {this->rotation, rotation});
 }
 
-void Algorithm::inverse() {
+void Algorithm::inverse() noexcept {
     ranges::reverse(this->twists);
     this->rotate(this->rotation);
     this->rotation = Cube::inverse_center[this->rotation];

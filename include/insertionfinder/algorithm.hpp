@@ -141,7 +141,7 @@ namespace InsertionFinder {
         }
         void normalize() noexcept;
         void rotate(int rotation);
-        void inverse();
+        void inverse() noexcept;
         static Algorithm inverse(const Algorithm& algorithm);
         std::vector<Algorithm> generate_isomorphisms() const;
     };

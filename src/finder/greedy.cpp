@@ -67,7 +67,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
 
     for (int depth = this->partial_states.size(); --depth > 0;) {
         auto& solution_list = this->partial_solution_list[depth];
-        auto& state = this->partial_states[depth];
+        PartialState& state = this->partial_states[depth];
         solution_list |=
             ranges::actions::remove_if([&state, this](const auto& x) {
                 return x.first.length() > state.fewest_moves + this->options.greedy_threshold;
@@ -99,7 +99,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
     for (auto& [skeleton, step]: this->partial_solution_list[0]) {
         auto [iter, inserted] = this->partial_solution_map.try_emplace(std::move(skeleton), step);
         const Algorithm& old_skeleton = iter->first;
-        auto& old_step = iter->second;
+        SolvingStep& old_step = iter->second;
         if (inserted) {
             skeletons.push_back(&old_skeleton);
         } else if (step.cancellation < old_step.cancellation) {
@@ -109,7 +109,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
     for (const Algorithm* current_skeleton: skeletons) {
         std::vector<Insertion> result({Insertion(*current_skeleton)});
         while (ranges::all_of(this->skeletons, [&](const Algorithm& x) {return x != *current_skeleton;})) {
-            const auto& step = this->partial_solution_map[*current_skeleton];
+            const SolvingStep& step = this->partial_solution_map.at(*current_skeleton);
             current_skeleton = step.skeleton;
             Algorithm previous_skeleton = *step.skeleton;
             if (step.swapped) {
@@ -125,8 +125,8 @@ void GreedyFinder::search_core(const SearchParams& params) {
 void GreedyFinder::run_worker(boost::asio::thread_pool& pool, Algorithm&& skeleton, const SolvingStep& step) {
     std::lock_guard<std::mutex> lock(this->worker_mutex);
     auto [iter, inserted] = this->partial_solution_map.try_emplace(std::move(skeleton), step);
-    const auto& old_skeleton = iter->first;
-    auto& old_step = iter->second;
+    const Algorithm& old_skeleton = iter->first;
+    SolvingStep& old_step = iter->second;
     if (inserted) {
         boost::asio::post(pool, [&]() {
             Worker(*this, pool, old_skeleton, old_step.cycle_status, old_step.cancellation).search();
