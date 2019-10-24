@@ -16,6 +16,7 @@
 #include "utils.hpp"
 using std::size_t;
 using std::uint32_t;
+using std::uint8_t;
 using std::uint_fast8_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::AlgorithmError;
@@ -157,8 +158,8 @@ std::string Algorithm::str() const {
 
 
 void Algorithm::save_to(std::ostream& out) const {
-    size_t length = this->twists.size();
-    out.write(reinterpret_cast<char*>(&length), sizeof(size_t));
+    uint8_t length = this->twists.size();
+    out.write(reinterpret_cast<char*>(&length), 1);
     auto data = std::make_unique<char[]>(length);
     for (size_t i = 0; i < length; ++i) {
         data[i] = this->twists[i];
@@ -169,9 +170,9 @@ void Algorithm::save_to(std::ostream& out) const {
 }
 
 void Algorithm::read_from(std::istream& in) {
-    size_t length;
-    in.read(reinterpret_cast<char*>(&length), sizeof(size_t));
-    if (in.gcount() != sizeof(size_t)) {
+    uint8_t length;
+    in.read(reinterpret_cast<char*>(&length), 1);
+    if (in.gcount() != 1) {
         throw AlgorithmStreamError();
     }
     auto data = std::make_unique<char[]>(length);

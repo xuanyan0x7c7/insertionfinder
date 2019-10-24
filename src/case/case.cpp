@@ -3,7 +3,7 @@
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/case.hpp>
-using std::size_t;
+using std::uint8_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::AlgorithmStreamError;
 using InsertionFinder::Case;
@@ -21,8 +21,8 @@ Case::Case(const Cube& state):
 
 void Case::save_to(std::ostream& out) const {
     this->_state.save_to(out);
-    size_t size = this->list.size();
-    out.write(reinterpret_cast<char*>(&size), sizeof(size_t));
+    uint8_t size = this->list.size();
+    out.write(reinterpret_cast<char*>(&size), 1);
     for (const Algorithm& algorithm: this->list) {
         algorithm.save_to(out);
     }
@@ -38,9 +38,9 @@ void Case::read_from(std::istream& in) {
     this->_has_parity = this->_state.has_parity();
     this->_corner_cycles = this->_state.corner_cycles();
     this->_edge_cycles = this->_state.edge_cycles();
-    size_t size;
-    in.read(reinterpret_cast<char*>(&size), sizeof(size_t));
-    if (in.gcount() != sizeof(size_t)) {
+    uint8_t size;
+    in.read(reinterpret_cast<char*>(&size), 1);
+    if (in.gcount() != 1) {
         throw CaseStreamError();
     }
     this->list.resize(size);
