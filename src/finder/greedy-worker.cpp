@@ -145,6 +145,19 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
         skeleton.swap_adjacent(insert_place);
     }
     uint32_t mask = state.mask();
+    bool corner_solved = !(mask & 0xff);
+    bool edge_solved = !(mask & 0xfff00);
+    bool center_solved = !(mask & 0x3f00000);
+    std::byte case_flag {0};
+    if (!corner_solved) {
+        case_flag |= CubeTwist::corners;
+    }
+    if (!edge_solved) {
+        case_flag |= CubeTwist::edges;
+    }
+    if (!center_solved) {
+        case_flag |= CubeTwist::centers;
+    }
     auto insert_place_mask = skeleton.get_insert_place_mask(insert_place);
     bool parity = cycle_status.parity;
     int corner_cycles = cycle_status.corner_cycles;
@@ -169,10 +182,12 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
         if (center_changed) {
             twist_flag |= CubeTwist::centers;
         }
-        Cube cube = Cube::twist(state, _case.state(), twist_flag);
+        Cube cube = Cube::twist(state, _case.state(), case_flag, twist_flag);
         bool new_parity = parity ^ _case.has_parity();
-        int new_corner_cycles = corner_changed ? cube.corner_cycles() : corner_cycles;
-        int new_edge_cycles = edge_changed ? cube.edge_cycles() : edge_cycles;
+        int new_corner_cycles = corner_changed
+            ? (corner_solved ? _case.corner_cycles() : cube.corner_cycles())
+            : corner_cycles;
+        int new_edge_cycles = edge_changed ? (edge_solved ? _case.edge_cycles() : cube.edge_cycles()) : edge_cycles;
         int new_placement = Cube::placement_twist(_case.rotation(), placement);
         int new_total_cycles = this->finder.get_total_cycles(
             new_parity, new_corner_cycles, new_edge_cycles, new_placement

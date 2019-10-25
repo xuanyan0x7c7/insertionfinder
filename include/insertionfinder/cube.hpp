@@ -122,7 +122,7 @@ namespace InsertionFinder {
         void twist(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
         void twist_before(std::uint_fast8_t twist, std::byte flags = CubeTwist::full);
         void twist_before(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
-        static Cube twist(const Cube& lhs, const Cube& rhs, std::byte flags = CubeTwist::full) noexcept;
+        static Cube twist(const Cube& lhs, const Cube& rhs, std::byte lhs_flags, std::byte rhs_flags) noexcept;
         void rotate(int rotation) {
             if (rotation) {
                 this->twist(Cube::rotation_cube[rotation]);
@@ -148,9 +148,7 @@ namespace InsertionFinder {
             cube.twist(twist);
             return cube;
         }
-        Cube operator*(const Cube& rhs) const noexcept {
-            return Cube::twist(*this, rhs);
-        }
+        Cube operator*(const Cube& rhs) const noexcept;
         friend Cube operator*(Cube&& lhs, const Algorithm& algorithm) noexcept {
             lhs.twist(algorithm);
             return std::move(lhs);

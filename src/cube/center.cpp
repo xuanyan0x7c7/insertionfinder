@@ -70,7 +70,7 @@ const std::array<std::array<int, 24>, 24> Cube::center_transform = generate_cent
 
 std::array<Cube, 24> Cube::generate_rotation_cube_table() noexcept {
     std::array<Cube, 24> rotation_cube;
-    std::array<Cube, 4> basic_rotation_cube;
+    Cube basic_rotation_cube[4];
     for (size_t i = 0; i < 4; ++i) {
         std::memcpy(basic_rotation_cube[i].corner, rotation_corner_table[i], 8 * sizeof(unsigned));
         std::memcpy(basic_rotation_cube[i].edge, rotation_edge_table[i], 12 * sizeof(unsigned));

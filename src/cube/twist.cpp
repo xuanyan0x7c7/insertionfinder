@@ -152,30 +152,53 @@ void Cube::twist_before(const Cube& cube, std::byte flags) noexcept {
 }
 
 
-Cube Cube::twist(const Cube& lhs, const Cube& rhs, std::byte flags) noexcept {
+Cube Cube::twist(const Cube& lhs, const Cube& rhs, std::byte lhs_flags, std::byte rhs_flags) noexcept {
     Cube result(Cube::raw_construct);
-    if (static_cast<bool>(flags & CubeTwist::corners)) {
+    if (static_cast<bool>(lhs_flags & rhs_flags & CubeTwist::corners)) {
         for (size_t i = 0; i < 8; ++i) {
             unsigned item = lhs.corner[i];
             unsigned transform = rhs.corner[item / 3];
             result.corner[i] = transform - transform % 3 + (item + transform) % 3;
         }
-    } else {
+    } else if (static_cast<bool>(lhs_flags & CubeTwist::corners)) {
         std::memcpy(result.corner, lhs.corner, 8 * sizeof(unsigned));
+    } else if (static_cast<bool>(rhs_flags & CubeTwist::corners)) {
+        std::memcpy(result.corner, rhs.corner, 8 * sizeof(unsigned));
+    } else {
+        for (unsigned i = 0; i < 8; ++i) {
+            result.corner[i] = i * 3;
+        }
     }
-    if (static_cast<bool>(flags & CubeTwist::edges)) {
+    if (static_cast<bool>(lhs_flags & rhs_flags & CubeTwist::edges)) {
         for (size_t i = 0; i < 12; ++i) {
             unsigned item = lhs.edge[i];
             result.edge[i] = rhs.edge[item >> 1] ^ (item & 1);
         }
-    } else {
+    } else if (static_cast<bool>(lhs_flags & CubeTwist::edges)) {
         std::memcpy(result.edge, lhs.edge, 12 * sizeof(unsigned));
-    }
-    if (static_cast<bool>(flags & CubeTwist::centers)) {
-        result._placement = Cube::center_transform[lhs._placement][rhs._placement];
+    } else if (static_cast<bool>(rhs_flags & CubeTwist::edges)) {
+        std::memcpy(result.edge, rhs.edge, 12 * sizeof(unsigned));
     } else {
-        result._placement = lhs._placement;
+        for (unsigned i = 0; i < 12; ++i) {
+            result.edge[i] = i << 1;
+        }
     }
+    result._placement = Cube::center_transform[lhs._placement][rhs._placement];
+    return result;
+}
+
+Cube Cube::operator*(const Cube& rhs) const noexcept {
+    Cube result(Cube::raw_construct);
+    for (size_t i = 0; i < 8; ++i) {
+        unsigned item = this->corner[i];
+        unsigned transform = rhs.corner[item / 3];
+        result.corner[i] = transform - transform % 3 + (item + transform) % 3;
+    }
+    for (size_t i = 0; i < 12; ++i) {
+        unsigned item = this->edge[i];
+        result.edge[i] = rhs.edge[item >> 1] ^ (item & 1);
+    }
+    result._placement = Cube::center_transform[this->_placement][rhs._placement];
     return result;
 }
 

@@ -164,6 +164,19 @@ void BruteForceFinder::Worker::try_insertion(
     }
     insertion.insert_place = insert_place;
     uint32_t mask = state.mask();
+    bool corner_solved = !(mask & 0xff);
+    bool edge_solved = !(mask & 0xfff00);
+    bool center_solved = !(mask & 0x3f00000);
+    std::byte case_flag {0};
+    if (!corner_solved) {
+        case_flag |= CubeTwist::corners;
+    }
+    if (!edge_solved) {
+        case_flag |= CubeTwist::edges;
+    }
+    if (!center_solved) {
+        case_flag |= CubeTwist::centers;
+    }
     auto insert_place_mask = insertion.skeleton.get_insert_place_mask(insert_place);
     bool parity = cycle_status.parity;
     int corner_cycles = cycle_status.corner_cycles;
@@ -187,10 +200,12 @@ void BruteForceFinder::Worker::try_insertion(
         if (center_changed) {
             twist_flag |= CubeTwist::centers;
         }
-        Cube cube = Cube::twist(state, _case.state(), twist_flag);
+        Cube cube = Cube::twist(state, _case.state(), case_flag, twist_flag);
         bool new_parity = parity ^ _case.has_parity();
-        int new_corner_cycles = corner_changed ? cube.corner_cycles() : corner_cycles;
-        int new_edge_cycles = edge_changed ? cube.edge_cycles() : edge_cycles;
+        int new_corner_cycles = corner_changed
+            ? (corner_solved ? _case.corner_cycles() : cube.corner_cycles())
+            : corner_cycles;
+        int new_edge_cycles = edge_changed ? (edge_solved ? _case.edge_cycles() : cube.edge_cycles()) : edge_cycles;
         int new_placement = Cube::placement_twist(_case.rotation(), placement);
         if (!new_parity && new_corner_cycles == 0 && new_edge_cycles == 0 && new_placement == 0) {
             this->solution_found(insert_place, _case);
