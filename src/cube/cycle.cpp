@@ -27,7 +27,9 @@ bool Cube::has_parity() const noexcept {
 
 int Cube::corner_cycles() const noexcept {
     unsigned visited_mask = 0;
-    int small_cycles[7] = {0, 0, 0, 0, 0, 0, 0};
+    int self_orientation[3] = {0, 0, 0};
+    int even_permutation[3] = {0, 0, 0};
+    int odd_permutation[3] = {0, 0, 0};
     int cycles = 0;
     bool parity = false;
 
@@ -45,49 +47,51 @@ int Cube::corner_cycles() const noexcept {
             cycles += length >> 1;
             orientation %= 3;
             if (length == 0 && orientation) {
-                ++small_cycles[orientation - 1];
+                ++self_orientation[orientation];
             } else if ((length & 1) == 0 && orientation) {
-                ++small_cycles[orientation + 1];
+                ++even_permutation[orientation];
             } else if (length & 1) {
                 parity = !parity;
                 ++cycles;
-                ++small_cycles[orientation + 4];
+                ++odd_permutation[orientation];
             }
         }
     }
 
     if (parity) {
         --cycles;
-        if (small_cycles[4]) {
-            --small_cycles[4];
-        } else if (small_cycles[5] < small_cycles[6]) {
-            --small_cycles[6];
-            ++small_cycles[3];
+        if (odd_permutation[0]) {
+            --odd_permutation[0];
+        } else if (odd_permutation[1] < odd_permutation[2]) {
+            --odd_permutation[2];
+            ++even_permutation[2];
         } else {
-            --small_cycles[5];
-            ++small_cycles[2];
+            --odd_permutation[1];
+            ++even_permutation[1];
         }
     }
 
-    if (small_cycles[5] < small_cycles[6]) {
-        small_cycles[3] += small_cycles[4] & 1;
-        small_cycles[2] += (small_cycles[6] - small_cycles[5]) >> 1;
+    if (odd_permutation[1] < odd_permutation[2]) {
+        even_permutation[2] += odd_permutation[0] & 1;
+        even_permutation[1] += (odd_permutation[2] - odd_permutation[1]) >> 1;
     } else {
-        small_cycles[2] += small_cycles[4] & 1;
-        small_cycles[3] += (small_cycles[5] - small_cycles[6]) >> 1;
+        even_permutation[1] += odd_permutation[0] & 1;
+        even_permutation[2] += (odd_permutation[1] - odd_permutation[2]) >> 1;
     }
 
-    int x = small_cycles[0] + small_cycles[2];
-    int y = small_cycles[1] + small_cycles[3];
+    int x = self_orientation[1] + even_permutation[1];
+    int y = self_orientation[2] + even_permutation[2];
     cycles += (x / 3 + y / 3) << 1;
     int twists = x % 3;
-    return cycles + twists + (small_cycles[2] + small_cycles[3] < twists);
+    return cycles + twists + (even_permutation[1] + even_permutation[2] < twists);
 }
 
 
 int Cube::edge_cycles() const noexcept {
     unsigned visited_mask = 0;
-    int small_cycles[3] = {0, 0, 0};
+    int self_flip = 0;
+    int even_flip = 0;
+    int odd_flip = 0;
     int cycles = 0;
     bool parity = false;
 
@@ -109,29 +113,29 @@ int Cube::edge_cycles() const noexcept {
             }
             if (flip) {
                 if (length == 0) {
-                    ++small_cycles[0];
+                    ++self_flip;
                 } else if (length & 1) {
-                    small_cycles[2] ^= 1;
+                    odd_flip ^= 1;
                 } else {
-                    ++small_cycles[1];
+                    ++even_flip;
                 }
             }
         }
     }
 
-    small_cycles[1] += small_cycles[2];
-    if (small_cycles[0] < small_cycles[1]) {
-        cycles += (small_cycles[0] + small_cycles[1]) >> 1;
+    even_flip += odd_flip;
+    if (self_flip < even_flip) {
+        cycles += (self_flip + even_flip) >> 1;
     } else {
         static constexpr int flip_cycles[7] = {0, 2, 3, 5, 6, 8, 9};
-        cycles += small_cycles[1] + flip_cycles[(small_cycles[0] - small_cycles[1]) >> 1];
+        cycles += even_flip + flip_cycles[(self_flip - even_flip) >> 1];
     }
 
     return cycles - parity;
 }
 
 
-std::optional<Cube> Cube::corner_cycle_cube(int index) {
+std::optional<Cube> Cube::corner_cycle_cube(unsigned index) {
     unsigned x = index / 24 / 24;
     unsigned y = index / 24 % 24;
     unsigned z = index % 24;
@@ -146,7 +150,7 @@ std::optional<Cube> Cube::corner_cycle_cube(int index) {
     }
 }
 
-std::optional<Cube> Cube::edge_cycle_cube(int index) {
+std::optional<Cube> Cube::edge_cycle_cube(unsigned index) {
     unsigned x = index / 24 / 24;
     unsigned y = index / 24 % 24;
     unsigned z = index % 24;

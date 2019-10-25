@@ -39,23 +39,17 @@ namespace {
     };
 
     struct Printer {
-        virtual void print_case_information(
-            const Algorithm& scramble, const Algorithm& skeleton,
-            const CycleStatus& status
-        ) {}
+        virtual void print_case_information(const Algorithm& scramble, const Algorithm& skeleton, CycleStatus status) {}
         virtual void print_result(
             const Algorithm& scramble, const Algorithm& skeleton,
-            const CycleStatus& status,
+            CycleStatus status,
             const Finder& finder, const Finder::Result& result
         ) = 0;
         virtual ~Printer() = default;
     };
 
     struct StandardPrinter: Printer {
-        void print_case_information(
-            const Algorithm& scramble, const Algorithm& skeleton,
-            const CycleStatus& status
-        ) override {
+        void print_case_information(const Algorithm& scramble, const Algorithm& skeleton, CycleStatus status) override {
             std::cout << "Scramble: " << scramble << std::endl;
             std::cout << "Skeleton: " << skeleton << std::endl;
             std::cout << "The cube ";
@@ -99,7 +93,7 @@ namespace {
 
         void print_result(
             const Algorithm& scramble, const Algorithm& skeleton,
-            const CycleStatus& status,
+            CycleStatus status,
             const Finder& finder, const Finder::Result& result
         ) override {
             if (result.status == FinderStatus::success) {
@@ -175,7 +169,7 @@ namespace {
     struct JSONPrinter: Printer {
         void print_result(
             const Algorithm& scramble, const Algorithm& skeleton,
-            const CycleStatus& status,
+            CycleStatus status,
             const Finder& finder, const Finder::Result& result
         ) override {
             UniValue map(UniValue::VOBJ);

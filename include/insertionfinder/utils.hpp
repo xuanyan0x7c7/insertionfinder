@@ -6,4 +6,4 @@ namespace InsertionFinder::Details {
     };
 
     template<class T> using remove_cvref_t = typename remove_cvref<T>::type;
-}
+};

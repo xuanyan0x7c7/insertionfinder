@@ -17,7 +17,7 @@ namespace InsertionFinder {
             Worker(BruteForceFinder& finder, const Algorithm& skeleton):
                 finder(finder), solving_step({Insertion(skeleton)}) {}
         public:
-            void search(const CycleStatus& cycle_status, std::size_t begin, std::size_t end);
+            void search(CycleStatus cycle_status, std::size_t begin, std::size_t end);
         private:
             void search_last_corner_cycle(std::size_t begin, std::size_t end);
             void search_last_edge_cycle(std::size_t begin, std::size_t end);

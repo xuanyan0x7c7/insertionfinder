@@ -195,8 +195,8 @@ namespace InsertionFinder {
             return this->_placement;
         }
     private:
-        static std::optional<Cube> corner_cycle_cube(int index);
-        static std::optional<Cube> edge_cycle_cube(int index);
+        static std::optional<Cube> corner_cycle_cube(unsigned index);
+        static std::optional<Cube> edge_cycle_cube(unsigned index);
     public:
         int corner_cycle_index() const noexcept;
         int edge_cycle_index() const noexcept;
