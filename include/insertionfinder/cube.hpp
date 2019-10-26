@@ -143,36 +143,24 @@ namespace InsertionFinder {
             cube.twist(algorithm);
             return cube;
         }
-        Cube operator*(std::uint_fast8_t twist) const noexcept {
+        Cube operator*(std::uint_fast8_t twist) const {
             Cube cube = *this;
             cube.twist(twist);
             return cube;
         }
         Cube operator*(const Cube& rhs) const noexcept;
-        friend Cube operator*(Cube&& lhs, const Algorithm& algorithm) noexcept {
-            lhs.twist(algorithm);
-            return std::move(lhs);
-        }
-        friend Cube operator*(Cube&& lhs, std::uint_fast8_t twist) noexcept {
-            lhs.twist(twist);
-            return std::move(lhs);
-        }
-        friend Cube operator*(Cube&& lhs, const Cube& rhs) noexcept {
-            lhs.twist(rhs);
-            return std::move(lhs);
-        }
         friend Cube operator*(const Algorithm& algorithm, const Cube& rhs) noexcept {
             Cube cube;
             cube.twist(algorithm);
             cube.twist(rhs);
             return cube;
         }
-        friend Cube operator*(std::uint_fast8_t twist, const Cube& rhs) noexcept;
+        friend Cube operator*(std::uint_fast8_t twist, const Cube& rhs);
         Cube& operator*=(const Algorithm& algorithm) noexcept {
             this->twist(algorithm);
             return *this;
         }
-        Cube& operator*=(std::uint_fast8_t twist) noexcept {
+        Cube& operator*=(std::uint_fast8_t twist) {
             this->twist(twist);
             return *this;
         }
@@ -221,4 +209,9 @@ namespace InsertionFinder {
             return index;
         }
     };
+
+    template<class T> Cube operator*(Cube&& lhs, const T& rhs) noexcept(noexcept(lhs.twist(rhs))) {
+        lhs.twist(rhs);
+        return std::move(lhs);
+    }
 };

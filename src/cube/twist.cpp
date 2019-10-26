@@ -202,19 +202,21 @@ Cube Cube::operator*(const Cube& rhs) const noexcept {
     return result;
 }
 
-Cube InsertionFinder::operator*(uint_fast8_t twist, const Cube& rhs) noexcept {
-    const unsigned* corner_table = corner_twist_table[twist];
-    const unsigned* edge_table = edge_twist_table[twist];
-    Cube result(Cube::raw_construct);
-    for (size_t i = 0; i < 8; ++i) {
-        unsigned item = corner_table[i];
-        unsigned transform = rhs.corner[item / 3];
-        result.corner[i] = transform - transform % 3 + (item + transform) % 3;
+namespace InsertionFinder {
+    Cube operator*(uint_fast8_t twist, const Cube& rhs) {
+        const unsigned* corner_table = corner_twist_table[twist];
+        const unsigned* edge_table = edge_twist_table[twist];
+        Cube result(Cube::raw_construct);
+        for (size_t i = 0; i < 8; ++i) {
+            unsigned item = corner_table[i];
+            unsigned transform = rhs.corner[item / 3];
+            result.corner[i] = transform - transform % 3 + (item + transform) % 3;
+        }
+        for (size_t i = 0; i < 12; ++i) {
+            unsigned item = edge_table[i];
+            result.edge[i] = rhs.edge[item >> 1] ^ (item & 1);
+        }
+        result._placement = rhs._placement;
+        return result;
     }
-    for (size_t i = 0; i < 12; ++i) {
-        unsigned item = edge_table[i];
-        result.edge[i] = rhs.edge[item >> 1] ^ (item & 1);
-    }
-    result._placement = rhs._placement;
-    return result;
-}
+};
