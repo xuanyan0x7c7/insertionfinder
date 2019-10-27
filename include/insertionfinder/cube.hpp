@@ -126,11 +126,7 @@ namespace InsertionFinder {
             cube.twist(algorithm);
             return cube;
         }
-        Cube operator*(Twist twist) const noexcept {
-            Cube cube = *this;
-            cube.twist(twist);
-            return cube;
-        }
+        Cube operator*(Twist twist) const noexcept;
         Cube operator*(const Cube& rhs) const noexcept;
         friend Cube operator*(const Algorithm& algorithm, const Cube& rhs) noexcept {
             Cube cube;
@@ -139,15 +135,7 @@ namespace InsertionFinder {
             return cube;
         }
         friend Cube operator*(Twist twist, const Cube& rhs) noexcept;
-        Cube& operator*=(const Algorithm& algorithm) noexcept {
-            this->twist(algorithm);
-            return *this;
-        }
-        Cube& operator*=(Twist twist) noexcept {
-            this->twist(twist);
-            return *this;
-        }
-        Cube& operator*=(const Cube& rhs) noexcept {
+        template<class T> Cube& operator*=(const T& rhs) noexcept(noexcept(this->twist(rhs))) {
             this->twist(rhs);
             return *this;
         }

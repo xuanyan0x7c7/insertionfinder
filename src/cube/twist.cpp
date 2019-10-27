@@ -188,6 +188,23 @@ Cube Cube::twist(const Cube& lhs, const Cube& rhs, std::byte lhs_flags, std::byt
     return result;
 }
 
+Cube Cube::operator*(Twist twist) const noexcept {
+    const unsigned* corner_table = corner_twist_table[twist];
+    const unsigned* edge_table = edge_twist_table[twist];
+    Cube result(Cube::raw_construct);
+    for (size_t i = 0; i < 8; ++i) {
+        unsigned item = this->corner[i];
+        unsigned transform = corner_table[item / 3];
+        result.corner[i] = transform - transform % 3 + (item + transform) % 3;
+    }
+    for (size_t i = 0; i < 12; ++i) {
+        unsigned item = this->edge[i];
+        result.edge[i] = edge_table[item >> 1] ^ (item & 1);
+    }
+    result._placement = this->_placement;
+    return result;
+}
+
 Cube Cube::operator*(const Cube& rhs) const noexcept {
     Cube result(Cube::raw_construct);
     for (size_t i = 0; i < 8; ++i) {
