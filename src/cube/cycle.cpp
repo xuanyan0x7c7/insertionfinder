@@ -2,9 +2,11 @@
 #include <optional>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/twist.hpp>
 using std::size_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::Cube;
+using InsertionFinder::Twist;
 namespace CubeTwist = InsertionFinder::CubeTwist;
 
 
@@ -200,7 +202,7 @@ std::vector<std::array<int, 24>> Cube::generate_corner_cycle_transform_table() {
             for (size_t j = 0; j < 24; ++j) {
                 if (j & 3) {
                     Cube new_cube = *cube;
-                    new_cube.twist_before(Algorithm::inverse_twist[j], CubeTwist::corners);
+                    new_cube.twist_before(Twist::inverse(j), CubeTwist::corners);
                     new_cube.twist(j, CubeTwist::corners);
                     table[j] = new_cube.corner_cycle_index();
                 }
@@ -218,7 +220,7 @@ std::vector<std::array<int, 24>> Cube::generate_edge_cycle_transform_table() {
             for (size_t j = 0; j < 24; ++j) {
                 if (j & 3) {
                     Cube new_cube = *cube;
-                    new_cube.twist_before(Algorithm::inverse_twist[j], CubeTwist::edges);
+                    new_cube.twist_before(Twist::inverse(j), CubeTwist::edges);
                     new_cube.twist(j, CubeTwist::edges);
                     table[j] = new_cube.edge_cycle_index();
                 }

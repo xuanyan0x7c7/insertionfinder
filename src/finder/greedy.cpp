@@ -14,6 +14,7 @@ using std::size_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::Cube;
 using InsertionFinder::GreedyFinder;
+using InsertionFinder::Rotation;
 namespace Details = InsertionFinder::Details;
 
 
@@ -26,7 +27,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
         bool parity = cube.has_parity();
         int corner_cycles = cube.corner_cycles();
         int edge_cycles = cube.edge_cycles();
-        int placement = cube.placement();
+        Rotation placement = cube.placement();
         if (!parity && Cube::center_cycles[placement] <= 1) {
             this->result.status &= ~FinderStatus::parity_algorithms_needed;
         } else if (!this->change_parity) {

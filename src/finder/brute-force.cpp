@@ -8,8 +8,9 @@
 #include <insertionfinder/finder/brute-force.hpp>
 using std::size_t;
 using InsertionFinder::Algorithm;
-using InsertionFinder::Cube;
 using InsertionFinder::BruteForceFinder;
+using InsertionFinder::Cube;
+using InsertionFinder::Rotation;
 namespace FinderStatus = InsertionFinder::FinderStatus;
 
 
@@ -20,7 +21,7 @@ void BruteForceFinder::search_core(const SearchParams& params) {
         bool parity = cube.has_parity();
         int corner_cycles = cube.corner_cycles();
         int edge_cycles = cube.edge_cycles();
-        int placement = cube.placement();
+        Rotation placement = cube.placement();
         if (!parity && Cube::center_cycles[placement] <= 1) {
             this->result.status &= ~FinderStatus::parity_algorithms_needed;
         } else if (!this->change_parity) {

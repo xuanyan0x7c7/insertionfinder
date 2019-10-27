@@ -4,6 +4,7 @@
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/twist.hpp>
 #include <insertionfinder/finder/finder.hpp>
 
 namespace InsertionFinder {
@@ -21,7 +22,7 @@ namespace InsertionFinder {
         private:
             void search_last_corner_cycle(std::size_t begin, std::size_t end);
             void search_last_edge_cycle(std::size_t begin, std::size_t end);
-            void search_last_placement(int placement, std::size_t begin, std::size_t end);
+            void search_last_placement(Rotation placement, std::size_t begin, std::size_t end);
             void try_insertion(
                 std::size_t insert_place,
                 const Cube& state,

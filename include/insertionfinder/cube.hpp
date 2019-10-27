@@ -11,6 +11,7 @@
 #include <ostream>
 #include <vector>
 #include <insertionfinder/algorithm.hpp>
+#include <insertionfinder/twist.hpp>
 
 namespace InsertionFinder {class Cube;};
 template<> struct std::hash<InsertionFinder::Cube> {
@@ -37,14 +38,6 @@ namespace InsertionFinder {
         class RawConstructor {};
         static constexpr RawConstructor raw_construct {};
     public:
-        static constexpr int inverse_center[24] = {
-            0, 3, 2, 1,
-            12, 23, 6, 17,
-            8, 9, 10, 11,
-            4, 19, 14, 21,
-            20, 7, 18, 13,
-            16, 15, 22, 5
-        };
         static constexpr int center_cycles[24] = {
             0, 2, 1, 2,
             2, 1, 3, 1,
@@ -56,7 +49,7 @@ namespace InsertionFinder {
     private:
         unsigned corner[8];
         unsigned edge[12];
-        int _placement;
+        Rotation _placement;
     public:
         Cube() noexcept:
             corner {0, 3, 6, 9, 12, 15, 18, 21},
@@ -86,7 +79,6 @@ namespace InsertionFinder {
         static const std::array<Cube, 24> rotation_cube;
         static const std::vector<std::array<int, 24>> corner_cycle_transform;
         static const std::vector<std::array<int, 24>> edge_cycle_transform;
-        static const std::array<std::array<int, 24>, 24> center_transform;
     private:
         static std::array<Cube, 24> generate_rotation_cube_table() noexcept;
         static std::vector<std::array<int, 24>> generate_corner_cycle_transform_table();
@@ -100,7 +92,7 @@ namespace InsertionFinder {
         }
         void twist_inverse(const Algorithm& algorithm, std::byte flags = CubeTwist::full) noexcept {
             if (static_cast<bool>(flags & CubeTwist::centers)) {
-                this->rotate(Cube::inverse_center[algorithm.cube_rotation()]);
+                this->rotate(algorithm.cube_rotation().inverse());
             }
             this->twist_inverse(algorithm, 0, algorithm.length(), flags);
         }
@@ -115,27 +107,18 @@ namespace InsertionFinder {
             std::byte flags = CubeTwist::full
         ) {
             for (size_t i = end; i-- != begin;) {
-                this->twist(Algorithm::inverse_twist[algorithm[i]], flags);
+                this->twist(algorithm[i].inverse(), flags);
             }
         }
-        void twist(std::uint_fast8_t twist, std::byte flags = CubeTwist::full);
+        void twist(Twist twist, std::byte flags = CubeTwist::full) noexcept;
         void twist(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
-        void twist_before(std::uint_fast8_t twist, std::byte flags = CubeTwist::full);
+        void twist_before(Twist twist, std::byte flags = CubeTwist::full) noexcept;
         void twist_before(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
         static Cube twist(const Cube& lhs, const Cube& rhs, std::byte lhs_flags, std::byte rhs_flags) noexcept;
-        void rotate(int rotation) {
+        void rotate(Rotation rotation) noexcept {
             if (rotation) {
                 this->twist(Cube::rotation_cube[rotation]);
             }
-        }
-        static int placement_twist(int placement, int rotation) {
-            return Cube::center_transform[placement][rotation];
-        }
-        static int placement_twist(int placement, std::initializer_list<int> rotations) {
-            for (int rotation: rotations) {
-                placement = Cube::center_transform[placement][rotation];
-            }
-            return placement;
         }
     public:
         Cube operator*(const Algorithm& algorithm) const noexcept {
@@ -143,7 +126,7 @@ namespace InsertionFinder {
             cube.twist(algorithm);
             return cube;
         }
-        Cube operator*(std::uint_fast8_t twist) const {
+        Cube operator*(Twist twist) const noexcept {
             Cube cube = *this;
             cube.twist(twist);
             return cube;
@@ -155,12 +138,12 @@ namespace InsertionFinder {
             cube.twist(rhs);
             return cube;
         }
-        friend Cube operator*(std::uint_fast8_t twist, const Cube& rhs);
+        friend Cube operator*(Twist twist, const Cube& rhs) noexcept;
         Cube& operator*=(const Algorithm& algorithm) noexcept {
             this->twist(algorithm);
             return *this;
         }
-        Cube& operator*=(std::uint_fast8_t twist) {
+        Cube& operator*=(Twist twist) noexcept {
             this->twist(twist);
             return *this;
         }
@@ -179,7 +162,7 @@ namespace InsertionFinder {
         }
         int corner_cycles() const noexcept;
         int edge_cycles() const noexcept;
-        int placement() const noexcept {
+        Rotation placement() const noexcept {
             return this->_placement;
         }
     private:
@@ -190,20 +173,20 @@ namespace InsertionFinder {
         int edge_cycle_index() const noexcept;
         Cube best_placement() const noexcept;
     public:
-        static int next_corner_cycle_index(int index, std::uint_fast8_t twist) {
+        static int next_corner_cycle_index(int index, Twist twist) {
             return Cube::corner_cycle_transform[index][twist];
         }
-        static int next_corner_cycle_index(int index, std::initializer_list<std::uint_fast8_t> twists) {
-            for (std::uint_fast8_t twist: twists) {
+        static int next_corner_cycle_index(int index, std::initializer_list<Twist> twists) {
+            for (Twist twist: twists) {
                 index = Cube::corner_cycle_transform[index][twist];
             }
             return index;
         }
-        static int next_edge_cycle_index(int index, std::uint_fast8_t twist) {
+        static int next_edge_cycle_index(int index, Twist twist) {
             return Cube::edge_cycle_transform[index][twist];
         }
-        static int next_edge_cycle_index(int index, std::initializer_list<std::uint_fast8_t> twists) {
-            for (std::uint_fast8_t twist: twists) {
+        static int next_edge_cycle_index(int index, std::initializer_list<Twist> twists) {
+            for (Twist twist: twists) {
                 index = Cube::edge_cycle_transform[index][twist];
             }
             return index;

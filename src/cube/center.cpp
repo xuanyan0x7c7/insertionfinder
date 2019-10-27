@@ -19,54 +19,8 @@ namespace {
         {6, 0, 2, 4, 14, 8, 10, 12, 23, 17, 19, 21},
         {23, 7, 21, 15, 17, 3, 19, 11, 1, 5, 13, 9}
     };
-
-    constexpr int rotation_permutation[24][6] = {
-        {0, 1, 2, 3, 4, 5},
-        {0, 1, 4, 5, 3, 2},
-        {0, 1, 3, 2, 5, 4},
-        {0, 1, 5, 4, 2, 3},
-        {5, 4, 2, 3, 0, 1},
-        {2, 3, 4, 5, 0, 1},
-        {4, 5, 3, 2, 0, 1},
-        {3, 2, 5, 4, 0, 1},
-        {1, 0, 2, 3, 5, 4},
-        {1, 0, 4, 5, 2, 3},
-        {1, 0, 3, 2, 4, 5},
-        {1, 0, 5, 4, 3, 2},
-        {4, 5, 2, 3, 1, 0},
-        {3, 2, 4, 5, 1, 0},
-        {5, 4, 3, 2, 1, 0},
-        {2, 3, 5, 4, 1, 0},
-        {2, 3, 1, 0, 4, 5},
-        {4, 5, 1, 0, 3, 2},
-        {3, 2, 1, 0, 5, 4},
-        {5, 4, 1, 0, 2, 3},
-        {3, 2, 0, 1, 4, 5},
-        {5, 4, 0, 1, 3, 2},
-        {2, 3, 0, 1, 5, 4},
-        {4, 5, 0, 1, 2, 3}
-    };
-
-    std::array<std::array<int, 24>, 24> generate_center_transform_table() noexcept {
-        std::array<std::array<int, 24>, 24> center_transform;
-        for (size_t i = 0; i < 24; ++i) {
-            for (size_t j = 0; j < 24; ++j) {
-                int center0 = rotation_permutation[j][rotation_permutation[i][0]];
-                int center2 = rotation_permutation[j][rotation_permutation[i][2]];
-                for (int k = 0; k < 24; ++k) {
-                    if (center0 == rotation_permutation[k][0] && center2 == rotation_permutation[k][2]) {
-                        center_transform[i][j] = k;
-                        break;
-                    }
-                }
-            }
-        }
-        return center_transform;
-    }
 }
 
-
-const std::array<std::array<int, 24>, 24> Cube::center_transform = generate_center_transform_table();
 
 std::array<Cube, 24> Cube::generate_rotation_cube_table() noexcept {
     std::array<Cube, 24> rotation_cube;
@@ -105,7 +59,7 @@ const std::array<Cube, 24> Cube::rotation_cube = Cube::generate_rotation_cube_ta
 
 Cube Cube::best_placement() const noexcept {
     Cube original_cube = *this;
-    original_cube.rotate(Cube::inverse_center[this->_placement]);
+    original_cube.rotate(this->_placement.inverse());
     int best_cycles = original_cube.corner_cycles() + original_cube.edge_cycles() + original_cube.has_parity();
     if (best_cycles <= 4) {
         return original_cube;

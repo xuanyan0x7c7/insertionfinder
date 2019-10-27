@@ -9,6 +9,7 @@
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/twist.hpp>
 #include <insertionfinder/utils.hpp>
 
 namespace InsertionFinder {
@@ -31,7 +32,7 @@ namespace InsertionFinder {
             std::int8_t edge_cycles;
             std::int8_t placement;
             CycleStatus() = default;
-            CycleStatus(bool parity, int corner_cycles, int edge_cycles, int placement):
+            CycleStatus(bool parity, int corner_cycles, int edge_cycles, Rotation placement):
                 parity(parity), corner_cycles(corner_cycles), edge_cycles(edge_cycles), placement(placement) {}
         };
     public:
@@ -121,7 +122,7 @@ namespace InsertionFinder {
             this->verbose = verbose;
         }
     public:
-        int get_total_cycles(bool parity, int corner_cycles, int edge_cycles, int placement) {
+        int get_total_cycles(bool parity, int corner_cycles, int edge_cycles, Rotation placement) {
             int center_cycles = Cube::center_cycles[placement];
             return (center_cycles > 1 ? 0 : parity * this->parity_multiplier)
                 + (corner_cycles + edge_cycles + center_cycles) * 2;

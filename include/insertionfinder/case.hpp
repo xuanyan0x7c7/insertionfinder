@@ -9,6 +9,7 @@
 #include <range/v3/all.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/twist.hpp>
 #include <insertionfinder/utils.hpp>
 
 namespace InsertionFinder {
@@ -60,7 +61,7 @@ namespace InsertionFinder {
         int edge_cycles() const noexcept {
             return this->_edge_cycles;
         }
-        int rotation() const noexcept {
+        Rotation rotation() const noexcept {
             return this->_state.placement();
         }
         const std::vector<Algorithm>& algorithm_list() const noexcept {

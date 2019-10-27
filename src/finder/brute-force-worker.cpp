@@ -4,14 +4,16 @@
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/twist.hpp>
 #include <insertionfinder/finder/brute-force.hpp>
 #include "utils.hpp"
 using std::size_t;
 using std::uint32_t;
-using std::uint_fast8_t;
 using InsertionFinder::Algorithm;
-using InsertionFinder::Cube;
 using InsertionFinder::BruteForceFinder;
+using InsertionFinder::Cube;
+using InsertionFinder::Rotation;
+using InsertionFinder::Twist;
 namespace Details = InsertionFinder::Details;
 
 
@@ -30,7 +32,7 @@ void BruteForceFinder::Worker::search(CycleStatus cycle_status, size_t begin, si
     bool parity = cycle_status.parity;
     int corner_cycles = cycle_status.corner_cycles;
     int edge_cycles = cycle_status.edge_cycles;
-    int placement = cycle_status.placement;
+    Rotation placement = cycle_status.placement;
     if (!parity && corner_cycles == 1 && edge_cycles == 0 && placement == 0) {
         this->search_last_corner_cycle(begin, end);
         return;
@@ -65,21 +67,21 @@ void BruteForceFinder::Worker::search(CycleStatus cycle_status, size_t begin, si
             state.twist(this->finder.scramble_cube, twist_flag);
             state.twist(skeleton, 0, insert_place, twist_flag);
         } else {
-            uint_fast8_t twist = skeleton[insert_place - 1];
-            state.twist_before(Algorithm::inverse_twist[twist], twist_flag);
+            Twist twist = skeleton[insert_place - 1];
+            state.twist_before(twist.inverse(), twist_flag);
             state.twist(twist, twist_flag);
         }
         this->try_insertion(insert_place, state, cycle_status);
 
         if (skeleton.swappable(insert_place)) {
-            uint_fast8_t twist0 = skeleton[insert_place - 1];
-            uint_fast8_t twist1 = skeleton[insert_place];
+            Twist twist0 = skeleton[insert_place - 1];
+            Twist twist1 = skeleton[insert_place];
             Cube swapped_state;
             swapped_state.twist(twist0, twist_flag);
-            swapped_state.twist(Algorithm::inverse_twist[twist1], twist_flag);
+            swapped_state.twist(twist1.inverse(), twist_flag);
             swapped_state.twist(state, twist_flag);
             swapped_state.twist(twist1, twist_flag);
-            swapped_state.twist(Algorithm::inverse_twist[twist0], twist_flag);
+            swapped_state.twist(twist0.inverse(), twist_flag);
             this->try_insertion(insert_place, swapped_state, cycle_status, true);
         }
     }
@@ -106,7 +108,7 @@ void BruteForceFinder::Worker::search_last_corner_cycle(size_t begin, size_t end
         if (skeleton.swappable(insert_place)) {
             int swapped_index = Cube::next_corner_cycle_index(
                 index,
-                {skeleton[insert_place], Algorithm::inverse_twist[skeleton[insert_place - 1]]}
+                {skeleton[insert_place], skeleton[insert_place - 1].inverse()}
             );
             this->try_last_insertion(insert_place, corner_cycle_index[swapped_index], true);
         }
@@ -134,16 +136,16 @@ void BruteForceFinder::Worker::search_last_edge_cycle(size_t begin, size_t end) 
         if (skeleton.swappable(insert_place)) {
             int swapped_index = Cube::next_edge_cycle_index(
                 index,
-                {skeleton[insert_place], Algorithm::inverse_twist[skeleton[insert_place - 1]]}
+                {skeleton[insert_place], skeleton[insert_place - 1].inverse()}
             );
             this->try_last_insertion(insert_place, edge_cycle_index[swapped_index], true);
         }
     }
 }
 
-void BruteForceFinder::Worker::search_last_placement(int placement, size_t begin, size_t end) {
+void BruteForceFinder::Worker::search_last_placement(Rotation placement, size_t begin, size_t end) {
     const Algorithm skeleton = this->solving_step.back().skeleton;
-    int case_index = this->finder.center_index[Cube::inverse_center[placement]];
+    int case_index = this->finder.center_index[placement.inverse()];
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
         this->try_last_insertion(insert_place, case_index);
         if (skeleton.swappable(insert_place)) {
@@ -181,7 +183,7 @@ void BruteForceFinder::Worker::try_insertion(
     bool parity = cycle_status.parity;
     int corner_cycles = cycle_status.corner_cycles;
     int edge_cycles = cycle_status.edge_cycles;
-    int placement = cycle_status.placement;
+    Rotation placement = cycle_status.placement;
 
     for (const Case& _case: this->finder.cases) {
         if (Details::bitcount_less_than_2(mask & _case.mask())) {
@@ -206,7 +208,7 @@ void BruteForceFinder::Worker::try_insertion(
             ? (corner_solved ? _case.corner_cycles() : cube.corner_cycles())
             : corner_cycles;
         int new_edge_cycles = edge_changed ? (edge_solved ? _case.edge_cycles() : cube.edge_cycles()) : edge_cycles;
-        int new_placement = Cube::placement_twist(_case.rotation(), placement);
+        Rotation new_placement = _case.rotation() * placement;
         if (!new_parity && new_corner_cycles == 0 && new_edge_cycles == 0 && new_placement == 0) {
             this->solution_found(insert_place, _case);
         } else if (

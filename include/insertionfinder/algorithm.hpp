@@ -8,6 +8,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <insertionfinder/twist.hpp>
 
 namespace InsertionFinder {class Algorithm;};
 std::ostream& operator<<(std::ostream&, const InsertionFinder::Algorithm&);
@@ -38,18 +39,9 @@ namespace InsertionFinder {
 
     class Algorithm {
         friend struct std::hash<Algorithm>;
-    public:
-        static constexpr std::uint_fast8_t inverse_twist[24] = {
-            0, 3, 2, 1,
-            4, 7, 6, 5,
-            8, 11, 10, 9,
-            12, 15, 14, 13,
-            16, 19, 18, 17,
-            20, 23, 22, 21
-        };
     private:
-        std::vector<std::uint_fast8_t> twists;
-        int rotation;
+        std::vector<Twist> twists;
+        Rotation rotation;
     private:
         std::uint32_t begin_mask;
         std::uint32_t end_mask;
@@ -67,10 +59,10 @@ namespace InsertionFinder {
         std::size_t length() const noexcept {
             return this->twists.size();
         }
-        std::uint_fast8_t operator[](std::size_t index) const {
+        Twist operator[](std::size_t index) const {
             return this->twists[index];
         }
-        int cube_rotation() const noexcept {
+        Rotation cube_rotation() const noexcept {
             return this->rotation;
         }
     public:
@@ -140,7 +132,7 @@ namespace InsertionFinder {
             this->cancel_moves();
         }
         void normalize() noexcept;
-        void rotate(int rotation);
+        void rotate(Rotation rotation);
         void inverse() noexcept;
         static Algorithm inverse(const Algorithm& algorithm);
         std::vector<Algorithm> generate_isomorphisms() const;

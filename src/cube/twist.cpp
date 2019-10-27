@@ -4,10 +4,11 @@
 #include <array>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/twist.hpp>
 using std::size_t;
-using std::uint_fast8_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::Cube;
+using InsertionFinder::Twist;
 namespace CubeTwist = InsertionFinder::CubeTwist;
 
 
@@ -68,7 +69,7 @@ namespace {
 };
 
 
-void Cube::twist(uint_fast8_t twist, std::byte flags) {
+void Cube::twist(Twist twist, std::byte flags) noexcept {
     if (static_cast<bool>(flags & CubeTwist::corners)) {
         const unsigned* table = corner_twist_table[twist];
         for (unsigned& item: this->corner) {
@@ -101,12 +102,12 @@ void Cube::twist(const Cube& cube, std::byte flags) noexcept {
         }
     }
     if (static_cast<bool>(flags & CubeTwist::centers)) {
-        this->_placement = Cube::center_transform[this->_placement][cube._placement];
+        this->_placement *= cube._placement;
     }
 }
 
 
-void Cube::twist_before(uint_fast8_t twist, std::byte flags) {
+void Cube::twist_before(Twist twist, std::byte flags) noexcept {
     if (static_cast<bool>(flags & CubeTwist::corners)) {
         const unsigned* table = corner_twist_table[twist];
         unsigned corner[8];
@@ -147,7 +148,7 @@ void Cube::twist_before(const Cube& cube, std::byte flags) noexcept {
         std::memcpy(this->edge, edge, 12 * sizeof(unsigned));
     }
     if (static_cast<bool>(flags & CubeTwist::centers)) {
-        this->_placement = Cube::center_transform[cube._placement][this->_placement];
+        this->_placement = cube._placement * this->_placement;
     }
 }
 
@@ -183,7 +184,7 @@ Cube Cube::twist(const Cube& lhs, const Cube& rhs, std::byte lhs_flags, std::byt
             result.edge[i] = i << 1;
         }
     }
-    result._placement = Cube::center_transform[lhs._placement][rhs._placement];
+    result._placement = lhs._placement * rhs._placement;
     return result;
 }
 
@@ -198,12 +199,12 @@ Cube Cube::operator*(const Cube& rhs) const noexcept {
         unsigned item = this->edge[i];
         result.edge[i] = rhs.edge[item >> 1] ^ (item & 1);
     }
-    result._placement = Cube::center_transform[this->_placement][rhs._placement];
+    result._placement = this->_placement * rhs._placement;
     return result;
 }
 
 namespace InsertionFinder {
-    Cube operator*(uint_fast8_t twist, const Cube& rhs) {
+    Cube operator*(Twist twist, const Cube& rhs) noexcept {
         const unsigned* corner_table = corner_twist_table[twist];
         const unsigned* edge_table = edge_twist_table[twist];
         Cube result(Cube::raw_construct);

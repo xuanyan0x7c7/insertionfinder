@@ -54,7 +54,7 @@ void Cube::inverse() noexcept {
         edge[item >> 1] = i << 1 | (item & 1);
     }
     std::memcpy(this->edge, edge, 12 * sizeof(unsigned));
-    this->_placement = Cube::inverse_center[this->_placement];
+    this->_placement = this->_placement.inverse();
 }
 
 Cube Cube::inverse(const Cube& cube) noexcept {
@@ -67,7 +67,7 @@ Cube Cube::inverse(const Cube& cube) noexcept {
         unsigned item = cube.edge[i];
         result.edge[item >> 1] = i << 1 | (item & 1);
     }
-    result._placement = Cube::inverse_center[cube._placement];
+    result._placement = cube._placement.inverse();
     return result;
 }
 

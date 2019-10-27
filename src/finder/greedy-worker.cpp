@@ -6,14 +6,16 @@
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/twist.hpp>
 #include <insertionfinder/finder/greedy.hpp>
 #include "utils.hpp"
 using std::size_t;
 using std::uint32_t;
-using std::uint_fast8_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::Cube;
 using InsertionFinder::GreedyFinder;
+using InsertionFinder::Rotation;
+using InsertionFinder::Twist;
 namespace Details = InsertionFinder::Details;
 
 
@@ -21,7 +23,7 @@ void GreedyFinder::Worker::search() {
     bool parity = this->cycle_status.parity;
     int corner_cycles = this->cycle_status.corner_cycles;
     int edge_cycles = this->cycle_status.edge_cycles;
-    int placement = this->cycle_status.placement;
+    Rotation placement = this->cycle_status.placement;
     if (!this->finder.options.enable_replacement) {
         if (!parity && corner_cycles == 1 && edge_cycles == 0 && placement == 0) {
             this->search_last_corner_cycle();
@@ -56,21 +58,21 @@ void GreedyFinder::Worker::search() {
             state.rotate(placement);
             state.twist(this->finder.scramble_cube, twist_flag);
         } else {
-            uint_fast8_t twist = this->skeleton[insert_place - 1];
-            state.twist_before(Algorithm::inverse_twist[twist], twist_flag);
+            Twist twist = this->skeleton[insert_place - 1];
+            state.twist_before(twist.inverse(), twist_flag);
             state.twist(twist, twist_flag);
         }
         this->try_insertion(insert_place, state);
 
         if (this->skeleton.swappable(insert_place)) {
-            uint_fast8_t twist0 = this->skeleton[insert_place - 1];
-            uint_fast8_t twist1 = this->skeleton[insert_place];
+            Twist twist0 = this->skeleton[insert_place - 1];
+            Twist twist1 = this->skeleton[insert_place];
             Cube swapped_state;
             swapped_state.twist(twist0, twist_flag);
-            swapped_state.twist(Algorithm::inverse_twist[twist1], twist_flag);
+            swapped_state.twist(twist1.inverse(), twist_flag);
             swapped_state.twist(state, twist_flag);
             swapped_state.twist(twist1, twist_flag);
-            swapped_state.twist(Algorithm::inverse_twist[twist0], twist_flag);
+            swapped_state.twist(twist0.inverse(), twist_flag);
             this->try_insertion(insert_place, swapped_state, true);
         }
     }
@@ -95,7 +97,7 @@ void GreedyFinder::Worker::search_last_corner_cycle() {
         if (this->skeleton.swappable(insert_place)) {
             int swapped_index = Cube::next_corner_cycle_index(
                 index,
-                {this->skeleton[insert_place], Algorithm::inverse_twist[this->skeleton[insert_place - 1]]}
+                {this->skeleton[insert_place], this->skeleton[insert_place - 1].inverse()}
             );
             this->try_last_insertion(insert_place, corner_cycle_index[swapped_index], true);
         }
@@ -121,15 +123,15 @@ void GreedyFinder::Worker::search_last_edge_cycle() {
         if (this->skeleton.swappable(insert_place)) {
             int swapped_index = Cube::next_edge_cycle_index(
                 index,
-                {this->skeleton[insert_place], Algorithm::inverse_twist[this->skeleton[insert_place - 1]]}
+                {this->skeleton[insert_place], this->skeleton[insert_place - 1].inverse()}
             );
             this->try_last_insertion(insert_place, edge_cycle_index[swapped_index], true);
         }
     }
 }
 
-void GreedyFinder::Worker::search_last_placement(int placement) {
-    int case_index = this->finder.center_index[Cube::inverse_center[placement]];
+void GreedyFinder::Worker::search_last_placement(Rotation placement) {
+    int case_index = this->finder.center_index[placement.inverse()];
     for (size_t insert_place = 0; insert_place <= this->skeleton.length(); ++insert_place) {
         this->try_last_insertion(insert_place, case_index);
         if (this->skeleton.swappable(insert_place)) {
@@ -162,7 +164,7 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
     bool parity = cycle_status.parity;
     int corner_cycles = cycle_status.corner_cycles;
     int edge_cycles = cycle_status.edge_cycles;
-    int placement = cycle_status.placement;
+    Rotation placement = cycle_status.placement;
     int total_cycles = this->finder.get_total_cycles(parity, corner_cycles, edge_cycles, placement);
 
     for (const Case& _case: this->finder.cases) {
@@ -188,7 +190,7 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
             ? (corner_solved ? _case.corner_cycles() : cube.corner_cycles())
             : corner_cycles;
         int new_edge_cycles = edge_changed ? (edge_solved ? _case.edge_cycles() : cube.edge_cycles()) : edge_cycles;
-        int new_placement = Cube::placement_twist(_case.rotation(), placement);
+        Rotation new_placement = _case.rotation() * placement;
         int new_total_cycles = this->finder.get_total_cycles(
             new_parity, new_corner_cycles, new_edge_cycles, new_placement
         );

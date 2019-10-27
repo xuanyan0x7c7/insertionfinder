@@ -8,6 +8,7 @@ using std::size_t;
 using InsertionFinder::Case;
 using InsertionFinder::Cube;
 using InsertionFinder::Finder;
+using InsertionFinder::Rotation;
 namespace FinderStatus = InsertionFinder::FinderStatus;
 
 
@@ -25,7 +26,7 @@ void Finder::init() {
         bool parity = _case.has_parity();
         int corner_cycles = _case.corner_cycles();
         int edge_cycles = _case.edge_cycles();
-        int rotation = _case.rotation();
+        Rotation rotation = _case.rotation();
         bool corner_changed = _case.mask() & 0xff;
         bool edge_changed = _case.mask() & 0xfff00;
         if (parity || Cube::center_cycles[rotation] > 1) {
