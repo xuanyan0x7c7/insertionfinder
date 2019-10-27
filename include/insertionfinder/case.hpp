@@ -3,14 +3,12 @@
 #include <exception>
 #include <istream>
 #include <ostream>
-#include <type_traits>
 #include <utility>
 #include <vector>
 #include <range/v3/all.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/twist.hpp>
-#include <insertionfinder/utils.hpp>
 
 namespace InsertionFinder {
     struct CaseStreamError: std::exception {
@@ -72,7 +70,6 @@ namespace InsertionFinder {
             return ranges::find(this->list, algorithm) != this->list.cend();
         }
         template<class T> void add_algorithm(T&& algorithm) {
-            static_assert(std::is_same_v<InsertionFinder::Details::remove_cvref_t<T>, Algorithm>);
             if (!this->contains_algorithm(algorithm)) {
                 this->list.emplace_back(std::forward<T>(algorithm));
             }

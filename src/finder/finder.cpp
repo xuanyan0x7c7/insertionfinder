@@ -63,7 +63,7 @@ void Finder::search(const SearchParams& params) {
     auto begin = std::chrono::high_resolution_clock::now();
     this->search_core(params);
     if (this->result.status == FinderStatus::success) {
-        for (auto& solution: this->solutions) {
+        for (Solution& solution: this->solutions) {
             size_t cancellation = solution.insertions.front().skeleton.length();
             for (size_t i = 0; i < solution.insertions.size() - 1; ++i) {
                 cancellation += solution.insertions[i].insertion->length();
@@ -71,7 +71,10 @@ void Finder::search(const SearchParams& params) {
             cancellation -= solution.insertions.back().skeleton.length();
             solution.cancellation = cancellation;
         }
-        ranges::sort(this->solutions, [](const auto& x, const auto& y) {return x.cancellation < y.cancellation;});
+        ranges::sort(
+            this->solutions,
+            [](const Solution& x, const Solution& y) {return x.cancellation < y.cancellation;}
+        );
     }
     auto end = std::chrono::high_resolution_clock::now();
     this->result.duration = (end - begin).count();

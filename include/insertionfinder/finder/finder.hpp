@@ -111,7 +111,7 @@ namespace InsertionFinder {
         std::size_t get_fewest_moves() const noexcept {
             return this->fewest_moves;
         }
-        const std::vector<Solution> get_solutions() const noexcept {
+        const std::vector<Solution>& get_solutions() const noexcept {
             return this->solutions;
         }
         Result get_result() const noexcept {
