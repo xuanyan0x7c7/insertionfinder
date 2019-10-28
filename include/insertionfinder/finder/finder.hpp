@@ -83,8 +83,8 @@ namespace InsertionFinder {
         bool change_corner = false;
         bool change_edge = false;
         bool change_center = false;
-        Cube scramble_cube;
-        Cube inverse_scramble_cube;
+        const Cube scramble_cube;
+        const Cube inverse_scramble_cube;
     public:
         Finder(const Algorithm& scramble, const std::vector<Algorithm>& skeletons, const std::vector<Case>& cases):
             scramble(scramble), skeletons(skeletons), cases(cases),
