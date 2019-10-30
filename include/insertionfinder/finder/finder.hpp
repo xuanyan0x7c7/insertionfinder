@@ -10,7 +10,6 @@
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/twist.hpp>
-#include <insertionfinder/utils.hpp>
 
 namespace InsertionFinder {
     namespace FinderStatus {
