@@ -99,7 +99,7 @@ void Algorithm::print(std::ostream& out, size_t begin, size_t end) const {
         return;
     }
     out << this->twists[begin];
-    for (Twist twist: ranges::views::slice(this->twists, begin + 1, ranges::end)) {
+    for (Twist twist: ranges::views::slice(this->twists, begin + 1, end)) {
         out << ' ' << twist;
     }
 }
