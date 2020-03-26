@@ -135,7 +135,7 @@ namespace InsertionFinder {
         void rotate(Rotation rotation);
         void inverse() noexcept;
         static Algorithm inverse(const Algorithm& algorithm);
-        std::vector<Algorithm> generate_isomorphisms() const;
+        std::vector<Algorithm> generate_symmetrics() const;
     };
 
     inline Algorithm operator""_alg(const char* string) {

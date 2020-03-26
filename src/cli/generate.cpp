@@ -53,7 +53,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
             if (auto node = map.find(cube); node != map.end() && node->second.contains_algorithm(algorithm)) {
                 continue;
             }
-            for (Algorithm& alg: algorithm.generate_isomorphisms()) {
+            for (Algorithm& alg: algorithm.generate_symmetrics()) {
                 Cube cube = Cube() * alg;
                 if (auto node = map.find(cube); node != map.end()) {
                     node->second.add_algorithm(std::move(alg));

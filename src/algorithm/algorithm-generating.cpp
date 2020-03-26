@@ -11,7 +11,7 @@ using InsertionFinder::Twist;
 namespace Details = InsertionFinder::Details;
 
 
-std::vector<Algorithm> Algorithm::generate_isomorphisms() const {
+std::vector<Algorithm> Algorithm::generate_symmetrics() const {
     std::vector<Algorithm> result(96);
     size_t length = this->twists.size();
     for (size_t i = 0; i < 96; ++i) {
