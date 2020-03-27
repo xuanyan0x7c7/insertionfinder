@@ -1,8 +1,4 @@
 U R2 U'
-U2 R2 U2
 U R U2 R' U'
-U R' U2 R U'
 U R F2 R' U'
 U R2 F2 R2 U'
-U R' F2 R U'
-U2 R F2 R' U2

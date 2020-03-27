@@ -1,6 +1,3 @@
 U D R L F B U D R L F B
 U D R' L' F B U' D' R L F' B'
 U D' R U D' F U D' L U D' B
-U R U D' F U D' L U D' B D'
-U R L F B U D R L F B D
-U R' L' F B U' D' R L F' B' D
