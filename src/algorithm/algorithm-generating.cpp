@@ -6,6 +6,7 @@
 #include <insertionfinder/twist.hpp>
 #include "utils.hpp"
 using std::size_t;
+using std::uint_fast8_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::Rotation;
 using InsertionFinder::Twist;
@@ -13,10 +14,8 @@ namespace Details = InsertionFinder::Details;
 
 
 namespace {
-    void swap_twists(std::vector<Twist>& twists, size_t first, size_t last, Rotation rotation) {
-        Twist temp = twists[first];
-        twists[first] = twists[last] * rotation;
-        twists[last] = temp * rotation.inverse();
+    inline std::pair<size_t, uint_fast8_t> extract_twist(Twist twist) {
+        return {twist >> 2 & 1, twist & 3};
     }
 }
 
@@ -53,10 +52,10 @@ std::vector<Algorithm> Algorithm::generate_rotation_conjugates() const {
     result.front().cancel_moves();
     result.front().normalize();
     size_t length = result.front().twists.size();
-    result.reserve(length << 1);
+    result.reserve(length << 2);
     const Algorithm& base = result.front();
     bool has_next = true;
-    for (size_t offset = 1; offset < length && has_next; ++offset) {
+    for (size_t offset = 1; offset < length; ++offset) {
         Algorithm algorithm;
         algorithm.rotation = base.rotation;
         algorithm.twists.reserve(length);
@@ -91,32 +90,56 @@ std::vector<Algorithm> Algorithm::generate_rotation_conjugates() const {
         }
     }
     if (length >= 3 && base.twists.front() >> 3 == (base.twists.back() * base.rotation) >> 3) {
-        bool is_parallel[2] = {
-            base.twists[0] >> 3 == base.twists[1] >> 3,
-            base.twists[length - 2] >> 3 == base.twists[length - 1] >> 3
-        };
-        std::vector<Algorithm> algorithms(is_parallel[0] + is_parallel[1] + 1, base);
-        if (is_parallel[0]) {
-            if (is_parallel[1]) {
-                swap_twists(algorithms[0].twists, 0, length - 2, base.rotation);
-                swap_twists(algorithms[1].twists, 1, length - 1, base.rotation);
-                swap_twists(algorithms[2].twists, 0, length - 2, base.rotation);
-                swap_twists(algorithms[2].twists, 1, length - 1, base.rotation);
-            } else {
-                swap_twists(algorithms[0].twists, 0, length - 1, base.rotation);
-                swap_twists(algorithms[1].twists, 1, length - 1, base.rotation);
-            }
-        } else if (is_parallel[1]) {
-            swap_twists(algorithms[0].twists, 0, length - 1, base.rotation);
-            swap_twists(algorithms[1].twists, 0, length - 2, base.rotation);
+        if (has_next) {
+            Algorithm algorithm = base;
+            algorithm.twists.front() = base.twists.back() * base.rotation;
+            algorithm.twists.back() = base.twists.front() * base.rotation.inverse();
+            result.push_back(std::move(algorithm));
         } else {
-            swap_twists(algorithms[0].twists, 0, length - 1, base.rotation);
-        }
-        for (Algorithm& algorithm: algorithms) {
-            algorithm.cancel_moves();
-            if (algorithm.twists.size() == length) {
-                algorithm.normalize();
-                result.push_back(std::move(algorithm));
+            uint_fast8_t twist_base = (base.twists.front() >> 3) << 3;
+            uint_fast8_t sum[2] = {0, 0};
+            size_t interval[2] = {1, length - 1};
+            auto [index1, offset1] = extract_twist(base.twists[0]);
+            sum[index1] = (sum[index1] + offset1) & 3;
+            if (base.twists[0] >> 3 == base.twists[1] >> 3) {
+                interval[0] = 2;
+                auto [index, offset] = extract_twist(base.twists[1]);
+                sum[index] = (sum[index] + offset) & 3;
+            }
+            auto [index2, offset2] = extract_twist(base.twists[length - 1] * base.rotation);
+            sum[index2] = (sum[index2] + offset2) & 3;
+            if (base.twists[length - 2] >> 3 == base.twists[length - 1] >> 3) {
+                interval[1] = length - 2;
+                auto [index, offset] = extract_twist(base.twists[length - 2] * base.rotation);
+                sum[index] = (sum[index] + offset) & 3;
+            }
+            size_t holes = length + interval[0] - interval[1];
+            for (uint_fast8_t i = 0; i < 4; ++i) {
+                for (uint_fast8_t j = 0; j < 4; ++j) {
+                    if (holes == (i != 0) + (i != sum[0]) + (j != 0) + (j != sum[1])) {
+                        Algorithm algorithm;
+                        algorithm.rotation = base.rotation;
+                        algorithm.twists.reserve(length);
+                        if (i != 0) {
+                            algorithm.twists.push_back(twist_base | i);
+                        }
+                        if (j != 0) {
+                            algorithm.twists.push_back(twist_base | 4 | j);
+                        }
+                        algorithm.twists.insert(
+                            algorithm.twists.cend(),
+                            base.twists.cbegin() + interval[0],
+                            base.twists.cbegin() + interval[1]
+                        );
+                        if (i != sum[0]) {
+                            algorithm.twists.push_back(Twist(twist_base | (sum[0] - i & 3)) * base.rotation.inverse());
+                        }
+                        if (j != sum[1]) {
+                            algorithm.twists.push_back(Twist(twist_base | 4 | (sum[1] - j & 3)) * base.rotation.inverse());
+                        }
+                        result.push_back(std::move(algorithm));
+                    }
+                }
             }
         }
     }
