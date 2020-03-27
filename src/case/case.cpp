@@ -1,8 +1,9 @@
 #include <istream>
 #include <ostream>
 #include <insertionfinder/algorithm.hpp>
-#include <insertionfinder/cube.hpp>
 #include <insertionfinder/case.hpp>
+#include <insertionfinder/cube.hpp>
+#include "../utils/encoding.hpp"
 using std::uint8_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::AlgorithmStreamError;
@@ -10,6 +11,7 @@ using InsertionFinder::Case;
 using InsertionFinder::CaseStreamError;
 using InsertionFinder::Cube;
 using InsertionFinder::CubeStreamError;
+namespace Details = InsertionFinder::Details;
 
 
 Case::Case(const Cube& state):
@@ -21,8 +23,7 @@ Case::Case(const Cube& state):
 
 void Case::save_to(std::ostream& out) const {
     this->_state.save_to(out);
-    uint8_t size = this->list.size();
-    out.write(reinterpret_cast<char*>(&size), 1);
+    Details::write_varuint(out, this->list.size());
     for (const Algorithm& algorithm: this->list) {
         algorithm.save_to(out);
     }
@@ -38,9 +39,10 @@ void Case::read_from(std::istream& in) {
     this->_has_parity = this->_state.has_parity();
     this->_corner_cycles = this->_state.corner_cycles();
     this->_edge_cycles = this->_state.edge_cycles();
-    uint8_t size;
-    in.read(reinterpret_cast<char*>(&size), 1);
-    if (in.gcount() != 1) {
+    size_t size;
+    if (auto x = Details::read_varuint(in)) {
+        size = *x;
+    } else {
         throw CaseStreamError();
     }
     this->list.resize(size);

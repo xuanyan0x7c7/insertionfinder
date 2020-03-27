@@ -17,6 +17,7 @@
 #include <insertionfinder/finder/brute-force.hpp>
 #include <insertionfinder/finder/greedy.hpp>
 #include <insertionfinder/finder/finder.hpp>
+#include "../utils/encoding.hpp"
 #include "commands.hpp"
 using std::int64_t;
 using std::size_t;
@@ -26,8 +27,9 @@ using InsertionFinder::Algorithm;
 using InsertionFinder::Case;
 using InsertionFinder::Cube;
 using InsertionFinder::Finder;
-namespace FinderStatus = InsertionFinder::FinderStatus;
 namespace CLI = InsertionFinder::CLI;
+namespace Details = InsertionFinder::Details;
+namespace FinderStatus = InsertionFinder::FinderStatus;
 
 
 namespace {
@@ -254,7 +256,9 @@ void CLI::find_insertion(const po::variables_map& vm) {
             }
         }
         size_t size;
-        if (!fin.read(reinterpret_cast<char*>(&size), sizeof(size_t))) {
+        if (auto x = Details::read_varuint(fin)) {
+            size = *x;
+        } else {
             std::cerr << "Invalid algorithm file " << name << std::endl;
             continue;
         }

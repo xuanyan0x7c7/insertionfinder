@@ -1,5 +1,5 @@
 AM_CPPFLAGS = -I$(top_srcdir)/include
-SUBDIRS = algorithm case cli cube finder twist
+SUBDIRS = algorithm case cli cube finder twist utils
 bin_PROGRAMS = insertionfinder
 insertionfinder_SOURCES = main.cpp
 insertionfinder_LDADD = \
@@ -9,6 +9,7 @@ insertionfinder_LDADD = \
     cube/libcube.la \
     algorithm/libalgorithm.la \
     twist/libtwist.la \
+    utils/libutils.la \
     ${PTHREAD_CFLAGS} \
     ${BOOST_SYSTEM_LIBS} \
     ${BOOST_FILESYSTEM_LIBS} \
@@ -21,7 +22,8 @@ libinsertionfinder_la_LIBADD = \
     case/libcase.la \
     cube/libcube.la \
     algorithm/libalgorithm.la \
-    twist/libtwist.la
+    twist/libtwist.la \
+    utils/libutils.la
 
 install-exec-hook:
 	cd $(DESTDIR)$(bindir) \

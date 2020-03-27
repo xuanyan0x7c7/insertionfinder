@@ -10,6 +10,7 @@
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
+#include "../utils/encoding.hpp"
 #include "commands.hpp"
 using std::size_t;
 namespace po = boost::program_options;
@@ -18,6 +19,7 @@ using InsertionFinder::AlgorithmError;
 using InsertionFinder::Case;
 using InsertionFinder::Cube;
 namespace CLI = InsertionFinder::CLI;
+namespace Details = InsertionFinder::Details;
 
 
 void CLI::generate_algorithms(const po::variables_map& vm) {
@@ -84,7 +86,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
             throw CLI::CommandExecutionError("Failed to open output file " + name);
         }
     }
-    out->write(reinterpret_cast<const char*>(&size), sizeof(size_t));
+    Details::write_varuint(*out, size);
     for (Case& _case: cases) {
         _case.sort_algorithms();
         _case.save_to(*out);

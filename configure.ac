@@ -36,6 +36,7 @@ AC_CONFIG_FILES([
     src/cube/Makefile
     src/finder/Makefile
     src/twist/Makefile
+    src/utils/Makefile
     test/Makefile
     data/algorithms/Makefile
     data/algorithms/extras/Makefile
