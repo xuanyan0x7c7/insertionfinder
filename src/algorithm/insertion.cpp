@@ -80,9 +80,13 @@ std::pair<Algorithm, size_t> Algorithm::insert(const Algorithm& insertion, size_
     Algorithm result;
     result.twists.reserve(this->twists.size() + insertion.twists.size());
     result.twists.assign(this->twists.cbegin(), this->twists.cbegin() + insert_place);
-    result.twists.insert(result.twists.end(), insertion.twists.cbegin(), insertion.twists.cend());
-    for (Twist twist: ranges::views::slice(this->twists, insert_place, ranges::end)) {
-        result.twists.push_back(twist * insertion.rotation.inverse());
+    result.twists.insert(result.twists.cend(), insertion.twists.cbegin(), insertion.twists.cend());
+    if (insertion.rotation == 0) {
+        result.twists.insert(result.twists.cend(), this->twists.cbegin() + insert_place, this->twists.cend());
+    } else {
+        for (Twist twist: ranges::views::slice(this->twists, insert_place, ranges::end)) {
+            result.twists.push_back(twist * insertion.rotation.inverse());
+        }
     }
     size_t place = result.cancel_moves();
     return {result, std::min(place, insert_place + 1)};
