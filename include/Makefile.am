@@ -4,6 +4,7 @@ nobase_include_HEADERS = \
     insertionfinder/case.hpp \
     insertionfinder/config.h \
     insertionfinder/cube.hpp \
+    insertionfinder/twist.hpp \
     insertionfinder/finder/brute-force.hpp \
     insertionfinder/finder/finder.hpp \
     insertionfinder/finder/greedy.hpp
