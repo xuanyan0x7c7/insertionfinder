@@ -123,3 +123,14 @@ std::vector<Algorithm> Algorithm::generate_rotation_conjugates() const {
     result |= ranges::actions::sort | ranges::actions::unique;
     return result;
 }
+
+std::vector<Algorithm> Algorithm::generate_similars() const {
+    std::vector<Algorithm> result;
+    for (const Algorithm& algorithm: this->generate_rotation_conjugates()) {
+        for (Algorithm& alg: algorithm.generate_symmetrics()) {
+            result.push_back(std::move(alg));
+        }
+    }
+    result |= ranges::actions::sort | ranges::actions::unique;
+    return result;
+}
