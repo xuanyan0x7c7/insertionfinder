@@ -135,7 +135,7 @@ namespace InsertionFinder {
             return cube;
         }
         friend Cube operator*(Twist twist, const Cube& rhs) noexcept;
-        template<class T> Cube& operator*=(const T& rhs) noexcept(noexcept(this->twist(rhs))) {
+        template<class T> Cube& operator*=(const T& rhs) noexcept(noexcept(twist(rhs))) {
             this->twist(rhs);
             return *this;
         }
