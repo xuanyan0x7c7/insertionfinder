@@ -49,6 +49,9 @@ void GreedyFinder::search_core(const SearchParams& params) {
             continue;
         }
         int cycles = this->get_total_cycles(parity, corner_cycles, edge_cycles, placement);
+        if (cycles == 0) {
+            return;
+        }
         if (cycles >= this->partial_states.size()) {
             int previous_cycles = this->partial_states.size() - 1;
             this->partial_solution_list.resize(cycles + 1);

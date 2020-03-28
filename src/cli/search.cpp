@@ -100,7 +100,10 @@ namespace {
         ) override {
             if (result.status == FinderStatus::success) {
                 const auto& solutions = finder.get_solutions();
-                if (solutions.empty()) {
+                if (
+                    solutions.empty() &&
+                    (status.parity || status.corner_cycles || status.edge_cycles || status.center_cycles)
+                ) {
                     std::cout << "No solution found." << std::endl;
                 }
                 for (size_t index = 0; index < solutions.size(); ++index) {
