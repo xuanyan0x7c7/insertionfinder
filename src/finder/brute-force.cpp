@@ -10,12 +10,14 @@ using std::size_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::BruteForceFinder;
 using InsertionFinder::Cube;
+using InsertionFinder::Insertion;
 using InsertionFinder::Rotation;
+using InsertionFinder::Solution;
 namespace FinderStatus = InsertionFinder::FinderStatus;
 
 
 void BruteForceFinder::search_core(const SearchParams& params) {
-    for (const Algorithm& skeleton: this->skeletons) {
+    for (const auto& [skeleton, _]: this->skeletons) {
         Cube original_cube = this->scramble_cube * skeleton;
         Cube cube = original_cube.best_placement();
         bool parity = cube.has_parity();

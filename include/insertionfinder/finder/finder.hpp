@@ -4,12 +4,15 @@
 #include <array>
 #include <atomic>
 #include <limits>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/insertion.hpp>
 #include <insertionfinder/twist.hpp>
+#include <insertionfinder/utils.hpp>
 
 namespace InsertionFinder {
     namespace FinderStatus {
@@ -35,27 +38,6 @@ namespace InsertionFinder {
                 parity(parity), corner_cycles(corner_cycles), edge_cycles(edge_cycles), placement(placement) {}
         };
     public:
-        struct Insertion {
-            Algorithm skeleton;
-            std::size_t insert_place;
-            const Algorithm* insertion;
-            explicit Insertion(
-                const Algorithm& skeleton,
-                std::size_t insert_place = 0,
-                const Algorithm* insertion = nullptr
-            ): skeleton(skeleton), insert_place(insert_place), insertion(insertion) {}
-            explicit Insertion(
-                Algorithm&& skeleton,
-                std::size_t insert_place = 0,
-                const Algorithm* insertion = nullptr
-            ): skeleton(std::move(skeleton)), insert_place(insert_place), insertion(insertion) {}
-        };
-        struct Solution {
-            std::vector<Insertion> insertions;
-            std::size_t cancellation = 0;
-            Solution(const std::vector<Insertion>& insertions): insertions(insertions) {}
-            Solution(std::vector<Insertion>&& insertions): insertions(std::move(insertions)) {}
-        };
         struct Result {
             std::byte status = FinderStatus::full;
             std::int64_t duration;
@@ -67,7 +49,7 @@ namespace InsertionFinder {
         };
     protected:
         const Algorithm scramble;
-        const std::vector<Algorithm> skeletons;
+        std::unordered_map<Algorithm, std::size_t> skeletons;
         const std::vector<Case>& cases;
         std::atomic<std::size_t> fewest_moves = std::numeric_limits<std::size_t>::max();
         std::vector<Solution> solutions;
@@ -85,21 +67,10 @@ namespace InsertionFinder {
         const Cube scramble_cube;
         const Cube inverse_scramble_cube;
     public:
-        Finder(const Algorithm& scramble, const std::vector<Algorithm>& skeletons, const std::vector<Case>& cases):
-            scramble(scramble), skeletons(skeletons), cases(cases),
-            scramble_cube(Cube() * scramble), inverse_scramble_cube(Cube::inverse(this->scramble_cube)) {
-            this->init();
-        }
-        Finder(const Algorithm& scramble, std::vector<Algorithm>&& skeletons, const std::vector<Case>& cases):
-            scramble(scramble), skeletons(std::move(skeletons)), cases(cases),
-            scramble_cube(Cube() * scramble), inverse_scramble_cube(Cube::inverse(this->scramble_cube)) {
-            this->init();
-        }
-        Finder(const Algorithm& scramble, const Algorithm& skeleton, const std::vector<Case>& cases):
-            scramble(scramble), skeletons({skeleton}), cases(cases),
-            scramble_cube(Cube() * scramble), inverse_scramble_cube(Cube::inverse(this->scramble_cube)) {
-            this->init();
-        }
+        template<class Scramble, class Skeleton, std::enable_if_t<std::is_convertible_v<Skeleton, Algorithm>, int> = 0>
+        Finder(Scramble&& scramble, Skeleton&& skeleton, const std::vector<Case>& cases);
+        template<class Scramble, class Range, std::enable_if_t<Details::is_iterable_v<Range>, int> = 0>
+        Finder(Scramble&& scramble, Range&& range, const std::vector<Case>& cases);
         virtual ~Finder() = default;
     public:
         void search(const SearchParams& params);
@@ -127,4 +98,31 @@ namespace InsertionFinder {
                 + (corner_cycles + edge_cycles + center_cycles) * 2;
         }
     };
+
+    template<class Scramble, class Skeleton, std::enable_if_t<std::is_convertible_v<Skeleton, Algorithm>, int>>
+    Finder::Finder(Scramble&& scramble, Skeleton&& skeleton, const std::vector<Case>& cases):
+        scramble(std::forward<Scramble>(scramble)), cases(cases),
+        scramble_cube(Cube() * scramble), inverse_scramble_cube(Cube::inverse(this->scramble_cube)) {
+        Algorithm algorithm(std::forward<Skeleton>(skeleton));
+        algorithm.simplify();
+        algorithm.normalize();
+        this->skeletons.emplace(std::move(algorithm), 0);
+    }
+
+    template<class Scramble, class Range, std::enable_if_t<Details::is_iterable_v<Range>, int>>
+    Finder::Finder(Scramble&& scramble, Range&& range, const std::vector<Case>& cases):
+        scramble(std::forward<Scramble>(scramble)), cases(cases),
+        scramble_cube(Cube() * scramble), inverse_scramble_cube(Cube::inverse(this->scramble_cube)) {
+        for (auto&& x: std::forward<Range>(range)) {
+            auto [skeleton, cancellation] = Details::Mapping<Algorithm, std::size_t>(std::forward<decltype(x)>(x));
+            skeleton.simplify();
+            skeleton.normalize();
+            if (auto [node, inserted] = this->skeletons.try_emplace(std::move(skeleton), cancellation); !inserted) {
+                if (node->second > cancellation) {
+                    node->second = cancellation;
+                }
+            }
+        }
+        this->init();
+    }
 };

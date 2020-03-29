@@ -7,6 +7,7 @@
 #include <range/v3/all.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/insertion.hpp>
 #include <insertionfinder/finder/finder.hpp>
 #include <insertionfinder/finder/greedy.hpp>
 #include "utils.hpp"
@@ -14,6 +15,7 @@ using std::size_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::Cube;
 using InsertionFinder::GreedyFinder;
+using InsertionFinder::Insertion;
 using InsertionFinder::Rotation;
 namespace Details = InsertionFinder::Details;
 
@@ -21,7 +23,7 @@ namespace Details = InsertionFinder::Details;
 void GreedyFinder::search_core(const SearchParams& params) {
     size_t max_threshold = std::max<size_t>(this->options.greedy_threshold, this->options.replacement_threshold);
     this->partial_states[0].fewest_moves = std::numeric_limits<size_t>::max() - max_threshold;
-    for (const Algorithm& skeleton: this->skeletons) {
+    for (const auto& [skeleton, _]: this->skeletons) {
         Cube original_cube = this->scramble_cube * skeleton;
         Cube cube = original_cube.best_placement();
         bool parity = cube.has_parity();
@@ -112,7 +114,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
     }
     for (const Algorithm* current_skeleton: skeletons) {
         std::vector<Insertion> result({Insertion(*current_skeleton)});
-        while (ranges::all_of(this->skeletons, [&](const Algorithm& x) {return x != *current_skeleton;})) {
+        while (ranges::all_of(this->skeletons, [&](const auto& x) {return x.first != *current_skeleton;})) {
             const SolvingStep& step = this->partial_solution_map.at(*current_skeleton);
             current_skeleton = step.skeleton;
             Algorithm previous_skeleton = *step.skeleton;

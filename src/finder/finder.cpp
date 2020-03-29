@@ -3,12 +3,15 @@
 #include <range/v3/all.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/insertion.hpp>
 #include <insertionfinder/finder/finder.hpp>
 using std::size_t;
+using InsertionFinder::Algorithm;
 using InsertionFinder::Case;
 using InsertionFinder::Cube;
 using InsertionFinder::Finder;
 using InsertionFinder::Rotation;
+using InsertionFinder::Solution;
 namespace FinderStatus = InsertionFinder::FinderStatus;
 
 
@@ -64,12 +67,14 @@ void Finder::search(const SearchParams& params) {
     this->search_core(params);
     if (this->result.status == FinderStatus::success) {
         for (Solution& solution: this->solutions) {
+            Algorithm skeleton = solution.insertions.front().skeleton;
+            skeleton.normalize();
             size_t cancellation = solution.insertions.front().skeleton.length();
             for (size_t i = 0; i < solution.insertions.size() - 1; ++i) {
                 cancellation += solution.insertions[i].insertion->length();
             }
             cancellation -= solution.insertions.back().skeleton.length();
-            solution.cancellation = cancellation;
+            solution.cancellation = this->skeletons.at(skeleton) + cancellation;
         }
         ranges::sort(
             this->solutions,

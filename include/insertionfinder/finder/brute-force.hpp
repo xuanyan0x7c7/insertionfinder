@@ -4,6 +4,7 @@
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/insertion.hpp>
 #include <insertionfinder/twist.hpp>
 #include <insertionfinder/finder/finder.hpp>
 

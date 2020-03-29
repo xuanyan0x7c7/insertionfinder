@@ -4,6 +4,7 @@
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/insertion.hpp>
 #include <insertionfinder/twist.hpp>
 #include <insertionfinder/finder/brute-force.hpp>
 #include "utils.hpp"
@@ -12,6 +13,7 @@ using std::uint32_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::BruteForceFinder;
 using InsertionFinder::Cube;
+using InsertionFinder::Insertion;
 using InsertionFinder::Rotation;
 using InsertionFinder::Twist;
 namespace Details = InsertionFinder::Details;

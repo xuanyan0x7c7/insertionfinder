@@ -27,6 +27,8 @@ using InsertionFinder::Algorithm;
 using InsertionFinder::Case;
 using InsertionFinder::Cube;
 using InsertionFinder::Finder;
+using InsertionFinder::Insertion;
+using InsertionFinder::Solution;
 namespace CLI = InsertionFinder::CLI;
 namespace Details = InsertionFinder::Details;
 namespace FinderStatus = InsertionFinder::FinderStatus;
@@ -107,10 +109,10 @@ namespace {
                     std::cout << "No solution found." << std::endl;
                 }
                 for (size_t index = 0; index < solutions.size(); ++index) {
-                    const Finder::Solution& solution = solutions[index];
+                    const Solution& solution = solutions[index];
                     std::cout << std::endl << "Solution #" << index + 1 << std::endl;
                     for (size_t i = 0; i < solution.insertions.size() - 1; ++i) {
-                        const Finder::Insertion& insertion = solution.insertions[i];
+                        const Insertion& insertion = solution.insertions[i];
                         const Algorithm& skeleton = insertion.skeleton;
                         size_t insert_place = insertion.insert_place;
                         if (insert_place > 0) {
@@ -194,13 +196,13 @@ namespace {
             }
 
             UniValue solution_list(UniValue::VARR);
-            for (const Finder::Solution& solution: solutions) {
+            for (const Solution& solution: solutions) {
                 UniValue solution_map(UniValue::VOBJ);
                 solution_map.pushKV("final_solution", solution.insertions.back().skeleton.str());
                 solution_map.pushKV("cancellation", static_cast<int>(solution.cancellation));
                 UniValue insertion_list(UniValue::VARR);
                 for (size_t depth = 0; depth < solution.insertions.size() - 1; ++depth) {
-                    const Finder::Insertion& insertion = solution.insertions[depth];
+                    const Insertion& insertion = solution.insertions[depth];
                     UniValue insertion_map(UniValue::VOBJ);
                     insertion_map.pushKV("skeleton", insertion.skeleton.str());
                     insertion_map.pushKV("insert_place", static_cast<int>(insertion.insert_place));
