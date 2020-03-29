@@ -57,15 +57,14 @@ namespace InsertionFinder {
         constexpr operator int() const noexcept {
             return this->rotation;
         }
-        void rotate(Rotation rotation) {
-            this->rotation = Rotation::rotation_transform[this->rotation][rotation.rotation];
+        void rotate(Rotation rotation) noexcept {
+            *this *= rotation;
         }
         friend Rotation operator*(Rotation lhs, Rotation rhs) noexcept {
             return Rotation::rotation_transform[lhs.rotation][rhs.rotation];
         }
-        Rotation& operator*=(Rotation rhs) noexcept {
-            this->rotate(rhs);
-            return *this;
+        Rotation& operator*=(Rotation rotation) noexcept {
+            return *this = *this * rotation;
         }
     };
 
@@ -113,17 +112,15 @@ namespace InsertionFinder {
         constexpr operator std::uint_fast8_t() const noexcept {
             return this->twist;
         }
-        void rotate(Rotation rotation) {
-            const std::uint_fast8_t* transform = Twist::rotation_permutation[rotation];
-            this->twist = transform[this->twist >> 3] << 2 ^ (this->twist & 7);
+        void rotate(Rotation rotation) noexcept {
+            *this *= rotation;
         }
         Twist operator*(Rotation rotation) const noexcept {
             const std::uint_fast8_t* transform = Twist::rotation_permutation[rotation];
             return transform[this->twist >> 3] << 2 ^ (this->twist & 7);
         }
         Twist& operator*=(Rotation rotation) noexcept {
-            this->rotate(rotation);
-            return *this;
+            return *this = *this * rotation;
         }
     };
 };

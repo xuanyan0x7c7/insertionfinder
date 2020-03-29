@@ -97,7 +97,7 @@ namespace InsertionFinder {
             this->twist_inverse(algorithm, 0, algorithm.length(), flags);
         }
         void twist(const Algorithm& algorithm, std::size_t begin, std::size_t end, std::byte flags = CubeTwist::full) {
-            for (size_t i = begin; i < end; ++i) {
+            for (std::size_t i = begin; i < end; ++i) {
                 this->twist(algorithm[i], flags);
             }
         }
@@ -106,7 +106,7 @@ namespace InsertionFinder {
             std::size_t begin, std::size_t end,
             std::byte flags = CubeTwist::full
         ) {
-            for (size_t i = end; i-- != begin;) {
+            for (std::size_t i = end; i-- > begin;) {
                 this->twist(algorithm[i].inverse(), flags);
             }
         }
