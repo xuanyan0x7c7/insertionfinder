@@ -107,6 +107,7 @@ namespace InsertionFinder {
         algorithm.simplify();
         algorithm.normalize();
         this->skeletons.emplace(std::move(algorithm), 0);
+        this->init();
     }
 
     template<class Scramble, class Range, std::enable_if_t<Details::is_iterable_v<Range>, int>>
