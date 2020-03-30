@@ -14,6 +14,7 @@ using InsertionFinder::Algorithm;
 using InsertionFinder::BruteForceFinder;
 using InsertionFinder::Cube;
 using InsertionFinder::Insertion;
+using InsertionFinder::InsertionAlgorithm;
 using InsertionFinder::Rotation;
 using InsertionFinder::Twist;
 namespace Details = InsertionFinder::Details;
@@ -217,7 +218,7 @@ void BruteForceFinder::Worker::try_insertion(
             this->finder.get_total_cycles(new_parity, new_corner_cycles, new_edge_cycles, new_placement)
             < this->finder.get_total_cycles(parity, corner_cycles, edge_cycles, placement)
         ) {
-            for (const Algorithm& algorithm: _case.algorithm_list()) {
+            for (const InsertionAlgorithm& algorithm: _case.algorithm_list()) {
                 Insertion& insertion = this->solving_step.back();
                 insertion.insertion = &algorithm;
                 if (!insertion.skeleton.is_worthy_insertion(
@@ -265,7 +266,7 @@ void BruteForceFinder::Worker::solution_found(size_t insert_place, const Case& _
     Insertion& insertion = this->solving_step.back();
     insertion.insert_place = insert_place;
     auto insert_place_mask = insertion.skeleton.get_insert_place_mask(insert_place);
-    for (const Algorithm& algorithm: _case.algorithm_list()) {
+    for (const InsertionAlgorithm& algorithm: _case.algorithm_list()) {
         Insertion& insertion = this->solving_step.back();
         insertion.insertion = &algorithm;
         if (!insertion.skeleton.is_worthy_insertion(

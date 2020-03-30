@@ -11,6 +11,7 @@ using std::size_t;
 using std::uint32_t;
 using std::uint_fast8_t;
 using InsertionFinder::Algorithm;
+using InsertionFinder::InsertionAlgorithm;
 namespace Details = InsertionFinder::Details;
 
 
@@ -94,7 +95,7 @@ std::pair<Algorithm, size_t> Algorithm::insert(const Algorithm& insertion, size_
 
 
 bool Algorithm::is_worthy_insertion(
-    const Algorithm& insertion, size_t insert_place,
+    const InsertionAlgorithm& insertion, size_t insert_place,
     std::pair<uint32_t, uint32_t> insert_place_mask,
     size_t fewest_twists
 ) const {

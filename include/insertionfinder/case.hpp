@@ -20,7 +20,7 @@ namespace InsertionFinder {
     class Case {
     private:
         Cube _state;
-        std::vector<Algorithm> list;
+        std::vector<InsertionAlgorithm> list;
     private:
         std::uint32_t _mask;
         bool _has_parity;
@@ -28,7 +28,11 @@ namespace InsertionFinder {
         int _edge_cycles;
     public:
         Case() {}
-        explicit Case(const Cube& state);
+        explicit Case(const Cube& state):
+            _state(state),
+            _mask(state.mask()),
+            _has_parity(state.has_parity()),
+            _corner_cycles(state.corner_cycles()), _edge_cycles(state.edge_cycles()) {}
     public:
         void save_to(std::ostream& out) const;
         void read_from(std::istream& in);
@@ -62,7 +66,7 @@ namespace InsertionFinder {
         Rotation rotation() const noexcept {
             return this->_state.placement();
         }
-        const std::vector<Algorithm>& algorithm_list() const noexcept {
+        const std::vector<InsertionAlgorithm>& algorithm_list() const noexcept {
             return this->list;
         }
     public:
@@ -75,7 +79,7 @@ namespace InsertionFinder {
             }
         }
         void merge_algorithms(Case&& from) {
-            for (Algorithm& algorithm: from.list) {
+            for (InsertionAlgorithm& algorithm: from.list) {
                 this->add_algorithm(std::move(algorithm));
             }
         }

@@ -5,26 +5,19 @@
 #include <insertionfinder/cube.hpp>
 #include "../utils/encoding.hpp"
 using std::uint8_t;
-using InsertionFinder::Algorithm;
 using InsertionFinder::AlgorithmStreamError;
 using InsertionFinder::Case;
 using InsertionFinder::CaseStreamError;
 using InsertionFinder::Cube;
 using InsertionFinder::CubeStreamError;
+using InsertionFinder::InsertionAlgorithm;
 namespace Details = InsertionFinder::Details;
-
-
-Case::Case(const Cube& state):
-    _state(state),
-    _mask(state.mask()),
-    _has_parity(state.has_parity()),
-    _corner_cycles(state.corner_cycles()), _edge_cycles(state.edge_cycles()) {}
 
 
 void Case::save_to(std::ostream& out) const {
     this->_state.save_to(out);
     Details::write_varuint(out, this->list.size());
-    for (const Algorithm& algorithm: this->list) {
+    for (const InsertionAlgorithm& algorithm: this->list) {
         algorithm.save_to(out);
     }
 }
@@ -47,7 +40,7 @@ void Case::read_from(std::istream& in) {
     }
     this->list.resize(size);
     try {
-        for (Algorithm& algorithm: this->list) {
+        for (InsertionAlgorithm& algorithm: this->list) {
             algorithm.read_from(in);
         }
     } catch (const AlgorithmStreamError& e) {

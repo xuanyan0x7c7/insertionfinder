@@ -37,15 +37,13 @@ namespace InsertionFinder {
         }
     };
 
+    class InsertionAlgorithm;
+
     class Algorithm {
         friend struct std::hash<Algorithm>;
-    private:
+    protected:
         std::vector<Twist> twists;
         Rotation rotation;
-    private:
-        std::uint32_t begin_mask;
-        std::uint32_t end_mask;
-        std::uint32_t set_up_mask;
     public:
         Algorithm(): rotation(0) {}
         Algorithm(const Algorithm&) = default;
@@ -91,7 +89,7 @@ namespace InsertionFinder {
         std::string str() const;
     public:
         void save_to(std::ostream& out) const;
-        void read_from(std::istream& in);
+        virtual void read_from(std::istream& in);
     public:
         Algorithm operator+(const Algorithm& rhs) const;
         template<class T> Algorithm operator+(T&& rhs) const {
@@ -114,7 +112,7 @@ namespace InsertionFinder {
         std::pair<std::uint32_t, std::uint32_t> get_insert_place_mask(std::size_t insert_place) const;
         std::pair<Algorithm, std::size_t> insert(const Algorithm& insertion, std::size_t insert_place) const;
         bool is_worthy_insertion(
-            const Algorithm& insertion, std::size_t insert_place,
+            const InsertionAlgorithm& insertion, std::size_t insert_place,
             std::pair<std::uint32_t, std::uint32_t> insert_place_mask,
             std::size_t fewest_twists = std::numeric_limits<std::size_t>::max()
         ) const;
@@ -143,4 +141,23 @@ namespace InsertionFinder {
     inline Algorithm operator""_alg(const char* string) {
         return Algorithm(string);
     }
+
+    class InsertionAlgorithm: public Algorithm {
+        friend class Algorithm;
+    private:
+        std::uint32_t begin_mask;
+        std::uint32_t end_mask;
+        std::uint32_t set_up_mask;
+    public:
+        InsertionAlgorithm(): Algorithm() {}
+        InsertionAlgorithm(const InsertionAlgorithm&) = default;
+        InsertionAlgorithm(InsertionAlgorithm&&) = default;
+        InsertionAlgorithm& operator=(const InsertionAlgorithm&) = default;
+        InsertionAlgorithm& operator=(InsertionAlgorithm&&) = default;
+        ~InsertionAlgorithm() = default;
+        InsertionAlgorithm(const Algorithm& algorithm): Algorithm(algorithm) {}
+        InsertionAlgorithm(Algorithm&& algorithm): Algorithm(std::move(algorithm)) {}
+    public:
+        void read_from(std::istream& in);
+    };
 };

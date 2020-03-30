@@ -22,6 +22,7 @@ using InsertionFinder::Algorithm;
 using InsertionFinder::AlgorithmError;
 using InsertionFinder::AlgorithmStreamError;
 using InsertionFinder::Cube;
+using InsertionFinder::InsertionAlgorithm;
 using InsertionFinder::Rotation;
 using InsertionFinder::Twist;
 namespace Details = InsertionFinder::Details;
@@ -141,7 +142,11 @@ void Algorithm::read_from(std::istream& in) {
         throw AlgorithmStreamError();
     }
     this->rotation = rotation_data;
+}
 
+void InsertionAlgorithm::read_from(std::istream& in) {
+    this->Algorithm::read_from(in);
+    size_t length = this->twists.size();
     this->begin_mask = Details::twist_mask(this->twists[0].inverse());
     if (length > 1 && this->twists[0] >> 3 == this->twists[1] >> 3) {
         this->begin_mask |= Details::twist_mask(this->twists[1].inverse());

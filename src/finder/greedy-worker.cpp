@@ -14,6 +14,7 @@ using std::uint32_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::Cube;
 using InsertionFinder::GreedyFinder;
+using InsertionFinder::InsertionAlgorithm;
 using InsertionFinder::Rotation;
 using InsertionFinder::Twist;
 namespace Details = InsertionFinder::Details;
@@ -199,7 +200,7 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
         } else if (new_total_cycles < total_cycles) {
             auto& partial_solution = this->finder.partial_solution_list[new_total_cycles];
             PartialState& partial_state = this->finder.partial_states[new_total_cycles];
-            for (const Algorithm& algorithm: _case.algorithm_list()) {
+            for (const InsertionAlgorithm& algorithm: _case.algorithm_list()) {
                 size_t target = partial_state.fewest_moves + this->finder.options.greedy_threshold;
                 if (!skeleton.is_worthy_insertion(algorithm, insert_place, insert_place_mask, target)) {
                     continue;
@@ -224,7 +225,7 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
             }
         } else if (this->finder.options.enable_replacement && new_total_cycles == total_cycles) {
             PartialState& partial_state = this->finder.partial_states[new_total_cycles];
-            for (const Algorithm& algorithm: _case.algorithm_list()) {
+            for (const InsertionAlgorithm& algorithm: _case.algorithm_list()) {
                 size_t target = partial_state.fewest_moves + this->finder.options.replacement_threshold;
                 if (!skeleton.is_worthy_insertion(algorithm, insert_place, insert_place_mask, target)) {
                     continue;
@@ -258,7 +259,7 @@ void GreedyFinder::Worker::solution_found(size_t insert_place, bool swapped, con
         skeleton.swap_adjacent(insert_place);
     }
     auto insert_place_mask = skeleton.get_insert_place_mask(insert_place);
-    for (const Algorithm& algorithm: _case.algorithm_list()) {
+    for (const InsertionAlgorithm& algorithm: _case.algorithm_list()) {
         auto& partial_solution = this->finder.partial_solution_list.front();
         if (!skeleton.is_worthy_insertion(algorithm, insert_place, insert_place_mask, this->finder.fewest_moves)) {
             continue;
