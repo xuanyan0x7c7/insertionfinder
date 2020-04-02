@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <cstdint>
 #include <exception>
 #include <functional>
@@ -138,7 +139,7 @@ namespace InsertionFinder {
         std::vector<Algorithm> generate_similars() const;
     };
 
-    inline Algorithm operator""_alg(const char* string) {
+    inline Algorithm operator""_alg(const char* string, std::size_t length) {
         return Algorithm(string);
     }
 
@@ -158,6 +159,6 @@ namespace InsertionFinder {
         InsertionAlgorithm(const Algorithm& algorithm): Algorithm(algorithm) {}
         InsertionAlgorithm(Algorithm&& algorithm): Algorithm(std::move(algorithm)) {}
     public:
-        void read_from(std::istream& in);
+        void read_from(std::istream& in) override;
     };
 };
