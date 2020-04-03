@@ -35,11 +35,13 @@ AC_CONFIG_FILES([
     src/cli/Makefile
     src/cube/Makefile
     src/finder/Makefile
+    src/improver/Makefile
     src/twist/Makefile
     src/utils/Makefile
     test/Makefile
     data/algorithms/Makefile
     data/algorithms/extras/Makefile
+    data/algorithms/slices/Makefile
 ])
 
 AC_OUTPUT

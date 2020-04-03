@@ -31,6 +31,7 @@ void CLI::parse(int argc, char** argv) try {
     po::options_description command_options("Commands");
     command_options.add_options()
         ("solve,s", "find insertions!")
+        ("improve,i", "find improvements!")
         ("verify,v", "verify cube state")
         ("generate,g", "generate algorithm files");
     cli_options.add(command_options);
@@ -71,6 +72,7 @@ void CLI::parse(int argc, char** argv) try {
                 ->implicit_value(std::thread::hardware_concurrency()),
             "multiple threads"
         )
+        ("symmetrics-only", "generate only symmetric algorithms")
         ("json", "use JSON output")
         ("verbose", "verbose");
     cli_options.add(configuration_options);
@@ -88,7 +90,11 @@ void CLI::parse(int argc, char** argv) try {
         return;
     }
     if (vm.count("solve")) {
-        CLI::find_insertion(vm);
+        CLI::find_insertions(vm);
+        return;
+    }
+    if (vm.count("improve")) {
+        CLI::find_improvements(vm);
         return;
     }
     if (vm.count("verify")) {

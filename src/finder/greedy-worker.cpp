@@ -17,6 +17,7 @@ using InsertionFinder::GreedyFinder;
 using InsertionFinder::InsertionAlgorithm;
 using InsertionFinder::Rotation;
 using InsertionFinder::Twist;
+namespace CubeTwist = InsertionFinder::CubeTwist;
 namespace Details = InsertionFinder::Details;
 
 

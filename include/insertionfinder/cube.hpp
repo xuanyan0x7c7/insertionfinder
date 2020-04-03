@@ -115,9 +115,9 @@ namespace InsertionFinder {
         void twist_before(Twist twist, std::byte flags = CubeTwist::full) noexcept;
         void twist_before(const Cube& cube, std::byte flags = CubeTwist::full) noexcept;
         static Cube twist(const Cube& lhs, const Cube& rhs, std::byte lhs_flags, std::byte rhs_flags) noexcept;
-        void rotate(Rotation rotation) noexcept {
+        void rotate(Rotation rotation, std::byte flags = CubeTwist::full) noexcept {
             if (rotation) {
-                this->twist(Cube::rotation_cube[rotation]);
+                this->twist(Cube::rotation_cube[rotation], flags);
             }
         }
     public:
@@ -153,13 +153,13 @@ namespace InsertionFinder {
         Rotation placement() const noexcept {
             return this->_placement;
         }
+        Cube best_placement() const noexcept;
     private:
         static std::optional<Cube> corner_cycle_cube(unsigned index);
         static std::optional<Cube> edge_cycle_cube(unsigned index);
     public:
         int corner_cycle_index() const noexcept;
         int edge_cycle_index() const noexcept;
-        Cube best_placement() const noexcept;
     public:
         static int next_corner_cycle_index(int index, Twist twist) {
             return Cube::corner_cycle_transform[index][twist];

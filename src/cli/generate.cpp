@@ -55,7 +55,10 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
             if (auto node = map.find(cube); node != map.end() && node->second.contains_algorithm(algorithm)) {
                 continue;
             }
-            for (Algorithm& alg: algorithm.generate_similars()) {
+            std::vector<Algorithm> algorithms = vm.count("symmetrics-only")
+                ? algorithm.generate_symmetrics()
+                : algorithm.generate_similars();
+            for (Algorithm& alg: algorithms) {
                 Cube cube = Cube() * alg;
                 if (auto node = map.find(cube); node != map.end()) {
                     node->second.add_algorithm(std::move(alg));
