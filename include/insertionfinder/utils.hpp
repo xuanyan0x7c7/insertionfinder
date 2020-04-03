@@ -13,10 +13,3 @@ namespace InsertionFinder::Details {
 
     template <class T> constexpr bool is_iterable_v = is_iterable<T>::value;
 };
-
-namespace InsertionFinder::Details {
-    template<class K, class V> struct Mapping: std::pair<K, V> {
-        template <class T> Mapping(T&& arg): std::pair<K, V>(std::forward<T>(arg), V()) {}
-        template <class T, class U> Mapping(const std::pair<T, U>& arg): std::pair<K, V>(arg) {}
-    };
-};

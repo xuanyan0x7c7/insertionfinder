@@ -115,7 +115,8 @@ namespace InsertionFinder {
         scramble(std::forward<Scramble>(scramble)), cases(cases),
         scramble_cube(Cube() * scramble), inverse_scramble_cube(Cube::inverse(this->scramble_cube)) {
         for (auto&& x: std::forward<Range>(range)) {
-            auto [skeleton, cancellation] = Details::Mapping<Algorithm, std::size_t>(std::forward<decltype(x)>(x));
+            Algorithm skeleton = std::forward<decltype(x.first)>(x.first);
+            std::size_t cancellation = x.second;
             skeleton.simplify();
             skeleton.normalize();
             if (auto [node, inserted] = this->skeletons.try_emplace(std::move(skeleton), cancellation); !inserted) {
