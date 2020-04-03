@@ -1,7 +1,12 @@
 #include <cstddef>
+#include <cstdint>
+#include <insertionfinder/algorithm.hpp>
+#include <insertionfinder/cube.hpp>
+#include <insertionfinder/twist.hpp>
 #include <insertionfinder/improver/improver.hpp>
 #include <insertionfinder/improver/slice.hpp>
 using std::size_t;
+using std::uint32_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::Cube;
 using InsertionFinder::InsertionAlgorithm;
@@ -42,6 +47,7 @@ void SliceImprover::Worker::search() {
 
 void SliceImprover::Worker::try_insertion(std::size_t insert_place, const Cube& state, bool swapped) {
     static constexpr std::byte twist_flag = CubeTwist::edges;
+    static constexpr uint32_t valid_masks[3] = {0x3cf0000, 0x3305500, 0x0f0aa00};
     Algorithm skeleton = this->skeleton;
     if (swapped) {
         skeleton.swap_adjacent(insert_place);
@@ -50,6 +56,10 @@ void SliceImprover::Worker::try_insertion(std::size_t insert_place, const Cube& 
 
     for (const Case& _case: this->improver.cases) {
         Cube cube = Cube::twist(state, _case.state(), twist_flag, twist_flag);
+        uint32_t mask = cube.mask();
+        if ((mask & ~valid_masks[0]) && (mask & ~valid_masks[1]) && (mask & ~valid_masks[2])) {
+            continue;
+        }
         for (const InsertionAlgorithm& algorithm: _case.algorithm_list()) {
             size_t target = this->improver.fewest_moves + this->improver.options.threshold;
             if (!skeleton.is_worthy_insertion(algorithm, insert_place, insert_place_mask, target)) {
