@@ -1,6 +1,4 @@
 #include <cstddef>
-#include <cstdint>
-#include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <limits>
@@ -21,7 +19,7 @@
 #include <insertionfinder/finder/greedy.hpp>
 #include "../utils/encoding.hpp"
 #include "commands.hpp"
-using std::int64_t;
+#include "utils.hpp"
 using std::size_t;
 namespace fs = std::filesystem;
 namespace po = boost::program_options;
@@ -51,7 +49,7 @@ namespace {
         virtual void print_result(
             const Algorithm& scramble, const Algorithm& skeleton,
             CycleStatus status,
-            const Finder& finder, const Finder::Result& result
+            const Finder& finder, Finder::Result result
         ) = 0;
         virtual ~Printer() = default;
     };
@@ -102,7 +100,7 @@ namespace {
         void print_result(
             const Algorithm& scramble, const Algorithm& skeleton,
             CycleStatus status,
-            const Finder& finder, const Finder::Result& result
+            const Finder& finder, Finder::Result result
         ) override {
             if (result.status == FinderStatus::success) {
                 const auto& solutions = finder.get_solutions();
@@ -116,20 +114,7 @@ namespace {
                     const Solution& solution = solutions[index];
                     std::cout << std::endl << "Solution #" << index + 1 << std::endl;
                     for (size_t i = 0; i < solution.insertions.size() - 1; ++i) {
-                        const Insertion& insertion = solution.insertions[i];
-                        const Algorithm& skeleton = insertion.skeleton;
-                        size_t insert_place = insertion.insert_place;
-                        if (insert_place > 0) {
-                            skeleton.print(std::cout, 0, insert_place);
-                            std::cout << ' ';
-                        }
-                        std::cout << "[@" << i + 1 << ']';
-                        if (insert_place < skeleton.length()) {
-                            std::cout << ' ';
-                            skeleton.print(std::cout, insert_place, skeleton.length());
-                        }
-                        std::cout << std::endl;
-                        std::cout << "Insert at @" << i + 1 << ": " << *insertion.insertion << std::endl;
+                        Details::print_insertion(std::cout, solution.insertions[i], i);
                     }
                     std::cout
                         << "Total moves: " << finder.get_fewest_moves() << ", "
@@ -151,29 +136,7 @@ namespace {
                     std::cout << "Center algorithms needed." << std::endl;
                 }
             }
-            std::cout << "Time usage: " << std::fixed << std::setprecision(3);
-            if (result.duration < 1000) {
-                std::cout << result.duration << " nanoseconds." << std::endl;
-            } else if (result.duration < 1'000'000) {
-                std::cout << result.duration / 1e3 << " microseconds." << std::endl;
-            } else if (result.duration < 1'000'000'000) {
-                std::cout << result.duration / 1e6 << " milliseconds." << std::endl;
-            } else if (result.duration < 60 * INT64_C(1'000'000'000)) {
-                std::cout << result.duration / 1e9 << " seconds." << std::endl;
-            } else if (result.duration < 60 * 60 * INT64_C(1'000'000'000)) {
-                int64_t duration = (result.duration + 500'000) / 1'000'000;
-                std::cout << duration / (60 * 1000)
-                    << std::right << std::setfill('0')
-                    << ':' << std::setw(2) << duration / 1000 % 60
-                     << '.'<< std::setw(3) << duration % 1000 << std::endl;
-            } else {
-                int64_t duration = (result.duration + 500'000) / 1'000'000;
-                std::cout << duration / (60 * 60 * 1000)
-                    << std::right << std::setfill('0')
-                    << ':' << std::setw(2) << duration / (60 * 1000) % 60
-                    << ':' << std::setw(2) << duration / 1000 % 60
-                    << ':' << std::setw(3) << duration % 1000 << '.' << std::endl;
-            }
+            Details::print_duration(std::cout, result.duration);
         }
     };
 
@@ -181,7 +144,7 @@ namespace {
         void print_result(
             const Algorithm& scramble, const Algorithm& skeleton,
             CycleStatus status,
-            const Finder& finder, const Finder::Result& result
+            const Finder& finder, Finder::Result result
         ) override {
             UniValue map(UniValue::VOBJ);
             map.pushKV("scramble", scramble.str());
