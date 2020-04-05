@@ -112,9 +112,7 @@ namespace {
                 }
                 for (size_t index = 0; index < solutions.size(); ++index) {
                     const Solution& solution = solutions[index];
-                    std::cout << std::endl << "Solution #" << index + 1 << std::endl;
-                    Details::print_insertions(std::cout, solution);
-                    Details::print_solution_status(std::cout, solution);
+                    std::cout << std::endl << "Solution #" << index + 1 << std::endl << solution << std::endl;
                 }
             } else {
                 if (result.status == FinderStatus::parity_algorithms_needed) {

@@ -1,5 +1,5 @@
 AM_CPPFLAGS = -I$(top_srcdir)/include
-SUBDIRS = algorithm case cli cube finder improver twist utils
+SUBDIRS = algorithm case cli cube finder improver insertion twist utils
 bin_PROGRAMS = insertionfinder
 insertionfinder_SOURCES = main.cpp
 insertionfinder_LDADD = \
@@ -8,6 +8,7 @@ insertionfinder_LDADD = \
     finder/libfinder.la \
     case/libcase.la \
     cube/libcube.la \
+    insertion/libinsertion.la \
     algorithm/libalgorithm.la \
     twist/libtwist.la \
     utils/libutils.la \
@@ -23,6 +24,7 @@ libinsertionfinder_la_LIBADD = \
     finder/libfinder.la \
     case/libcase.la \
     cube/libcube.la \
+    insertion/libinsertion.la \
     algorithm/libalgorithm.la \
     twist/libtwist.la \
     utils/libutils.la

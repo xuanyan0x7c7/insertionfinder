@@ -55,9 +55,7 @@ namespace {
             } else {
                 for (size_t index = 0; index < solutions.size(); ++index) {
                     const Solution& solution = solutions[index];
-                    std::cout << std::endl << "Improvement #" << index + 1 << std::endl;
-                    Details::print_insertions(std::cout, solution);
-                    Details::print_solution_status(std::cout, solution);
+                    std::cout << std::endl << "Improvement #" << index + 1 << std::endl << solution << std::endl;
                 }
             }
             Details::print_duration(std::cout, result.duration);
