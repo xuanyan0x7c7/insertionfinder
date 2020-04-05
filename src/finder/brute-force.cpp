@@ -55,7 +55,7 @@ void BruteForceFinder::search_core(const SearchParams& params) {
                         std::cerr << skeleton << " (" << twists << "f)" << std::endl;
                     }
                 }
-                this->solutions.emplace_back(Solution({Insertion(skeleton)}));
+                this->solutions.emplace_back(skeleton);
             }
             continue;
         }

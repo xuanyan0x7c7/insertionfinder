@@ -56,14 +56,8 @@ namespace {
                 for (size_t index = 0; index < solutions.size(); ++index) {
                     const Solution& solution = solutions[index];
                     std::cout << std::endl << "Improvement #" << index + 1 << std::endl;
-                    for (size_t i = 0; i < solution.insertions.size() - 1; ++i) {
-                        Details::print_insertion(std::cout, solution.insertions[i], i);
-                    }
-                    std::cout
-                        << "Total moves: " << improver.get_fewest_moves() << ", "
-                        << solution.cancellation << " move" << (solution.cancellation == 1 ? "" : "s")
-                        << " cancelled." << std::endl
-                        << "Full solution: " << solution.insertions.back().skeleton << std::endl;
+                    Details::print_insertions(std::cout, solution);
+                    Details::print_solution_status(std::cout, solution);
                 }
             }
             Details::print_duration(std::cout, result.duration);
@@ -80,11 +74,10 @@ namespace {
             UniValue solution_list(UniValue::VARR);
             for (const Solution& solution: solutions) {
                 UniValue solution_map(UniValue::VOBJ);
-                solution_map.pushKV("final_solution", solution.insertions.back().skeleton.str());
+                solution_map.pushKV("final_solution", solution.final_solution.str());
                 solution_map.pushKV("cancellation", static_cast<int>(solution.cancellation));
                 UniValue insertion_list(UniValue::VARR);
-                for (size_t depth = 0; depth < solution.insertions.size() - 1; ++depth) {
-                    const Insertion& insertion = solution.insertions[depth];
+                for (const Insertion& insertion: solution.insertions) {
                     UniValue insertion_map(UniValue::VOBJ);
                     insertion_map.pushKV("skeleton", insertion.skeleton.str());
                     insertion_map.pushKV("insert_place", static_cast<int>(insertion.insert_place));
@@ -194,9 +187,6 @@ void CLI::find_improvements(const po::variables_map& vm) {
         skeleton, cases,
         SliceImprover::Options {vm["replacement-threshold"].as<size_t>()}
     );
-    // if (vm.count("verbose")) {
-    //     improver->set_verbose();
-    // }
     size_t max_threads = vm["jobs"].as<size_t>();
     improver->search({max_threads});
     printer->print_result(skeleton, *improver, improver->get_result());

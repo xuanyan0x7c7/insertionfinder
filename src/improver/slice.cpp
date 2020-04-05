@@ -17,7 +17,7 @@ void SliceImprover::search_core(const SearchParams& params) {
     pool.join();
 
     for (const Algorithm& algorithm: this->partial_solution_list) {
-        std::vector<Insertion> result({Insertion(algorithm)});
+        std::vector<Insertion> result;
         const Algorithm* current_skeleton = &algorithm;
         while (*current_skeleton != this->skeleton) {
             const SolvingStep& step = this->partial_solution_map.at(*current_skeleton);
@@ -29,7 +29,7 @@ void SliceImprover::search_core(const SearchParams& params) {
             result.emplace_back(std::move(previous_skeleton), step.insert_place, step.insertion);
         }
         ranges::actions::reverse(result);
-        this->solutions.emplace_back(move(result));
+        this->solutions.emplace_back(algorithm, move(result));
     }
 }
 

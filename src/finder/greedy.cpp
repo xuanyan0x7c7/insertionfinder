@@ -113,8 +113,9 @@ void GreedyFinder::search_core(const SearchParams& params) {
             old_step = step;
         }
     }
-    for (const Algorithm* current_skeleton: skeletons) {
-        std::vector<Insertion> result({Insertion(*current_skeleton)});
+    for (const Algorithm* skeleton: skeletons) {
+        const Algorithm* current_skeleton = skeleton;
+        std::vector<Insertion> result;
         while (ranges::all_of(this->skeletons, [&](const auto& x) {return x.first != *current_skeleton;})) {
             const SolvingStep& step = this->partial_solution_map.at(*current_skeleton);
             current_skeleton = step.skeleton;
@@ -125,7 +126,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
             result.emplace_back(std::move(previous_skeleton), step.insert_place, step.insertion);
         }
         ranges::actions::reverse(result);
-        this->solutions.emplace_back(move(result));
+        this->solutions.emplace_back(*skeleton, move(result));
     }
 }
 

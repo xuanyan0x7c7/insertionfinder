@@ -9,23 +9,34 @@ using std::size_t;
 using std::int64_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::Insertion;
+using InsertionFinder::Solution;
 namespace Details = InsertionFinder::Details;
 
 
-void Details::print_insertion(std::ostream& out, const Insertion& insertion, size_t index) {
-    const Algorithm& skeleton = insertion.skeleton;
-    size_t insert_place = insertion.insert_place;
-    if (insert_place > 0) {
-        skeleton.print(out, 0, insert_place);
-        out << ' ';
+void Details::print_insertions(std::ostream& out, const Solution& solution) {
+    for (size_t index = 0; index < solution.insertions.size(); ++index) {
+        const Insertion& insertion = solution.insertions[index];
+        const Algorithm& skeleton = insertion.skeleton;
+        size_t insert_place = insertion.insert_place;
+        if (insert_place > 0) {
+            skeleton.print(out, 0, insert_place);
+            out << ' ';
+        }
+        out << "[@" << index + 1 << ']';
+        if (insert_place < skeleton.length()) {
+            out << ' ';
+            skeleton.print(out, insert_place, skeleton.length());
+        }
+        out << std::endl;
+        out << "Insert at @" << index + 1 << ": " << *insertion.insertion << std::endl;
     }
-    out << "[@" << index + 1 << ']';
-    if (insert_place < skeleton.length()) {
-        out << ' ';
-        skeleton.print(out, insert_place, skeleton.length());
-    }
-    out << std::endl;
-    out << "Insert at @" << index + 1 << ": " << *insertion.insertion << std::endl;
+}
+
+void Details::print_solution_status(std::ostream& out, const Solution& solution) {
+    out << "Total moves: " << solution.final_solution.length() << ", "
+        << solution.cancellation << " move" << (solution.cancellation == 1 ? "" : "s")
+        << " cancelled." << std::endl
+        << "Final solution: " << solution.final_solution << std::endl;
 }
 
 void Details::print_duration(std::ostream& out, int64_t duration) {

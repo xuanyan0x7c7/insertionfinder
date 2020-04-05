@@ -301,5 +301,8 @@ void BruteForceFinder::Worker::update_fewest_moves() {
             std::cerr << this->solving_step.back().skeleton << " (" << twists << "f)" << std::endl;
         }
     }
-    this->finder.solutions.emplace_back(this->solving_step);
+    this->finder.solutions.emplace_back(
+        this->solving_step.back().skeleton,
+        std::vector<Insertion>(this->solving_step.cbegin(), this->solving_step.cend() - 1)
+    );
 }

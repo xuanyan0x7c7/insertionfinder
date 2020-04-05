@@ -11,6 +11,7 @@ using InsertionFinder::Algorithm;
 using InsertionFinder::Case;
 using InsertionFinder::Cube;
 using InsertionFinder::Finder;
+using InsertionFinder::Insertion;
 using InsertionFinder::Rotation;
 using InsertionFinder::Solution;
 namespace FinderStatus = InsertionFinder::FinderStatus;
@@ -71,10 +72,10 @@ void Finder::search(const SearchParams& params) {
             Algorithm skeleton = solution.insertions.front().skeleton;
             skeleton.normalize();
             size_t cancellation = solution.insertions.front().skeleton.length();
-            for (size_t i = 0; i < solution.insertions.size() - 1; ++i) {
-                cancellation += solution.insertions[i].insertion->length();
+            for (const Insertion& insertion: solution.insertions) {
+                cancellation += insertion.insertion->length();
             }
-            cancellation -= solution.insertions.back().skeleton.length();
+            cancellation -= solution.final_solution.length();
             solution.cancellation = this->skeletons.at(skeleton) + cancellation;
         }
         ranges::sort(
