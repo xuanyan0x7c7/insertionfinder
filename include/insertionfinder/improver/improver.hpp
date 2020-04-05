@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <cstdint>
 #include <atomic>
 #include <utility>
 #include <vector>

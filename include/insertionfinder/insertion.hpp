@@ -1,5 +1,5 @@
 #pragma once
-#include <cstdint>
+#include <cstddef>
 #include <utility>
 #include <vector>
 #include <insertionfinder/algorithm.hpp>

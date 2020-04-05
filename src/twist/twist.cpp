@@ -2,6 +2,7 @@
 #include <ostream>
 #include <string>
 #include <insertionfinder/twist.hpp>
+using std::uint_fast8_t;
 using InsertionFinder::Twist;
 
 

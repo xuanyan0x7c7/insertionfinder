@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstdint>
 #include <algorithm>
 #include <functional>

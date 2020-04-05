@@ -1,8 +1,10 @@
+#include <cstddef>
 #include <cstdint>
 #include <istream>
 #include <optional>
 #include <ostream>
 #include "encoding.hpp"
+using std::size_t;
 using std::uint64_t;
 using std::uint8_t;
 
@@ -13,19 +15,19 @@ void InsertionFinder::Details::write_varuint(std::ostream& out, uint64_t n) {
         buffer[i] = n >> (i << 3) & 0xff;
     }
     if (n < 0xfd) {
-        out.write(reinterpret_cast<char*>(&buffer), 1);
+        out.write(reinterpret_cast<char*>(buffer), 1);
     } else if (n <= 0xffff) {
         char flag = 0xfd;
         out.write(&flag, 1);
-        out.write(reinterpret_cast<char*>(&buffer), 2);
-    } else if (n <= 0xffffffffu) {
+        out.write(reinterpret_cast<char*>(buffer), 2);
+    } else if (n <= UINT32_C(0xffffffff)) {
         char flag = 0xfe;
         out.write(&flag, 1);
-        out.write(reinterpret_cast<char*>(&buffer), 4);
+        out.write(reinterpret_cast<char*>(buffer), 4);
     } else {
         char flag = 0xff;
         out.write(&flag, 1);
-        out.write(reinterpret_cast<char*>(&buffer), 8);
+        out.write(reinterpret_cast<char*>(buffer), 8);
     }
 }
 
@@ -39,17 +41,17 @@ std::optional<uint64_t> InsertionFinder::Details::read_varuint(std::istream& in)
     if (flag < 0xfd) {
         buffer[0] = flag;
     } else if (flag == 0xfd) {
-        in.read(reinterpret_cast<char*>(&buffer), 2);
+        in.read(reinterpret_cast<char*>(buffer), 2);
         if (in.gcount() != 2) {
             return {};
         }
     } else if (flag == 0xfe) {
-        in.read(reinterpret_cast<char*>(&buffer), 4);
+        in.read(reinterpret_cast<char*>(buffer), 4);
         if (in.gcount() != 4) {
             return {};
         }
     } else {
-        in.read(reinterpret_cast<char*>(&buffer), 8);
+        in.read(reinterpret_cast<char*>(buffer), 8);
         if (in.gcount() != 8) {
             return {};
         }

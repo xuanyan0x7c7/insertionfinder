@@ -11,6 +11,7 @@ using InsertionFinder::SliceImprover;
 
 
 void SliceImprover::search_core(const SearchParams& params) {
+    this->partial_solution_list.insert(this->skeleton);
     boost::asio::thread_pool pool(params.max_threads);
     this->run_worker(pool, Algorithm(this->skeleton), SolvingStep {nullptr, 0, nullptr, false, 0, 0});
     pool.join();

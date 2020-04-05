@@ -12,6 +12,7 @@
 using std::size_t;
 using std::uint32_t;
 using InsertionFinder::Algorithm;
+using InsertionFinder::Case;
 using InsertionFinder::Cube;
 using InsertionFinder::GreedyFinder;
 using InsertionFinder::InsertionAlgorithm;

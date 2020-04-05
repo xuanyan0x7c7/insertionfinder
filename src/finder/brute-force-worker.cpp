@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <utility>
@@ -12,6 +13,7 @@ using std::size_t;
 using std::uint32_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::BruteForceFinder;
+using InsertionFinder::Case;
 using InsertionFinder::Cube;
 using InsertionFinder::Insertion;
 using InsertionFinder::InsertionAlgorithm;

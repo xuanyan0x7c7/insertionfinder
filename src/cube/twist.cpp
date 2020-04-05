@@ -1,5 +1,4 @@
 #include <cstddef>
-#include <cstdint>
 #include <cstring>
 #include <array>
 #include <insertionfinder/algorithm.hpp>

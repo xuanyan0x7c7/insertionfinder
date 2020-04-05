@@ -1,9 +1,11 @@
+#include <cstdint>
 #include <istream>
 #include <ostream>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
 #include "../utils/encoding.hpp"
+using std::uint64_t;
 using std::uint8_t;
 using InsertionFinder::AlgorithmStreamError;
 using InsertionFinder::Case;
@@ -32,7 +34,7 @@ void Case::read_from(std::istream& in) {
     this->_has_parity = this->_state.has_parity();
     this->_corner_cycles = this->_state.corner_cycles();
     this->_edge_cycles = this->_state.edge_cycles();
-    size_t size;
+    uint64_t size;
     if (auto x = Details::read_varuint(in)) {
         size = *x;
     } else {

@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstdint>
 #include <utility>
 #include <vector>
@@ -135,7 +136,9 @@ std::vector<Algorithm> Algorithm::generate_rotation_conjugates() const {
                             algorithm.twists.push_back(Twist(twist_base | (sum[0] - i & 3)) * base.rotation.inverse());
                         }
                         if (j != sum[1]) {
-                            algorithm.twists.push_back(Twist(twist_base | 4 | (sum[1] - j & 3)) * base.rotation.inverse());
+                            algorithm.twists.push_back(
+                                Twist(twist_base | 4 | (sum[1] - j & 3)) * base.rotation.inverse()
+                            );
                         }
                         result.push_back(std::move(algorithm));
                     }

@@ -1,3 +1,5 @@
+#include <cstddef>
+#include <cstdint>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -156,9 +158,9 @@ namespace {
                 std::cout << result.duration / 1e3 << " microseconds." << std::endl;
             } else if (result.duration < 1'000'000'000) {
                 std::cout << result.duration / 1e6 << " milliseconds." << std::endl;
-            } else if (result.duration < 60 * static_cast<int64_t>(1'000'000'000)) {
+            } else if (result.duration < 60 * INT64_C(1'000'000'000)) {
                 std::cout << result.duration / 1e9 << " seconds." << std::endl;
-            } else if (result.duration < 60 * 60 * static_cast<int64_t>(1'000'000'000)) {
+            } else if (result.duration < 60 * 60 * INT64_C(1'000'000'000)) {
                 int64_t duration = (result.duration + 500'000) / 1'000'000;
                 std::cout << duration / (60 * 1000)
                     << std::right << std::setfill('0')

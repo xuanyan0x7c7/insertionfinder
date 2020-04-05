@@ -1,4 +1,4 @@
-#include <atomic>
+#include <cstddef>
 #include <functional>
 #include <iostream>
 #include <mutex>
@@ -18,6 +18,7 @@ using InsertionFinder::GreedyFinder;
 using InsertionFinder::Insertion;
 using InsertionFinder::Rotation;
 namespace Details = InsertionFinder::Details;
+namespace FinderStatus = InsertionFinder::FinderStatus;
 
 
 void GreedyFinder::search_core(const SearchParams& params) {

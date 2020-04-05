@@ -1,7 +1,9 @@
+#include <cstddef>
 #include <array>
 #include <ostream>
 #include <string>
 #include <insertionfinder/twist.hpp>
+using std::size_t;
 using InsertionFinder::Rotation;
 
 

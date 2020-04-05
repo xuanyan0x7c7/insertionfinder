@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstring>
 #include <array>
 #include <insertionfinder/cube.hpp>

@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <mutex>
 #include <vector>
 #include <insertionfinder/algorithm.hpp>

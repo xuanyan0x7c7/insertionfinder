@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <array>
 #include <optional>
 #include <insertionfinder/algorithm.hpp>
