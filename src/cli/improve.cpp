@@ -45,7 +45,11 @@ namespace {
 
     struct StandardPrinter: Printer {
         void print_case_information(const Algorithm& skeleton) override {
-            std::cout << "Skeleton: " << skeleton << std::endl;
+            std::cout << "Skeleton: " << skeleton;
+            if (skeleton.length()) {
+                std::cout << " (" << skeleton.length() << "f)";
+            }
+            std::cout << std::endl;
         }
 
         void print_result(const Algorithm& skeleton, const Improver& improver, Improver::Result result) override {

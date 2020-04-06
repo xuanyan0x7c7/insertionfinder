@@ -57,7 +57,11 @@ namespace {
     struct StandardPrinter: Printer {
         void print_case_information(const Algorithm& scramble, const Algorithm& skeleton, CycleStatus status) override {
             std::cout << "Scramble: " << scramble << std::endl;
-            std::cout << "Skeleton: " << skeleton << std::endl;
+            std::cout << "Skeleton: " << skeleton;
+            if (skeleton.length()) {
+                std::cout << " (" << skeleton.length() << "f)";
+            }
+            std::cout << std::endl;
             std::cout << "The cube ";
             if (!status.parity && status.corner_cycles == 0 && status.edge_cycles == 0 && status.center_cycles == 0) {
                 std::cout << "is already solved";
