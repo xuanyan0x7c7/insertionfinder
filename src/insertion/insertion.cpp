@@ -14,35 +14,39 @@ std::ostream& operator<<(std::ostream& out, const Insertion& insertion) {
 }
 
 void Insertion::print(std::ostream& out) const {
-    const Algorithm& skeleton = this->skeleton;
+    Algorithm result = this->skeleton.insert(*this->insertion, this->insert_place).first;
     size_t insert_place = this->insert_place;
     if (insert_place > 0) {
-        skeleton.print(out, 0, insert_place);
+        this->skeleton.print(out, 0, insert_place);
         out << ' ';
     }
     out << termcolor::green << "[@]" << termcolor::reset;
-    if (insert_place < skeleton.length()) {
+    if (insert_place < this->skeleton.length()) {
         out << ' ';
-        skeleton.print(out, insert_place, skeleton.length());
+        this->skeleton.print(out, insert_place, this->skeleton.length());
     }
     out << std::endl
         << termcolor::bold << "Insert at @: " << termcolor::reset
-        << termcolor::green << *this->insertion << termcolor::reset;
+        << termcolor::green << *this->insertion << termcolor::reset
+        << termcolor::italic << " (+" << this->insertion->length() << " -"
+        << this->skeleton.length() + this->insertion->length() - result.length() << ')' << termcolor::reset;
 }
 
 void Insertion::print(std::ostream& out, size_t index) const {
-    const Algorithm& skeleton = this->skeleton;
+    Algorithm result = this->skeleton.insert(*this->insertion, this->insert_place).first;
     size_t insert_place = this->insert_place;
     if (insert_place > 0) {
-        skeleton.print(out, 0, insert_place);
+        this->skeleton.print(out, 0, insert_place);
         out << ' ';
     }
     out << termcolor::green << "[@" << index + 1 << ']' << termcolor::reset;
-    if (insert_place < skeleton.length()) {
+    if (insert_place < this->skeleton.length()) {
         out << ' ';
-        skeleton.print(out, insert_place, skeleton.length());
+        this->skeleton.print(out, insert_place, this->skeleton.length());
     }
     out << std::endl
         << termcolor::bold << "Insert at @" << index + 1 << ": " << termcolor::reset
-        << termcolor::green << *this->insertion << termcolor::reset;
+        << termcolor::green << *this->insertion << termcolor::reset
+        << termcolor::italic << " (+" << this->insertion->length() << " -"
+        << this->skeleton.length() + this->insertion->length() - result.length() << ')' << termcolor::reset;
 }
