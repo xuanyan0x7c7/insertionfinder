@@ -14,6 +14,7 @@
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/termcolor.hpp>
 #include <insertionfinder/finder/finder.hpp>
 #include <insertionfinder/finder/brute-force.hpp>
 #include <insertionfinder/finder/greedy.hpp>
@@ -56,10 +57,10 @@ namespace {
 
     struct StandardPrinter: Printer {
         void print_case_information(const Algorithm& scramble, const Algorithm& skeleton, CycleStatus status) override {
-            std::cout << "Scramble: " << scramble << std::endl;
-            std::cout << "Skeleton: " << skeleton;
+            std::cout << termcolor::bold << "Scramble: " << termcolor::reset << scramble << std::endl;
+            std::cout << termcolor::bold << "Skeleton: " << termcolor::reset << skeleton;
             if (skeleton.length()) {
-                std::cout << " (" << skeleton.length() << "f)";
+                std::cout << " (" << termcolor::yellow << skeleton.length() << termcolor::reset << "f)";
             }
             std::cout << std::endl;
             std::cout << "The cube ";
@@ -116,7 +117,9 @@ namespace {
                 }
                 for (size_t index = 0; index < solutions.size(); ++index) {
                     const Solution& solution = solutions[index];
-                    std::cout << std::endl << "Solution #" << index + 1 << std::endl << solution << std::endl;
+                    std::cout << std::endl
+                        << termcolor::bold << "Solution #" << index + 1 << termcolor::reset << std::endl
+                        << solution << std::endl;
                 }
             } else {
                 if (result.status == FinderStatus::parity_algorithms_needed) {

@@ -5,6 +5,7 @@ nobase_include_HEADERS = \
     insertionfinder/config.h \
     insertionfinder/cube.hpp \
     insertionfinder/insertion.hpp \
+    insertionfinder/termcolor.hpp \
     insertionfinder/twist.hpp \
     insertionfinder/utils.hpp \
     insertionfinder/finder/brute-force.hpp \

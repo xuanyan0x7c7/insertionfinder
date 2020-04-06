@@ -14,6 +14,7 @@
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/termcolor.hpp>
 #include <insertionfinder/improver/improver.hpp>
 #include <insertionfinder/improver/slice.hpp>
 #include "../utils/encoding.hpp"
@@ -45,9 +46,9 @@ namespace {
 
     struct StandardPrinter: Printer {
         void print_case_information(const Algorithm& skeleton) override {
-            std::cout << "Skeleton: " << skeleton;
+            std::cout << termcolor::bold << "Skeleton: " << termcolor::reset << skeleton;
             if (skeleton.length()) {
-                std::cout << " (" << skeleton.length() << "f)";
+                std::cout << " (" << termcolor::yellow << skeleton.length() << termcolor::reset << "f)";
             }
             std::cout << std::endl;
         }
@@ -59,7 +60,9 @@ namespace {
             } else {
                 for (size_t index = 0; index < solutions.size(); ++index) {
                     const Solution& solution = solutions[index];
-                    std::cout << std::endl << "Improvement #" << index + 1 << std::endl << solution << std::endl;
+                    std::cout << std::endl
+                        << termcolor::bold << "Improvement #" << index + 1 << termcolor::reset << std::endl
+                        << solution << std::endl;
                 }
             }
             Details::print_duration(std::cout, result.duration);

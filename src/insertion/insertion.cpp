@@ -2,6 +2,7 @@
 #include <ostream>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/insertion.hpp>
+#include <insertionfinder/termcolor.hpp>
 using std::size_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::Insertion;
@@ -19,13 +20,14 @@ void Insertion::print(std::ostream& out) const {
         skeleton.print(out, 0, insert_place);
         out << ' ';
     }
-    out << "[@]";
+    out << termcolor::green << "[@]" << termcolor::reset;
     if (insert_place < skeleton.length()) {
         out << ' ';
         skeleton.print(out, insert_place, skeleton.length());
     }
-    out << std::endl;
-    out << "Insert at @: " << *this->insertion;
+    out << std::endl
+        << termcolor::bold << "Insert at @: " << termcolor::reset
+        << termcolor::green << *this->insertion << termcolor::reset;
 }
 
 void Insertion::print(std::ostream& out, size_t index) const {
@@ -35,11 +37,12 @@ void Insertion::print(std::ostream& out, size_t index) const {
         skeleton.print(out, 0, insert_place);
         out << ' ';
     }
-    out << "[@" << index + 1 << ']';
+    out << termcolor::green << "[@" << index + 1 << ']' << termcolor::reset;
     if (insert_place < skeleton.length()) {
         out << ' ';
         skeleton.print(out, insert_place, skeleton.length());
     }
-    out << std::endl;
-    out << "Insert at @" << index + 1 << ": " << *this->insertion;
+    out << std::endl
+        << termcolor::bold << "Insert at @" << index + 1 << ": " << termcolor::reset
+        << termcolor::green << *this->insertion << termcolor::reset;
 }
