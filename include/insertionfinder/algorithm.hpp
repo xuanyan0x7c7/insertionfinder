@@ -7,6 +7,7 @@
 #include <limits>
 #include <ostream>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 #include <insertionfinder/twist.hpp>
@@ -87,6 +88,8 @@ namespace InsertionFinder {
     public:
         friend std::ostream& ::operator<<(std::ostream& out, const Algorithm& algorithm);
         void print(std::ostream& out, std::size_t begin, std::size_t end) const;
+        void print(std::ostream& out, const std::vector<int>& marks) const;
+        void print(std::ostream& out, const std::vector<int>& marks, std::size_t begin, std::size_t end) const;
         std::string str() const;
     public:
         void save_to(std::ostream& out) const;
@@ -108,10 +111,13 @@ namespace InsertionFinder {
         }
     private:
         std::size_t cancel_moves();
+        std::vector<int> cancel_moves_return_marks();
     public:
         void detect_rotation() noexcept;
         std::pair<std::uint32_t, std::uint32_t> get_insert_place_mask(std::size_t insert_place) const;
         std::pair<Algorithm, std::size_t> insert(const Algorithm& insertion, std::size_t insert_place) const;
+        std::tuple<Algorithm, std::vector<int>, std::vector<int>>
+        insert_return_marks(const Algorithm& insertion, std::size_t insert_place) const;
         bool is_worthy_insertion(
             const InsertionAlgorithm& insertion, std::size_t insert_place,
             std::pair<std::uint32_t, std::uint32_t> insert_place_mask,

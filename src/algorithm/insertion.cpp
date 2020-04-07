@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <functional>
 #include <limits>
+#include <tuple>
 #include <utility>
+#include <vector>
 #include <range/v3/all.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
@@ -21,7 +23,6 @@ size_t Algorithm::cancel_moves() {
     auto end = this->twists.cend();
     auto p = begin - 1;
     auto needle = end;
-
     for (auto q = begin; q != end; ++q) {
         if (p < begin || *p >> 3 != *q >> 3) {
             *++p = *q;
@@ -30,8 +31,7 @@ size_t Algorithm::cancel_moves() {
                 if (needle > p) {
                     needle = p;
                 }
-                uint_fast8_t orientation = (*(p - 1) + *q) & 3;
-                if (orientation == 0) {
+                if (uint_fast8_t orientation = (*(p - 1) + *q) & 3; orientation == 0) {
                     *(p - 1) = *p;
                     --p;
                 } else {
@@ -41,8 +41,7 @@ size_t Algorithm::cancel_moves() {
                 *++p = *q;
             }
         } else {
-            uint_fast8_t orientation = (*p + *q) & 3;
-            if (orientation == 0) {
+            if (uint_fast8_t orientation = (*p + *q) & 3; orientation == 0) {
                 --p;
             } else {
                 *p = (*p & ~3) | orientation;
@@ -52,9 +51,54 @@ size_t Algorithm::cancel_moves() {
             }
         }
     }
-
     this->twists.resize(p + 1 - begin);
     return needle - begin;
+}
+
+std::vector<int> Algorithm::cancel_moves_return_marks() {
+    auto& twists = this->twists;
+    int length = twists.size();
+    std::vector<std::vector<int>> stacks(length);
+    int y = -1;
+    for (int x = 0; x < length; ++x) {
+        if (y < 0 || twists[y] >> 3 != twists[x] >> 3) {
+            twists[++y] = twists[x];
+            stacks[y].push_back(x);
+        } else if (twists[y] >> 2 != twists[x] >> 2) {
+            if (y > 0 && twists[y - 1] >> 3 == twists[y] >> 3) {
+                if (uint_fast8_t orientation = (twists[y - 1] + twists[x]) & 3; orientation == 0) {
+                    twists[y - 1] = twists[y];
+                    stacks[y - 1].swap(stacks[y]);
+                    stacks[y--].clear();
+                } else {
+                    twists[y - 1] = (twists[y - 1] & ~3) | orientation;
+                    stacks[y - 1].push_back(x);
+                }
+            } else {
+                twists[++y] = twists[x];
+                stacks[y].push_back(x);
+            }
+        } else {
+            if (uint_fast8_t orientation = (twists[y] + twists[x]) & 3; orientation == 0) {
+                stacks[y--].clear();
+            } else {
+                twists[y] = (twists[y] & ~3) | orientation;
+                stacks[y].push_back(x);
+            }
+        }
+    }
+    this->twists.resize(y + 1);
+    std::vector<int> marks(length, 2);
+    for (const auto& list: stacks) {
+        if (list.size() == 1) {
+            marks[list.front()] = 0;
+        } else {
+            for (int x: list) {
+                marks[x] = 1;
+            }
+        }
+    }
+    return marks;
 }
 
 
@@ -92,6 +136,30 @@ std::pair<Algorithm, size_t> Algorithm::insert(const Algorithm& insertion, size_
     }
     size_t place = result.cancel_moves();
     return {result, std::min(place, insert_place + 1)};
+}
+
+std::tuple<Algorithm, std::vector<int>, std::vector<int>>
+Algorithm::insert_return_marks(const Algorithm& insertion, size_t insert_place) const {
+    std::tuple<Algorithm, std::vector<int>, std::vector<int>> result;
+    Algorithm& algorithm = std::get<0>(result);
+    auto& skeleton_marks = std::get<1>(result);
+    auto& insertion_marks = std::get<2>(result);
+    algorithm.twists.reserve(this->twists.size() + insertion.twists.size());
+    algorithm.twists.assign(this->twists.cbegin(), this->twists.cbegin() + insert_place);
+    algorithm.twists.insert(algorithm.twists.cend(), insertion.twists.cbegin(), insertion.twists.cend());
+    if (insertion.rotation == 0) {
+        algorithm.twists.insert(algorithm.twists.cend(), this->twists.cbegin() + insert_place, this->twists.cend());
+    } else {
+        for (Twist twist: ranges::views::slice(this->twists, insert_place, ranges::end)) {
+            algorithm.twists.push_back(twist * insertion.rotation.inverse());
+        }
+    }
+    auto marks = algorithm.cancel_moves_return_marks();
+    skeleton_marks.reserve(this->twists.size());
+    skeleton_marks.assign(marks.cbegin(), marks.cbegin() + insert_place);
+    skeleton_marks.insert(skeleton_marks.cend(), marks.cbegin() + insert_place + insertion.twists.size(), marks.cend());
+    insertion_marks.assign(marks.cbegin() + insert_place, marks.cbegin() + insert_place + insertion.twists.size());
+    return result;
 }
 
 

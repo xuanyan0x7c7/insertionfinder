@@ -14,6 +14,7 @@
 #include <range/v3/all.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
+#include <insertionfinder/termcolor.hpp>
 #include <insertionfinder/twist.hpp>
 #include "utils.hpp"
 using std::size_t;
@@ -90,8 +91,11 @@ int Algorithm::compare(const Algorithm& lhs, const Algorithm& rhs) noexcept {
 
 std::ostream& operator<<(std::ostream& out, const Algorithm& algorithm) {
     algorithm.print(out, 0, algorithm.twists.size());
-    if (algorithm.rotation && !algorithm.twists.empty()) {
-        out << ' ' << algorithm.rotation;
+    if (algorithm.rotation) {
+        if (!algorithm.twists.empty()) {
+            out << ' ';
+        }
+        out << algorithm.rotation;
     }
     return out;
 }
@@ -103,6 +107,39 @@ void Algorithm::print(std::ostream& out, size_t begin, size_t end) const {
     out << this->twists[begin];
     for (Twist twist: ranges::views::slice(this->twists, begin + 1, end)) {
         out << ' ' << twist;
+    }
+}
+
+void Algorithm::print(std::ostream& out, const std::vector<int>& marks) const {
+    this->print(out, marks, 0, this->twists.size());
+    if (this->rotation) {
+        if (!this->twists.empty()) {
+            out << ' ';
+        }
+        out << this->rotation;
+    }
+}
+
+void Algorithm::print(std::ostream& out, const std::vector<int>& marks, size_t begin, size_t end) const {
+    if (begin >= end) {
+        return;
+    }
+    for (size_t i = begin; i < end; ++i) {
+        if (i > begin) {
+            out << ' ';
+        }
+        switch (marks[i]) {
+        case 1:
+            out << termcolor::green;
+            break;
+        case 2:
+            out << termcolor::green << termcolor::crossed;
+            break;
+        }
+        out << this->twists[i];
+        if (marks[i]) {
+            out << termcolor::reset;
+        }
     }
 }
 
