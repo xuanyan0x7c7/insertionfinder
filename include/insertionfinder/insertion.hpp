@@ -6,13 +6,6 @@
 #include <insertionfinder/algorithm.hpp>
 
 namespace InsertionFinder {
-    class Insertion;
-    class Solution;
-};
-std::ostream& operator<<(std::ostream&, const InsertionFinder::Insertion&);
-std::ostream& operator<<(std::ostream&, const InsertionFinder::Solution&);
-
-namespace InsertionFinder {
     struct Insertion {
         Algorithm skeleton;
         std::size_t insert_place;
@@ -27,8 +20,15 @@ namespace InsertionFinder {
             std::size_t insert_place = 0,
             const Algorithm* insertion = nullptr
         ): skeleton(std::move(skeleton)), insert_place(insert_place), insertion(insertion) {}
-        void print(std::ostream&) const;
-        void print(std::ostream&, std::size_t index) const;
+        void print(std::ostream& out, std::size_t index) const;
+    };
+
+    struct MergedInsertion {
+        Algorithm skeleton;
+        Algorithm final_solution;
+        std::vector<std::pair<std::size_t, std::vector<std::size_t>>> insert_places;
+        std::vector<Algorithm> insertions;
+        void print(std::ostream& out, std::size_t start_index) const;
     };
 
     struct Solution {
@@ -40,5 +40,7 @@ namespace InsertionFinder {
             final_solution(final_solution), insertions(insertions) {}
         Solution(const Algorithm& final_solution, std::vector<Insertion>&& insertions):
             final_solution(final_solution), insertions(std::move(insertions)) {}
+        std::vector<MergedInsertion> merge_insertions(const Algorithm& skeleton) const;
+        void print(std::ostream& _opaque_pthread_condattr_t, const Algorithm& skeleton) const;
     };
 };

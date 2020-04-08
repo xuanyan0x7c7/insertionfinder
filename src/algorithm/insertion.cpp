@@ -18,7 +18,7 @@ using InsertionFinder::InsertionAlgorithm;
 namespace Details = InsertionFinder::Details;
 
 
-size_t Algorithm::cancel_moves() {
+size_t Algorithm::cancel_moves() noexcept {
     auto begin = this->twists.begin();
     auto end = this->twists.cend();
     auto p = begin - 1;

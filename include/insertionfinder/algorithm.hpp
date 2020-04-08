@@ -110,7 +110,7 @@ namespace InsertionFinder {
             return *this += Algorithm(std::forward<T>(rhs));
         }
     private:
-        std::size_t cancel_moves();
+        std::size_t cancel_moves() noexcept;
         std::vector<int> cancel_moves_return_marks();
     public:
         void detect_rotation() noexcept;
@@ -132,7 +132,7 @@ namespace InsertionFinder {
             std::swap(this->twists[place - 1], this->twists[place]);
         }
     public:
-        void simplify() {
+        void simplify() noexcept {
             this->rotation = 0;
             this->cancel_moves();
         }

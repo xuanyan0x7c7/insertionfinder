@@ -8,15 +8,21 @@ using InsertionFinder::Algorithm;
 using InsertionFinder::Solution;
 
 
-std::ostream& operator<<(std::ostream& out, const Solution& solution) {
-    for (size_t index = 0; index < solution.insertions.size(); ++index) {
-        solution.insertions[index].print(out, index);
+void Solution::print(std::ostream& out, const Algorithm& skeleton) const {
+    for (size_t index = 0; index < this->insertions.size(); ++index) {
+        this->insertions[index].print(out, index);
         out << std::endl;
     }
+    out << termcolor::bold << "Merged Insertions:" << termcolor::reset << std::endl;
+    size_t start_index = 0;
+    for (const auto& solution: this->merge_insertions(skeleton)) {
+        solution.print(out, start_index);
+        out << std::endl;
+        start_index += solution.insertions.size();
+    }
     out << termcolor::bold << "Total moves: " << termcolor::reset
-        << termcolor::yellow << solution.final_solution.length() << termcolor::reset << ", "
-        << termcolor::yellow << solution.cancellation << termcolor::reset
-        << " move" << (solution.cancellation == 1 ? "" : "s") << " cancelled." << std::endl
-        << termcolor::bold << "Final solution: " << termcolor::reset << solution.final_solution;
-    return out;
+        << termcolor::yellow << this->final_solution.length() << termcolor::reset << ", "
+        << termcolor::yellow << this->cancellation << termcolor::reset
+        << " move" << (this->cancellation == 1 ? "" : "s") << " cancelled." << std::endl
+        << termcolor::bold << "Final solution: " << termcolor::reset << this->final_solution;
 }

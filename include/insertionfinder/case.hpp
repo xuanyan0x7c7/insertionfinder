@@ -70,7 +70,7 @@ namespace InsertionFinder {
             return this->list;
         }
     public:
-        bool contains_algorithm(const Algorithm& algorithm) const {
+        bool contains_algorithm(const Algorithm& algorithm) const noexcept {
             return ranges::find(this->list, algorithm) != this->list.cend();
         }
         template<class T> void add_algorithm(T&& algorithm) {
@@ -83,7 +83,7 @@ namespace InsertionFinder {
                 this->add_algorithm(std::move(algorithm));
             }
         }
-        void sort_algorithms() {
+        void sort_algorithms() noexcept {
             ranges::sort(this->list);
         }
     };

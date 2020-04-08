@@ -61,8 +61,9 @@ namespace {
                 for (size_t index = 0; index < solutions.size(); ++index) {
                     const Solution& solution = solutions[index];
                     std::cout << std::endl
-                        << termcolor::bold << "Improvement #" << index + 1 << termcolor::reset << std::endl
-                        << solution << std::endl;
+                        << termcolor::bold << "Improvement #" << index + 1 << termcolor::reset << std::endl;
+                    solution.print(std::cout, skeleton);
+                    std::cout << std::endl;
                 }
             }
             Details::print_duration(std::cout, result.duration);
