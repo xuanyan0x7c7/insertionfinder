@@ -6,7 +6,6 @@
 #include <tuple>
 #include <utility>
 #include <vector>
-#include <range/v3/all.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 #include "utils.hpp"
@@ -130,8 +129,8 @@ std::pair<Algorithm, size_t> Algorithm::insert(const Algorithm& insertion, size_
     if (insertion.rotation == 0) {
         result.twists.insert(result.twists.cend(), this->twists.cbegin() + insert_place, this->twists.cend());
     } else {
-        for (Twist twist: ranges::views::slice(this->twists, insert_place, ranges::end)) {
-            result.twists.push_back(twist * insertion.rotation.inverse());
+        for (size_t index = insert_place; index < this->twists.size(); ++index) {
+            result.twists.push_back(this->twists[index] * insertion.rotation.inverse());
         }
     }
     size_t place = result.cancel_moves();
@@ -150,8 +149,8 @@ Algorithm::insert_return_marks(const Algorithm& insertion, size_t insert_place) 
     if (insertion.rotation == 0) {
         algorithm.twists.insert(algorithm.twists.cend(), this->twists.cbegin() + insert_place, this->twists.cend());
     } else {
-        for (Twist twist: ranges::views::slice(this->twists, insert_place, ranges::end)) {
-            algorithm.twists.push_back(twist * insertion.rotation.inverse());
+        for (size_t index = insert_place; index < this->twists.size(); ++index) {
+            algorithm.twists.push_back(this->twists[index] * insertion.rotation.inverse());
         }
     }
     auto marks = algorithm.cancel_moves_return_marks();

@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <algorithm>
 #include <array>
 #include <functional>
 #include <istream>
@@ -11,7 +12,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <range/v3/all.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/termcolor.hpp>
@@ -58,9 +58,10 @@ Algorithm::Algorithm(const char* algorithm_string) {
         }
         const std::string match_string = match_result.str(1);
         if (
-            auto pattern = ranges::find_if(pattern_table, [&](const Pattern& pattern) {
-                return pattern.pattern_string == match_string;
-            });
+            auto pattern = std::find_if(
+                std::begin(pattern_table), std::end(pattern_table),
+                [&](const Pattern& pattern) {return pattern.pattern_string == match_string;}
+            );
             pattern == pattern_table + std::size(pattern_table)
         ) {
             this->twists.push_back(Twist(match_string) * rotation);
@@ -105,8 +106,8 @@ void Algorithm::print(std::ostream& out, size_t begin, size_t end) const {
         return;
     }
     out << this->twists[begin];
-    for (Twist twist: ranges::views::slice(this->twists, begin + 1, end)) {
-        out << ' ' << twist;
+    for (size_t index = begin; ++index < end;) {
+        out << ' ' << this->twists[index];
     }
 }
 
@@ -260,7 +261,7 @@ void Algorithm::rotate(Rotation rotation) {
 }
 
 void Algorithm::inverse() noexcept {
-    ranges::reverse(this->twists);
+    std::reverse(this->twists.begin(), this->twists.end());
     this->rotate(this->rotation);
     this->rotation = this->rotation.inverse();
 }
@@ -268,8 +269,8 @@ void Algorithm::inverse() noexcept {
 Algorithm Algorithm::inverse(const Algorithm& algorithm) {
     Algorithm result;
     result.twists.reserve(algorithm.twists.size());
-    for (Twist twist: ranges::views::reverse(algorithm.twists)) {
-        result.twists.push_back(twist * algorithm.rotation);
+    for (auto iter = algorithm.twists.crbegin(); iter != algorithm.twists.crend(); ++iter) {
+        result.twists.push_back(*iter * algorithm.rotation);
     }
     result.rotation = algorithm.rotation.inverse();
     return result;

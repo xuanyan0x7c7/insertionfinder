@@ -1,11 +1,11 @@
 #pragma once
 #include <cstdint>
+#include <algorithm>
 #include <exception>
 #include <istream>
 #include <ostream>
 #include <utility>
 #include <vector>
-#include <range/v3/all.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/twist.hpp>
@@ -71,7 +71,7 @@ namespace InsertionFinder {
         }
     public:
         bool contains_algorithm(const Algorithm& algorithm) const noexcept {
-            return ranges::find(this->list, algorithm) != this->list.cend();
+            return std::find(this->list.cbegin(), this->list.cend(), algorithm) != this->list.cend();
         }
         template<class T> void add_algorithm(T&& algorithm) {
             if (!this->contains_algorithm(algorithm)) {
@@ -84,7 +84,7 @@ namespace InsertionFinder {
             }
         }
         void sort_algorithms() noexcept {
-            ranges::sort(this->list);
+            std::sort(this->list.begin(), this->list.end());
         }
     };
 };

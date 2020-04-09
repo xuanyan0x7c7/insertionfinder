@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <memory>
@@ -6,7 +7,6 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <range/v3/all.hpp>
 #include <boost/program_options.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/case.hpp>
@@ -37,7 +37,9 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
             std::cerr << "Failed to open file " << name << std::endl;
             continue;
         }
-        for (std::string line: ranges::getlines(fin)) {
+        while (!fin.eof()) {
+            std::string line;
+            std::getline(fin, line);
             Algorithm algorithm;
             try {
                 algorithm = Algorithm(line);
@@ -78,7 +80,7 @@ void CLI::generate_algorithms(const po::variables_map& vm) {
     for (auto& node: map) {
         cases.emplace_back(std::move(node.second));
     }
-    ranges::sort(cases, [](const Case& x, const Case& y) {return Case::compare(x, y) < 0;});
+    std::sort(cases.begin(), cases.end(), [](const Case& x, const Case& y) {return Case::compare(x, y) < 0;});
 
     std::shared_ptr<std::ostream> out;
     if (algfilenames.empty()) {

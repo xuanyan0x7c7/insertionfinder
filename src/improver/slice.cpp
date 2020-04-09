@@ -1,7 +1,7 @@
 #include <mutex>
+#include <algorithm>
 #include <utility>
 #include <vector>
-#include <range/v3/all.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <insertionfinder/improver/improver.hpp>
 #include <insertionfinder/improver/slice.hpp>
@@ -28,7 +28,7 @@ void SliceImprover::search_core(const SearchParams& params) {
             }
             result.emplace_back(std::move(previous_skeleton), step.insert_place, step.insertion);
         }
-        ranges::actions::reverse(result);
+        std::reverse(result.begin(), result.end());
         this->solutions.emplace_back(algorithm, move(result));
     }
 }

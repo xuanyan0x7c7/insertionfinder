@@ -1,10 +1,10 @@
 #include <cstddef>
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <mutex>
 #include <utility>
 #include <vector>
-#include <range/v3/all.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/insertion.hpp>
@@ -75,19 +75,30 @@ void GreedyFinder::search_core(const SearchParams& params) {
     for (int depth = this->partial_states.size(); --depth > 0;) {
         auto& solution_list = this->partial_solution_list[depth];
         PartialState& state = this->partial_states[depth];
-        solution_list |=
-            ranges::actions::remove_if([&state, this](const auto& x) {
+        solution_list.erase(
+            std::remove_if(solution_list.begin(), solution_list.end(), [&state, this](const auto& x) {
                 return x.first.length() > state.fewest_moves + this->options.greedy_threshold;
-            })
-            | ranges::actions::sort([](const auto& x, const auto& y) {
+            }),
+            solution_list.end()
+        );
+        std::sort(
+            solution_list.begin(), solution_list.end(),
+            [](const auto& x, const auto& y) {
                 if (int comparison = Algorithm::compare(x.first, y.first); comparison < 0) {
                     return true;
                 } else if (comparison > 0) {
                     return false;
                 }
                 return x.second.cancellation < y.second.cancellation;
-            })
-            | ranges::actions::unique([](const auto& x, const auto& y) {return x.first == y.first;});
+            }
+        );
+        solution_list.erase(
+            std::unique(
+                solution_list.begin(), solution_list.end(),
+                [](const auto& x, const auto& y) {return x.first == y.first;}
+            ),
+            solution_list.end()
+        );
 
         if (this->verbose && (!solution_list.empty() || (depth & 1) == 0)) {
             std::cerr << "Searching depth " << depth / 2.0 << ": "
@@ -116,7 +127,10 @@ void GreedyFinder::search_core(const SearchParams& params) {
     for (const Algorithm* skeleton: skeletons) {
         const Algorithm* current_skeleton = skeleton;
         std::vector<Insertion> result;
-        while (ranges::all_of(this->skeletons, [&](const auto& x) {return x.first != *current_skeleton;})) {
+        while (std::all_of(
+            this->skeletons.cbegin(), this->skeletons.cend(),
+            [&](const auto& x) {return x.first != *current_skeleton;}
+        )) {
             const SolvingStep& step = this->partial_solution_map.at(*current_skeleton);
             current_skeleton = step.skeleton;
             Algorithm previous_skeleton = *step.skeleton;
@@ -125,7 +139,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
             }
             result.emplace_back(std::move(previous_skeleton), step.insert_place, step.insertion);
         }
-        ranges::actions::reverse(result);
+        std::reverse(result.begin(), result.end());
         this->solutions.emplace_back(*skeleton, move(result));
     }
 }

@@ -1,8 +1,8 @@
 #include <cstddef>
 #include <cstdint>
+#include <algorithm>
 #include <utility>
 #include <vector>
-#include <range/v3/all.hpp>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/twist.hpp>
 #include "utils.hpp"
@@ -43,7 +43,8 @@ std::vector<Algorithm> Algorithm::generate_symmetrics() const {
         algorithm.normalize();
         algorithm.detect_rotation();
     }
-    result |= ranges::actions::sort | ranges::actions::unique;
+    std::sort(result.begin(), result.end());
+    result.erase(std::unique(result.begin(), result.end()), result.end());
     return result;
 }
 
@@ -61,8 +62,8 @@ std::vector<Algorithm> Algorithm::generate_rotation_conjugates() const {
         algorithm.rotation = base.rotation;
         algorithm.twists.reserve(length);
         algorithm.twists.assign(base.twists.cbegin() + offset, base.twists.cend());
-        for (Twist twist: ranges::views::slice(base.twists, 0, offset)) {
-            algorithm.twists.push_back(twist * base.rotation.inverse());
+        for (size_t index = 0; index < offset; ++index) {
+            algorithm.twists.push_back(base.twists[index] * base.rotation.inverse());
         }
         algorithm.cancel_moves();
         if (algorithm.twists.size() == length) {
@@ -77,8 +78,8 @@ std::vector<Algorithm> Algorithm::generate_rotation_conjugates() const {
             swapped_algorithm.twists.reserve(length);
             swapped_algorithm.twists.assign(base.twists.cbegin() + offset, base.twists.cend());
             swapped_algorithm.twists.front() = base.twists[offset - 1];
-            for (Twist twist: ranges::views::slice(base.twists, 0, offset - 1)) {
-                swapped_algorithm.twists.push_back(twist * base.rotation.inverse());
+            for (size_t index = 0; index < offset - 1; ++index) {
+                swapped_algorithm.twists.push_back(base.twists[index] * base.rotation.inverse());
             }
             swapped_algorithm.twists.push_back(base.twists[offset] * base.rotation.inverse());
             swapped_algorithm.cancel_moves();
@@ -146,7 +147,8 @@ std::vector<Algorithm> Algorithm::generate_rotation_conjugates() const {
             }
         }
     }
-    result |= ranges::actions::sort | ranges::actions::unique;
+    std::sort(result.begin(), result.end());
+    result.erase(std::unique(result.begin(), result.end()), result.end());
     return result;
 }
 
@@ -157,6 +159,7 @@ std::vector<Algorithm> Algorithm::generate_similars() const {
             result.push_back(std::move(alg));
         }
     }
-    result |= ranges::actions::sort | ranges::actions::unique;
+    std::sort(result.begin(), result.end());
+    result.erase(std::unique(result.begin(), result.end()), result.end());
     return result;
 }

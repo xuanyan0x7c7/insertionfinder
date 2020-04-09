@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <limits>
@@ -7,7 +8,6 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <range/v3/all.hpp>
 #include <boost/program_options.hpp>
 #include <univalue.h>
 #include <insertionfinder/fallbacks/filesystem.hpp>
@@ -157,7 +157,7 @@ void CLI::find_improvements(const po::variables_map& vm) {
     for (auto& node: map) {
         cases.emplace_back(std::move(node.second));
     }
-    ranges::sort(cases, [](const Case& x, const Case& y) {return Case::compare(x, y) < 0;});
+    std::sort(cases.begin(), cases.end(), [](const Case& x, const Case& y) {return Case::compare(x, y) < 0;});
 
     std::shared_ptr<std::istream> in;
     if (filenames.empty()) {

@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <cstring>
+#include <algorithm>
 #include <chrono>
-#include <range/v3/all.hpp>
 #include <insertionfinder/case.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/insertion.hpp>
@@ -78,8 +78,8 @@ void Finder::search(const SearchParams& params) {
             cancellation -= solution.final_solution.length();
             solution.cancellation = this->skeletons.at(skeleton) + cancellation;
         }
-        ranges::sort(
-            this->solutions,
+        std::sort(
+            this->solutions.begin(), this->solutions.end(),
             [](const Solution& x, const Solution& y) {return x.cancellation < y.cancellation;}
         );
     }

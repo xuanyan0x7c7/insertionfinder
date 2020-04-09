@@ -1,6 +1,6 @@
 #include <cstddef>
+#include <algorithm>
 #include <chrono>
-#include <range/v3/all.hpp>
 #include <insertionfinder/insertion.hpp>
 #include <insertionfinder/improver/improver.hpp>
 using std::size_t;
@@ -20,8 +20,8 @@ void Improver::search(const SearchParams& params) {
         cancellation -= solution.final_solution.length();
         solution.cancellation = cancellation;
     }
-    ranges::sort(
-        this->solutions,
+    std::sort(
+        this->solutions.begin(), this->solutions.end(),
         [](const Solution& x, const Solution& y) {return x.cancellation < y.cancellation;}
     );
     auto end = std::chrono::high_resolution_clock::now();
