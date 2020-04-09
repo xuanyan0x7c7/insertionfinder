@@ -161,6 +161,49 @@ Algorithm::insert_return_marks(const Algorithm& insertion, size_t insert_place) 
     return result;
 }
 
+std::tuple<Algorithm, std::vector<int>, std::vector<std::vector<int>>>
+Algorithm::multi_insert_return_marks(
+    const std::vector<Algorithm>& insertions,
+    const std::vector<std::pair<size_t, std::vector<size_t>>>& insert_places
+) const {
+    std::tuple<Algorithm, std::vector<int>, std::vector<std::vector<int>>> result;
+    Algorithm& algorithm = std::get<0>(result);
+    auto& skeleton_marks = std::get<1>(result);
+    auto& insertion_marks = std::get<2>(result);
+    skeleton_marks.resize(this->twists.size());
+    insertion_marks.resize(insertions.size());
+    std::vector<std::pair<int, std::size_t>> table;
+    Rotation rotation = 0;
+    for (size_t i = 0; i < insert_places.size(); ++i) {
+        for (size_t j = (i == 0 ? 0 : insert_places[i - 1].first); j < insert_places[i].first; ++j) {
+            table.emplace_back(-1, j);
+            algorithm.twists.push_back(this->twists[j] * rotation.inverse());
+        }
+        for (size_t index: insert_places[i].second) {
+            const Algorithm& insertion = insertions[index];
+            insertion_marks[index].resize(insertion.twists.size());
+            for (size_t j = 0; j < insertion.twists.size(); ++j) {
+                table.emplace_back(index, j);
+                algorithm.twists.push_back(insertion.twists[j] * rotation.inverse());
+            }
+            rotation *= insertion.rotation;
+        }
+    }
+    for (size_t j = insert_places.back().first; j < this->twists.size(); ++j) {
+        table.emplace_back(-1, j);
+        algorithm.twists.push_back(this->twists[j] * rotation.inverse());
+    }
+    auto marks = algorithm.cancel_moves_return_marks();
+    for (size_t i = 0; i < marks.size(); ++i) {
+        if (table[i].first == -1) {
+            skeleton_marks[table[i].second] = marks[i];
+        } else {
+            insertion_marks[table[i].first][table[i].second] = marks[i];
+        }
+    }
+    return result;
+}
+
 
 bool Algorithm::is_worthy_insertion(
     const InsertionAlgorithm& insertion, size_t insert_place,

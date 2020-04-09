@@ -118,6 +118,11 @@ namespace InsertionFinder {
         std::pair<Algorithm, std::size_t> insert(const Algorithm& insertion, std::size_t insert_place) const;
         std::tuple<Algorithm, std::vector<int>, std::vector<int>>
         insert_return_marks(const Algorithm& insertion, std::size_t insert_place) const;
+        std::tuple<Algorithm, std::vector<int>, std::vector<std::vector<int>>>
+        multi_insert_return_marks(
+            const std::vector<Algorithm>& insertions,
+            const std::vector<std::pair<std::size_t, std::vector<std::size_t>>>& insert_places
+        ) const;
         bool is_worthy_insertion(
             const InsertionAlgorithm& insertion, std::size_t insert_place,
             std::pair<std::uint32_t, std::uint32_t> insert_place_mask,

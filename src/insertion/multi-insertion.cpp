@@ -101,7 +101,7 @@ bool MultiInsertion::try_insert(const Insertion& insertion) {
     } else if (this->positions[insertion.insert_place] != invalid) {
         this->insert_places_after[this->positions[insertion.insert_place]].push_back(this->insertions.size());
     } else if (this->positions[insertion.insert_place - 1] != invalid) {
-        this->insert_places_before[this->positions[insertion.insert_place] + 1].push_back(this->insertions.size());
+        this->insert_places_before[this->positions[insertion.insert_place - 1] + 1].push_back(this->insertions.size());
     } else {
         return false;
     }
@@ -149,32 +149,32 @@ bool MultiInsertion::try_insert(const Insertion& insertion) {
 
 
 void MergedInsertion::print(std::ostream& out, std::size_t start_index) const {
-    const Algorithm& new_skeleton = this->skeleton;
-    const auto& insert_places = this->insert_places;
-    const auto& insertions = this->insertions;
-    bool skeleton_has_space = insert_places.front().first > 0;
-    new_skeleton.print(out, 0, insert_places.front().first);
-    for (size_t index: insert_places.front().second) {
+    auto [
+        result, skeleton_marks, insertion_masks
+    ] = this->skeleton.multi_insert_return_marks(this->insertions, this->insert_places);
+    bool skeleton_has_space = this->insert_places.front().first > 0;
+    this->skeleton.print(out, skeleton_marks, 0, this->insert_places.front().first);
+    for (size_t index: this->insert_places.front().second) {
         if (skeleton_has_space) {
             out << ' ';
         }
         skeleton_has_space = true;
         out << termcolor::bold << "[@" << start_index + index + 1 << ']' << termcolor::reset;
     }
-    for (size_t i = 1; i < insert_places.size(); ++i) {
+    for (size_t i = 1; i < this->insert_places.size(); ++i) {
         out << ' ';
-        new_skeleton.print(out, insert_places[i - 1].first, insert_places[i].first);
-        for (size_t index: insert_places[i].second) {
+        this->skeleton.print(out, skeleton_marks, this->insert_places[i - 1].first, this->insert_places[i].first);
+        for (size_t index: this->insert_places[i].second) {
             out << termcolor::bold << " [@" << start_index + index + 1 << ']' << termcolor::reset;
         }
     }
-    if (insert_places.back().first < new_skeleton.length()) {
+    if (this->insert_places.back().first < this->skeleton.length()) {
         out << ' ';
-        new_skeleton.print(out, insert_places.back().first, new_skeleton.length());
+        this->skeleton.print(out, skeleton_marks, this->insert_places.back().first, this->skeleton.length());
     }
-    for (size_t i = 0; i < insertions.size(); ++i) {
-        out << std::endl
-            << termcolor::bold << "Insert at @" << start_index + i + 1 << ": " << termcolor::reset << insertions[i];
+    for (size_t i = 0; i < this->insertions.size(); ++i) {
+        out << std::endl << termcolor::bold << "Insert at @" << start_index + i + 1 << ": " << termcolor::reset;
+        this->insertions[i].print(out, insertion_masks[i]);
     }
 }
 
