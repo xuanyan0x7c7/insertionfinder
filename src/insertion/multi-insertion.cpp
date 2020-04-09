@@ -217,7 +217,7 @@ std::vector<MergedInsertion> Solution::merge_insertions(const Algorithm& skeleto
                     break;
                 }
             }
-            insertion.rotate(rotation);
+            insertion.rotate(rotation.inverse());
             insertion.normalize();
             merged_insertion.insertions.emplace_back(std::move(insertion));
         }
