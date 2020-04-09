@@ -73,6 +73,7 @@ void CLI::parse(int argc, char** argv) try {
             "multiple threads"
         )
         ("symmetrics-only", "generate only symmetric algorithms")
+        ("expand-insertions", "show expanded insertions")
         ("json", "use JSON output")
         ("verbose", "verbose");
     cli_options.add(configuration_options);

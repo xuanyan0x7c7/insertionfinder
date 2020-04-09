@@ -23,12 +23,14 @@ namespace InsertionFinder {
         void print(std::ostream& out, std::size_t index) const;
     };
 
+    struct Solution;
+
     struct MergedInsertion {
         Algorithm skeleton;
         Algorithm final_solution;
         std::vector<std::pair<std::size_t, std::vector<std::size_t>>> insert_places;
         std::vector<Algorithm> insertions;
-        void print(std::ostream& out, std::size_t start_index) const;
+        void print(std::ostream& out, std::size_t start_index, const Solution& solution) const;
     };
 
     struct Solution {
@@ -41,6 +43,6 @@ namespace InsertionFinder {
         Solution(const Algorithm& final_solution, std::vector<Insertion>&& insertions):
             final_solution(final_solution), insertions(std::move(insertions)) {}
         std::vector<MergedInsertion> merge_insertions(const Algorithm& skeleton) const;
-        void print(std::ostream& _opaque_pthread_condattr_t, const Algorithm& skeleton) const;
+        void print(std::ostream& _opaque_pthread_condattr_t, const Algorithm& skeleton, bool expand) const;
     };
 };

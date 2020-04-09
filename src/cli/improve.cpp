@@ -39,7 +39,8 @@ namespace {
         virtual void print_case_information(const Algorithm& skeleton) {}
         virtual void print_result(
             const Algorithm& skeleton,
-            const Improver& improver, Improver::Result result
+            const Improver& improver, Improver::Result result,
+            bool expand
         ) = 0;
         virtual ~Printer() = default;
     };
@@ -53,7 +54,11 @@ namespace {
             std::cout << std::endl;
         }
 
-        void print_result(const Algorithm& skeleton, const Improver& improver, Improver::Result result) override {
+        void print_result(
+            const Algorithm& skeleton,
+            const Improver& improver, Improver::Result result,
+            bool expand
+        ) override {
             const auto& solutions = improver.get_solutions();
             if (improver.get_fewest_moves() == skeleton.length()) {
                 std::cout << "No improvements found." << std::endl;
@@ -62,7 +67,7 @@ namespace {
                     const Solution& solution = solutions[index];
                     std::cout << std::endl
                         << termcolor::bold << "Improvement #" << index + 1 << termcolor::reset << std::endl;
-                    solution.print(std::cout, skeleton);
+                    solution.print(std::cout, skeleton, expand);
                     std::cout << std::endl;
                 }
             }
@@ -71,7 +76,11 @@ namespace {
     };
 
     struct JSONPrinter: Printer {
-        void print_result(const Algorithm& skeleton, const Improver& improver, Improver::Result result) override {
+        void print_result(
+            const Algorithm& skeleton,
+            const Improver& improver, Improver::Result result,
+            bool expand
+        ) override {
             UniValue map(UniValue::VOBJ);
             map.pushKV("skeleton", skeleton.str());
             const auto& solutions = improver.get_solutions();
@@ -195,5 +204,5 @@ void CLI::find_improvements(const po::variables_map& vm) {
     );
     size_t max_threads = vm["jobs"].as<size_t>();
     improver->search({max_threads});
-    printer->print_result(skeleton, *improver, improver->get_result());
+    printer->print_result(skeleton, *improver, improver->get_result(), vm.count("expand-insertions"));
 }

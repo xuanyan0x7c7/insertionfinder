@@ -148,7 +148,7 @@ bool MultiInsertion::try_insert(const Insertion& insertion) {
 }
 
 
-void MergedInsertion::print(std::ostream& out, std::size_t start_index) const {
+void MergedInsertion::print(std::ostream& out, std::size_t start_index, const Solution& solution) const {
     auto [
         result, skeleton_marks, insertion_masks
     ] = this->skeleton.multi_insert_return_marks(this->insertions, this->insert_places);
@@ -175,6 +175,12 @@ void MergedInsertion::print(std::ostream& out, std::size_t start_index) const {
     for (size_t i = 0; i < this->insertions.size(); ++i) {
         out << std::endl << termcolor::bold << "Insert at @" << start_index + i + 1 << ": " << termcolor::reset;
         this->insertions[i].print(out, insertion_masks[i]);
+        size_t length_before = solution.insertions[start_index + i].skeleton.length();
+        size_t length_after = start_index + i + 1 >= solution.insertions.size()
+            ? solution.final_solution.length()
+            : solution.insertions[start_index + i + 1].skeleton.length();
+        out << termcolor::dark << termcolor::italic << " (+" << this->insertions[i].length()
+            << " -" << length_before + this->insertions[i].length() - length_after << ')' << termcolor::reset;
     }
 }
 

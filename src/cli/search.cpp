@@ -50,7 +50,8 @@ namespace {
         virtual void print_result(
             const Algorithm& scramble, const Algorithm& skeleton,
             CycleStatus status,
-            const Finder& finder, Finder::Result result
+            const Finder& finder, Finder::Result result,
+            bool expand
         ) = 0;
         virtual ~Printer() = default;
     };
@@ -105,7 +106,8 @@ namespace {
         void print_result(
             const Algorithm& scramble, const Algorithm& skeleton,
             CycleStatus status,
-            const Finder& finder, Finder::Result result
+            const Finder& finder, Finder::Result result,
+            bool expand
         ) override {
             if (result.status == FinderStatus::success) {
                 const auto& solutions = finder.get_solutions();
@@ -119,7 +121,7 @@ namespace {
                     const Solution& solution = solutions[index];
                     std::cout << std::endl
                         << termcolor::bold << "Solution #" << index + 1 << termcolor::reset << std::endl;
-                    solution.print(std::cout, skeleton);
+                    solution.print(std::cout, skeleton, expand);
                     std::cout << std::endl;
                 }
             } else {
@@ -144,7 +146,8 @@ namespace {
         void print_result(
             const Algorithm& scramble, const Algorithm& skeleton,
             CycleStatus status,
-            const Finder& finder, Finder::Result result
+            const Finder& finder, Finder::Result result,
+            bool expand
         ) override {
             UniValue map(UniValue::VOBJ);
             map.pushKV("scramble", scramble.str());
@@ -330,6 +333,7 @@ void CLI::find_insertions(const po::variables_map& vm) {
     printer->print_result(
         scramble, skeleton,
         {parity, corner_cycles, edge_cycles, center_cycles},
-        *finder, finder->get_result()
+        *finder, finder->get_result(),
+        vm.count("expand-insertions")
     );
 }
