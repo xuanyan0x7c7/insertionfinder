@@ -27,6 +27,7 @@ Configurations:
   --parity arg (=1.5)                   count parity as 1/1.5 cycles
   -j [ --jobs ] [=arg(=8)] (=1)         multiple threads
   --symmetrics-only                     generate only symmetric algorithms
+  --expand-insertions                   show expanded insertions
   --json                                use JSON output
   --verbose                             verbose
 ```
