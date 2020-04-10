@@ -5,6 +5,7 @@
 #include <insertionfinder/termcolor.hpp>
 using std::size_t;
 using InsertionFinder::Algorithm;
+using InsertionFinder::MergedInsertion;
 using InsertionFinder::Solution;
 
 
@@ -16,7 +17,7 @@ void Solution::print(std::ostream& out, const Algorithm& skeleton, bool expand) 
         }
     } else {
         size_t start_index = 0;
-        for (const auto& solution: this->merge_insertions(skeleton)) {
+        for (const MergedInsertion& solution: this->merge_insertions(skeleton)) {
             solution.print(out, start_index, *this);
             out << std::endl;
             start_index += solution.insertions.size();
