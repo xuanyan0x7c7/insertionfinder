@@ -56,7 +56,7 @@ size_t Algorithm::cancel_moves() noexcept {
 
 std::vector<int> Algorithm::cancel_moves_return_marks() {
     auto& twists = this->twists;
-    int length = twists.size();
+    int length = this->length();
     std::vector<std::vector<int>> stacks(length);
     int y = -1;
     for (int x = 0; x < length; ++x) {
@@ -102,19 +102,21 @@ std::vector<int> Algorithm::cancel_moves_return_marks() {
 
 
 std::pair<uint32_t, uint32_t> Algorithm::get_insert_place_mask(size_t insert_place) const {
-    const auto& twists = this->twists;
     uint32_t mask_before = 0;
     uint32_t mask_after = 0;
     if (insert_place > 0) {
-        mask_before = Details::twist_mask(twists[insert_place - 1]);
-        if (insert_place > 1 && twists[insert_place - 1] >> 3 == twists[insert_place - 2] >> 3) {
-            mask_before |= Details::twist_mask(twists[insert_place - 2]);
+        mask_before = Details::twist_mask(this->twists[insert_place - 1]);
+        if (insert_place > 1 && this->twists[insert_place - 1] >> 3 == this->twists[insert_place - 2] >> 3) {
+            mask_before |= Details::twist_mask(this->twists[insert_place - 2]);
         }
     }
-    if (insert_place < twists.size()) {
-        mask_after = Details::twist_mask(twists[insert_place]);
-        if (insert_place + 1 < twists.size() && twists[insert_place] >> 3 == twists[insert_place + 1] >> 3) {
-            mask_after |= Details::twist_mask(twists[insert_place + 1]);
+    if (insert_place < this->length()) {
+        mask_after = Details::twist_mask(this->twists[insert_place]);
+        if (
+            insert_place + 1 < this->length()
+            && this->twists[insert_place] >> 3 == this->twists[insert_place + 1] >> 3
+        ) {
+            mask_after |= Details::twist_mask(this->twists[insert_place + 1]);
         }
     }
     return {mask_before, mask_after};
@@ -123,13 +125,13 @@ std::pair<uint32_t, uint32_t> Algorithm::get_insert_place_mask(size_t insert_pla
 
 std::pair<Algorithm, size_t> Algorithm::insert(const Algorithm& insertion, size_t insert_place) const {
     Algorithm result;
-    result.twists.reserve(this->twists.size() + insertion.twists.size());
+    result.twists.reserve(this->length() + insertion.length());
     result.twists.assign(this->twists.cbegin(), this->twists.cbegin() + insert_place);
     result.twists.insert(result.twists.cend(), insertion.twists.cbegin(), insertion.twists.cend());
     if (insertion.rotation == 0) {
         result.twists.insert(result.twists.cend(), this->twists.cbegin() + insert_place, this->twists.cend());
     } else {
-        for (size_t index = insert_place; index < this->twists.size(); ++index) {
+        for (size_t index = insert_place; index < this->length(); ++index) {
             result.twists.push_back(this->twists[index] * insertion.rotation.inverse());
         }
     }
@@ -143,21 +145,21 @@ Algorithm::insert_return_marks(const Algorithm& insertion, size_t insert_place) 
     Algorithm& algorithm = std::get<0>(result);
     auto& skeleton_marks = std::get<1>(result);
     auto& insertion_marks = std::get<2>(result);
-    algorithm.twists.reserve(this->twists.size() + insertion.twists.size());
+    algorithm.twists.reserve(this->length() + insertion.length());
     algorithm.twists.assign(this->twists.cbegin(), this->twists.cbegin() + insert_place);
     algorithm.twists.insert(algorithm.twists.cend(), insertion.twists.cbegin(), insertion.twists.cend());
     if (insertion.rotation == 0) {
         algorithm.twists.insert(algorithm.twists.cend(), this->twists.cbegin() + insert_place, this->twists.cend());
     } else {
-        for (size_t index = insert_place; index < this->twists.size(); ++index) {
+        for (size_t index = insert_place; index < this->length(); ++index) {
             algorithm.twists.push_back(this->twists[index] * insertion.rotation.inverse());
         }
     }
     auto marks = algorithm.cancel_moves_return_marks();
-    skeleton_marks.reserve(this->twists.size());
+    skeleton_marks.reserve(this->length());
     skeleton_marks.assign(marks.cbegin(), marks.cbegin() + insert_place);
-    skeleton_marks.insert(skeleton_marks.cend(), marks.cbegin() + insert_place + insertion.twists.size(), marks.cend());
-    insertion_marks.assign(marks.cbegin() + insert_place, marks.cbegin() + insert_place + insertion.twists.size());
+    skeleton_marks.insert(skeleton_marks.cend(), marks.cbegin() + insert_place + insertion.length(), marks.cend());
+    insertion_marks.assign(marks.cbegin() + insert_place, marks.cbegin() + insert_place + insertion.length());
     return result;
 }
 
@@ -170,7 +172,7 @@ Algorithm::multi_insert_return_marks(
     Algorithm& algorithm = std::get<0>(result);
     auto& skeleton_marks = std::get<1>(result);
     auto& insertion_marks = std::get<2>(result);
-    skeleton_marks.resize(this->twists.size());
+    skeleton_marks.resize(this->length());
     insertion_marks.resize(insertions.size());
     std::vector<std::pair<int, std::size_t>> table;
     Rotation rotation = 0;
@@ -181,15 +183,15 @@ Algorithm::multi_insert_return_marks(
         }
         for (size_t index: insert_places[i].second) {
             const Algorithm& insertion = insertions[index];
-            insertion_marks[index].resize(insertion.twists.size());
-            for (size_t j = 0; j < insertion.twists.size(); ++j) {
+            insertion_marks[index].resize(insertion.length());
+            for (size_t j = 0; j < insertion.length(); ++j) {
                 table.emplace_back(index, j);
                 algorithm.twists.push_back(insertion.twists[j] * rotation.inverse());
             }
             rotation *= insertion.rotation;
         }
     }
-    for (size_t j = insert_places.back().first; j < this->twists.size(); ++j) {
+    for (size_t j = insert_places.back().first; j < this->length(); ++j) {
         table.emplace_back(-1, j);
         algorithm.twists.push_back(this->twists[j] * rotation.inverse());
     }
@@ -210,7 +212,6 @@ bool Algorithm::is_worthy_insertion(
     std::pair<uint32_t, uint32_t> insert_place_mask,
     size_t fewest_twists
 ) const {
-    size_t length = this->twists.size();
     size_t cancellation = 0;
     if (uint32_t begin_mask = insert_place_mask.first & insertion.begin_mask) {
         if (begin_mask & (insertion.set_up_mask | 0xffffff)) {
@@ -229,16 +230,16 @@ bool Algorithm::is_worthy_insertion(
             if (low_mask == 0) {
                 cancellation += 2;
             } else if (low_mask & (low_mask - 1)) {
-                cancellation += (length - insert_place) << 1;
+                cancellation += (this->length() - insert_place) << 1;
             } else {
                 cancellation += 3;
             }
         } else if (low_mask) {
-            cancellation += (length - insert_place) << 1;
+            cancellation += (this->length() - insert_place) << 1;
         } else {
             ++cancellation;
         }
     }
     return fewest_twists == std::numeric_limits<size_t>::max()
-        || length + insertion.twists.size() <= fewest_twists + cancellation;
+        || this->length() + insertion.length() <= fewest_twists + cancellation;
 }

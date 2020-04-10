@@ -23,13 +23,12 @@ namespace {
 
 std::vector<Algorithm> Algorithm::generate_symmetrics() const {
     std::vector<Algorithm> result(96);
-    size_t length = this->twists.size();
     for (size_t i = 0; i < 96; ++i) {
-        result[i].twists.resize(length);
+        result[i].twists.resize(this->length());
     }
     for (size_t rotation = 0; rotation < 24; ++rotation) {
-        for (size_t index = 0; index < length; ++index) {
-            size_t inversed_index = length - 1 - index;
+        for (size_t index = 0; index < this->length(); ++index) {
+            size_t inversed_index = this->length() - 1 - index;
             Twist twist = this->twists[index];
             Twist result_twist = twist * Rotation(rotation);
             result[rotation].twists[index] = result_twist;
@@ -53,7 +52,7 @@ std::vector<Algorithm> Algorithm::generate_rotation_conjugates() const {
     result.push_back(*this);
     result.front().cancel_moves();
     result.front().normalize();
-    size_t length = result.front().twists.size();
+    size_t length = result.front().length();
     result.reserve(length << 2);
     const Algorithm& base = result.front();
     bool has_next = true;
@@ -66,7 +65,7 @@ std::vector<Algorithm> Algorithm::generate_rotation_conjugates() const {
             algorithm.twists.push_back(base.twists[index] * base.rotation.inverse());
         }
         algorithm.cancel_moves();
-        if (algorithm.twists.size() == length) {
+        if (algorithm.length() == length) {
             algorithm.normalize();
             result.push_back(std::move(algorithm));
         } else {
@@ -83,7 +82,7 @@ std::vector<Algorithm> Algorithm::generate_rotation_conjugates() const {
             }
             swapped_algorithm.twists.push_back(base.twists[offset] * base.rotation.inverse());
             swapped_algorithm.cancel_moves();
-            if (swapped_algorithm.twists.size() == length) {
+            if (swapped_algorithm.length() == length) {
                 swapped_algorithm.normalize();
                 result.push_back(std::move(swapped_algorithm));
             } else {

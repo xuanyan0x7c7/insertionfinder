@@ -78,12 +78,10 @@ Algorithm::Algorithm(const char* algorithm_string) {
 
 
 int Algorithm::compare(const Algorithm& lhs, const Algorithm& rhs) noexcept {
-    const auto& t1 = lhs.twists;
-    const auto& t2 = rhs.twists;
-    if (int x = static_cast<int>(t1.size()) - static_cast<int>(t2.size())) {
+    if (int x = static_cast<int>(lhs.length()) - static_cast<int>(rhs.length())) {
         return x;
     }
-    if (int x = std::memcmp(t1.data(), t2.data(), t1.size() * sizeof(Twist))) {
+    if (int x = std::memcmp(lhs.twists.data(), rhs.twists.data(), lhs.length() * sizeof(Twist))) {
         return x;
     }
     return lhs.rotation - rhs.rotation;
@@ -91,7 +89,7 @@ int Algorithm::compare(const Algorithm& lhs, const Algorithm& rhs) noexcept {
 
 
 std::ostream& operator<<(std::ostream& out, const Algorithm& algorithm) {
-    algorithm.print(out, 0, algorithm.twists.size());
+    algorithm.print(out, 0, algorithm.length());
     if (algorithm.rotation) {
         if (!algorithm.twists.empty()) {
             out << ' ';
@@ -112,7 +110,7 @@ void Algorithm::print(std::ostream& out, size_t begin, size_t end) const {
 }
 
 void Algorithm::print(std::ostream& out, const std::vector<int>& marks) const {
-    this->print(out, marks, 0, this->twists.size());
+    this->print(out, marks, 0, this->length());
     if (this->rotation) {
         if (!this->twists.empty()) {
             out << ' ';
@@ -152,7 +150,7 @@ std::string Algorithm::str() const {
 
 
 void Algorithm::save_to(std::ostream& out) const {
-    uint8_t length = this->twists.size();
+    uint8_t length = this->length();
     out.write(reinterpret_cast<char*>(&length), 1);
     auto data = std::make_unique<char[]>(length);
     for (size_t i = 0; i < length; ++i) {
@@ -185,7 +183,7 @@ void Algorithm::read_from(std::istream& in) {
 
 void InsertionAlgorithm::read_from(std::istream& in) {
     this->Algorithm::read_from(in);
-    size_t length = this->twists.size();
+    size_t length = this->length();
     this->begin_mask = Details::twist_mask(this->twists[0].inverse());
     if (length > 1 && this->twists[0] >> 3 == this->twists[1] >> 3) {
         this->begin_mask |= Details::twist_mask(this->twists[1].inverse());
@@ -211,7 +209,7 @@ void InsertionAlgorithm::read_from(std::istream& in) {
 
 Algorithm Algorithm::operator+(const Algorithm& rhs) const {
     Algorithm result;
-    result.twists.reserve(this->twists.size() + rhs.twists.size());
+    result.twists.reserve(this->length() + rhs.length());
     result.twists.assign(this->twists.cbegin(), this->twists.cend());
     for (Twist twist: rhs.twists) {
         result.twists.push_back(twist * this->rotation.inverse());
@@ -221,7 +219,7 @@ Algorithm Algorithm::operator+(const Algorithm& rhs) const {
 }
 
 Algorithm& Algorithm::operator+=(const Algorithm& rhs) {
-    this->twists.reserve(this->twists.size() + rhs.twists.size());
+    this->twists.reserve(this->length() + rhs.length());
     for (Twist twist: rhs.twists) {
         this->twists.push_back(twist * this->rotation.inverse());
     }
@@ -246,7 +244,7 @@ void Algorithm::detect_rotation() noexcept {
 
 
 void Algorithm::normalize() noexcept {
-    for (size_t i = 1, length = this->twists.size(); i < length; ++i) {
+    for (size_t i = 1, length = this->length(); i < length; ++i) {
         if (this->swappable(i) && this->twists[i - 1] > this->twists[i]) {
             this->swap_adjacent(i++);
         }
@@ -268,7 +266,7 @@ void Algorithm::inverse() noexcept {
 
 Algorithm Algorithm::inverse(const Algorithm& algorithm) {
     Algorithm result;
-    result.twists.reserve(algorithm.twists.size());
+    result.twists.reserve(algorithm.length());
     for (auto iter = algorithm.twists.crbegin(); iter != algorithm.twists.crend(); ++iter) {
         result.twists.push_back(*iter * algorithm.rotation);
     }
