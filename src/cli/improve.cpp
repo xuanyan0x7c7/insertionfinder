@@ -85,25 +85,11 @@ namespace {
             map.pushKV("skeleton", skeleton.str());
             const auto& solutions = improver.get_solutions();
             map.pushKV("fewest_moves", static_cast<int>(improver.get_fewest_moves()));
-
             UniValue solution_list(UniValue::VARR);
             for (const Solution& solution: solutions) {
-                UniValue solution_map(UniValue::VOBJ);
-                solution_map.pushKV("final_solution", solution.final_solution.str());
-                solution_map.pushKV("cancellation", static_cast<int>(solution.cancellation));
-                UniValue insertion_list(UniValue::VARR);
-                for (const Insertion& insertion: solution.insertions) {
-                    UniValue insertion_map(UniValue::VOBJ);
-                    insertion_map.pushKV("skeleton", insertion.skeleton.str());
-                    insertion_map.pushKV("insert_place", static_cast<int>(insertion.insert_place));
-                    insertion_map.pushKV("insertion", insertion.insertion->str());
-                    insertion_list.push_back(insertion_map);
-                }
-                solution_map.pushKV("insertions", insertion_list);
-                solution_list.push_back(solution_map);
+                solution_list.push_back(Details::create_json_solution(skeleton, solution));
             }
             map.pushKV("solutions", solution_list);
-
             map.pushKV("duration", result.duration);
             std::cout << map.write() << std::flush;
         }
