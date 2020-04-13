@@ -206,7 +206,7 @@ std::vector<MergedInsertion> Solution::merge_insertions(const Algorithm& skeleto
         auto insertions = multi_insertion.get_insertions();
         size_t insertion_count = insertions.size();
         merged_insertion.insertions.reserve(insertion_count);
-        for (int i = insertion_count; --i >= 0;) {
+        for (size_t i = insertion_count; i-- > 0;) {
             Algorithm insertion = *insertions[i];
             Rotation rotation = 0;
             for (const auto& [_, indices]: merged_insertion.insert_places) {

@@ -72,7 +72,7 @@ void GreedyFinder::search_core(const SearchParams& params) {
         );
     }
 
-    for (int depth = this->partial_states.size(); --depth > 0;) {
+    for (size_t depth = this->partial_states.size(); depth-- > 1;) {
         auto& solution_list = this->partial_solution_list[depth];
         PartialState& state = this->partial_states[depth];
         solution_list.erase(
