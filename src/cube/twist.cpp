@@ -183,7 +183,15 @@ Cube Cube::twist(const Cube& lhs, const Cube& rhs, std::byte lhs_flags, std::byt
             result.edge[i] = i << 1;
         }
     }
-    result._placement = lhs._placement * rhs._placement;
+    if (static_cast<bool>(lhs_flags & rhs_flags & CubeTwist::centers)) {
+        result._placement = lhs._placement * rhs._placement;
+    } else if (static_cast<bool>(lhs_flags & CubeTwist::centers)) {
+        result._placement = lhs._placement;
+    } else if (static_cast<bool>(rhs_flags & CubeTwist::centers)) {
+        result._placement = rhs._placement;
+    } else {
+        result._placement = 0;
+    }
     return result;
 }
 

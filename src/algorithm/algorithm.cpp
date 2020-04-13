@@ -212,7 +212,7 @@ Algorithm Algorithm::operator+(const Algorithm& rhs) const {
     result.twists.reserve(this->length() + rhs.length());
     result.twists.assign(this->twists.cbegin(), this->twists.cend());
     for (Twist twist: rhs.twists) {
-        result.twists.push_back(twist * this->rotation.inverse());
+        result.twists.push_back(twist / this->rotation);
     }
     result.rotation = this->rotation * rhs.rotation;
     return result;
@@ -221,7 +221,7 @@ Algorithm Algorithm::operator+(const Algorithm& rhs) const {
 Algorithm& Algorithm::operator+=(const Algorithm& rhs) {
     this->twists.reserve(this->length() + rhs.length());
     for (Twist twist: rhs.twists) {
-        this->twists.push_back(twist * this->rotation.inverse());
+        this->twists.push_back(twist / this->rotation);
     }
     this->rotation *= rhs.rotation;
     return *this;

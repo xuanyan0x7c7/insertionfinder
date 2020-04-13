@@ -69,7 +69,7 @@ void BruteForceFinder::Worker::search(CycleStatus cycle_status, size_t begin, si
     for (size_t insert_place = begin; insert_place <= end; ++insert_place) {
         if (insert_place == begin) {
             state.twist(skeleton, insert_place, skeleton.length(), twist_flag);
-            state.rotate(placement);
+            state.rotate(placement, twist_flag);
             state.twist(this->finder.scramble_cube, twist_flag);
             state.twist(skeleton, 0, insert_place, twist_flag);
         } else {

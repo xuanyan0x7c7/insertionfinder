@@ -11,18 +11,18 @@ using InsertionFinder::Algorithm;
 using InsertionFinder::Cube;
 using InsertionFinder::InsertionAlgorithm;
 using InsertionFinder::Rotation;
-using InsertionFinder::Twist;
 using InsertionFinder::SliceImprover;
+using InsertionFinder::Twist;
 namespace CubeTwist = InsertionFinder::CubeTwist;
 
 
 void SliceImprover::Worker::search() {
-    static constexpr std::byte twist_flag = CubeTwist::edges;
+    static constexpr std::byte twist_flag = CubeTwist::edges | CubeTwist::centers;
     Cube state;
     for (size_t insert_place = 0; insert_place <= this->skeleton.length(); ++insert_place) {
         if (insert_place == 0) {
             state.twist(this->skeleton, twist_flag);
-            state.rotate(this->placement);
+            state.rotate(this->placement, twist_flag);
             state.twist(this->improver.inverse_skeleton_cube, twist_flag);
         } else {
             Twist twist = this->skeleton[insert_place - 1];
@@ -45,8 +45,8 @@ void SliceImprover::Worker::search() {
     }
 }
 
-void SliceImprover::Worker::try_insertion(std::size_t insert_place, const Cube& state, bool swapped) {
-    static constexpr std::byte twist_flag = CubeTwist::edges;
+void SliceImprover::Worker::try_insertion(size_t insert_place, const Cube& state, bool swapped) {
+    static constexpr std::byte twist_flag = CubeTwist::edges | CubeTwist::centers;
     static constexpr uint32_t valid_masks[3] = {0x3cf0000, 0x3305500, 0x0f0aa00};
     Algorithm skeleton = this->skeleton;
     if (swapped) {

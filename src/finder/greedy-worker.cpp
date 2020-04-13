@@ -58,7 +58,7 @@ void GreedyFinder::Worker::search() {
     for (size_t insert_place = 0; insert_place <= this->skeleton.length(); ++insert_place) {
         if (insert_place == 0) {
             state.twist(this->skeleton, twist_flag);
-            state.rotate(placement);
+            state.rotate(placement, twist_flag);
             state.twist(this->finder.scramble_cube, twist_flag);
         } else {
             Twist twist = this->skeleton[insert_place - 1];

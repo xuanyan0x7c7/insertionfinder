@@ -122,5 +122,11 @@ namespace InsertionFinder {
         Twist& operator*=(Rotation rotation) noexcept {
             return *this = *this * rotation;
         }
+        Twist operator/(Rotation rotation) const noexcept {
+            return *this * rotation.inverse();
+        }
+        Twist operator/=(Rotation rotation) noexcept {
+            return *this *= rotation.inverse();
+        }
     };
 };

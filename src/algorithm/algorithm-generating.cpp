@@ -62,7 +62,7 @@ std::vector<Algorithm> Algorithm::generate_rotation_conjugates() const {
         algorithm.twists.reserve(length);
         algorithm.twists.assign(base.twists.cbegin() + offset, base.twists.cend());
         for (size_t index = 0; index < offset; ++index) {
-            algorithm.twists.push_back(base.twists[index] * base.rotation.inverse());
+            algorithm.twists.push_back(base.twists[index] / base.rotation);
         }
         algorithm.cancel_moves();
         if (algorithm.length() == length) {
@@ -78,9 +78,9 @@ std::vector<Algorithm> Algorithm::generate_rotation_conjugates() const {
             swapped_algorithm.twists.assign(base.twists.cbegin() + offset, base.twists.cend());
             swapped_algorithm.twists.front() = base.twists[offset - 1];
             for (size_t index = 0; index < offset - 1; ++index) {
-                swapped_algorithm.twists.push_back(base.twists[index] * base.rotation.inverse());
+                swapped_algorithm.twists.push_back(base.twists[index] / base.rotation);
             }
-            swapped_algorithm.twists.push_back(base.twists[offset] * base.rotation.inverse());
+            swapped_algorithm.twists.push_back(base.twists[offset] / base.rotation);
             swapped_algorithm.cancel_moves();
             if (swapped_algorithm.length() == length) {
                 swapped_algorithm.normalize();
@@ -133,11 +133,11 @@ std::vector<Algorithm> Algorithm::generate_rotation_conjugates() const {
                             base.twists.cbegin() + interval[1]
                         );
                         if (i != sum[0]) {
-                            algorithm.twists.push_back(Twist(twist_base | (sum[0] - i & 3)) * base.rotation.inverse());
+                            algorithm.twists.push_back(Twist(twist_base | (sum[0] - i & 3)) / base.rotation);
                         }
                         if (j != sum[1]) {
                             algorithm.twists.push_back(
-                                Twist(twist_base | 4 | (sum[1] - j & 3)) * base.rotation.inverse()
+                                Twist(twist_base | 4 | (sum[1] - j & 3)) / base.rotation
                             );
                         }
                         result.push_back(std::move(algorithm));

@@ -132,7 +132,7 @@ std::pair<Algorithm, size_t> Algorithm::insert(const Algorithm& insertion, size_
         result.twists.insert(result.twists.cend(), this->twists.cbegin() + insert_place, this->twists.cend());
     } else {
         for (size_t index = insert_place; index < this->length(); ++index) {
-            result.twists.push_back(this->twists[index] * insertion.rotation.inverse());
+            result.twists.push_back(this->twists[index] / insertion.rotation);
         }
     }
     size_t place = result.cancel_moves();
@@ -152,7 +152,7 @@ Algorithm::insert_return_marks(const Algorithm& insertion, size_t insert_place) 
         algorithm.twists.insert(algorithm.twists.cend(), this->twists.cbegin() + insert_place, this->twists.cend());
     } else {
         for (size_t index = insert_place; index < this->length(); ++index) {
-            algorithm.twists.push_back(this->twists[index] * insertion.rotation.inverse());
+            algorithm.twists.push_back(this->twists[index] / insertion.rotation);
         }
     }
     auto marks = algorithm.cancel_moves_return_marks();
@@ -179,21 +179,21 @@ Algorithm::multi_insert_return_marks(
     for (size_t i = 0; i < insert_places.size(); ++i) {
         for (size_t j = (i == 0 ? 0 : insert_places[i - 1].first); j < insert_places[i].first; ++j) {
             table.emplace_back(-1, j);
-            algorithm.twists.push_back(this->twists[j] * rotation.inverse());
+            algorithm.twists.push_back(this->twists[j] / rotation);
         }
         for (size_t index: insert_places[i].second) {
             const Algorithm& insertion = insertions[index];
             insertion_marks[index].resize(insertion.length());
             for (size_t j = 0; j < insertion.length(); ++j) {
                 table.emplace_back(index, j);
-                algorithm.twists.push_back(insertion.twists[j] * rotation.inverse());
+                algorithm.twists.push_back(insertion.twists[j] / rotation);
             }
             rotation *= insertion.rotation;
         }
     }
     for (size_t j = insert_places.back().first; j < this->length(); ++j) {
         table.emplace_back(-1, j);
-        algorithm.twists.push_back(this->twists[j] * rotation.inverse());
+        algorithm.twists.push_back(this->twists[j] / rotation);
     }
     auto marks = algorithm.cancel_moves_return_marks();
     for (size_t i = 0; i < marks.size(); ++i) {
