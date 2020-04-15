@@ -55,7 +55,7 @@ void SliceImprover::Worker::try_insertion(size_t insert_place, const Cube& state
     auto insert_place_mask = skeleton.get_insert_place_mask(insert_place);
 
     for (const Case& _case: this->improver.cases) {
-        Cube cube = Cube::twist(state, _case.state(), twist_flag, twist_flag);
+        Cube cube = Cube::twist(state, _case.get_state(), twist_flag, twist_flag);
         uint32_t mask = cube.mask();
         if ((mask & ~valid_masks[0]) && (mask & ~valid_masks[1]) && (mask & ~valid_masks[2])) {
             continue;

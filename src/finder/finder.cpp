@@ -24,16 +24,16 @@ void Finder::init() {
 
     for (size_t index = 0; index < this->cases.size(); ++index) {
         const Case& _case = this->cases[index];
-        const Cube& state = _case.state();
+        const Cube& state = _case.get_state();
         if (state.mask() == 0) {
             continue;
         }
         bool parity = _case.has_parity();
-        int corner_cycles = _case.corner_cycles();
-        int edge_cycles = _case.edge_cycles();
-        Rotation rotation = _case.rotation();
-        bool corner_changed = _case.mask() & 0xff;
-        bool edge_changed = _case.mask() & 0xfff00;
+        int corner_cycles = _case.get_corner_cycles();
+        int edge_cycles = _case.get_edge_cycles();
+        Rotation rotation = _case.get_placement();
+        bool corner_changed = _case.get_mask() & 0xff;
+        bool edge_changed = _case.get_mask() & 0xfff00;
         if (parity || Cube::center_cycles[rotation] > 1) {
             this->change_parity = true;
             this->result.status &= ~FinderStatus::parity_algorithms_needed;

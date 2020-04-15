@@ -140,7 +140,7 @@ void CLI::find_improvements(const po::variables_map& vm) {
                 std::cerr << "Invalid algorithm file " << name << std::endl;
                 break;
             }
-            auto [node, inserted] = map.try_emplace(_case.state(), std::move(_case));
+            auto [node, inserted] = map.try_emplace(_case.get_state(), std::move(_case));
             if (!inserted) {
                 node->second.merge_algorithms(std::move(_case));
             }

@@ -19,52 +19,53 @@ namespace InsertionFinder {
 
     class Case {
     private:
-        Cube _state;
+        Cube state;
         std::vector<InsertionAlgorithm> list;
     private:
-        std::uint32_t _mask;
-        bool _has_parity;
-        int _corner_cycles;
-        int _edge_cycles;
+        std::uint32_t mask;
+        bool parity;
+        int corner_cycles;
+        int edge_cycles;
     public:
         Case() {}
         explicit Case(const Cube& state):
-            _state(state),
-            _mask(state.mask()),
-            _has_parity(state.has_parity()),
-            _corner_cycles(state.corner_cycles()), _edge_cycles(state.edge_cycles()) {}
+            state(state),
+            mask(state.mask()),
+            parity(state.has_parity()),
+            corner_cycles(state.corner_cycles()),
+            edge_cycles(state.edge_cycles()) {}
     public:
         void save_to(std::ostream& out) const;
         void read_from(std::istream& in);
     public:
         static int compare(const Case& lhs, const Case& rhs) noexcept;
         bool operator==(const Case& rhs) const noexcept {
-            return this->_state == rhs._state;
+            return this->state == rhs.state;
         }
         bool operator!=(const Case& rhs) const noexcept {
-            return this->_state != rhs._state;
+            return this->state != rhs.state;
         }
     public:
-        const Cube& state() const noexcept {
-            return this->_state;
+        const Cube& get_state() const noexcept {
+            return this->state;
         }
-        std::uint32_t mask() const noexcept {
-            return this->_mask;
+        std::uint32_t get_mask() const noexcept {
+            return this->mask;
         }
         bool has_parity() const noexcept {
-            return this->_has_parity;
+            return this->parity;
         }
-        bool parity() const noexcept {
-            return this->_has_parity || Cube::center_cycles[this->_state.placement()] > 1;
+        bool get_parity() const noexcept {
+            return this->parity || Cube::center_cycles[this->get_placement()] > 1;
         }
-        int corner_cycles() const noexcept {
-            return this->_corner_cycles;
+        int get_corner_cycles() const noexcept {
+            return this->corner_cycles;
         }
-        int edge_cycles() const noexcept {
-            return this->_edge_cycles;
+        int get_edge_cycles() const noexcept {
+            return this->edge_cycles;
         }
-        Rotation rotation() const noexcept {
-            return this->_state.placement();
+        Rotation get_placement() const noexcept {
+            return this->state.placement();
         }
         const std::vector<InsertionAlgorithm>& algorithm_list() const noexcept {
             return this->list;

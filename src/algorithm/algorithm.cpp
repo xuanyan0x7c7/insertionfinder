@@ -127,13 +127,11 @@ void Algorithm::print(std::ostream& out, const std::vector<int>& marks, size_t b
         if (i > begin) {
             out << ' ';
         }
-        switch (marks[i]) {
-        case 1:
+        if (marks[i]) {
             out << termcolor::green;
-            break;
-        case 2:
-            out << termcolor::green << termcolor::crossed;
-            break;
+            if (marks[i] == 2) {
+                out << termcolor::crossed;
+            }
         }
         out << this->twists[i];
         if (marks[i]) {

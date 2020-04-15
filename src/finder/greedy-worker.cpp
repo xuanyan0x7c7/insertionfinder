@@ -144,7 +144,6 @@ void GreedyFinder::Worker::search_last_placement(Rotation placement) {
 }
 
 void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state, bool swapped) {
-    CycleStatus cycle_status = this->cycle_status;
     Algorithm skeleton = this->skeleton;
     if (swapped) {
         skeleton.swap_adjacent(insert_place);
@@ -164,19 +163,19 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
         case_flag |= CubeTwist::centers;
     }
     auto insert_place_mask = skeleton.get_insert_place_mask(insert_place);
-    bool parity = cycle_status.parity;
-    int corner_cycles = cycle_status.corner_cycles;
-    int edge_cycles = cycle_status.edge_cycles;
-    Rotation placement = cycle_status.placement;
+    bool parity = this->cycle_status.parity;
+    int corner_cycles = this->cycle_status.corner_cycles;
+    int edge_cycles = this->cycle_status.edge_cycles;
+    Rotation placement = this->cycle_status.placement;
     int total_cycles = this->finder.get_total_cycles(parity, corner_cycles, edge_cycles, placement);
 
     for (const Case& _case: this->finder.cases) {
-        if (Details::bitcount_less_than_2(mask & _case.mask())) {
+        if (Details::bitcount_less_than_2(mask & _case.get_mask())) {
             continue;
         }
-        bool corner_changed = _case.mask() & 0xff;
-        bool edge_changed = _case.mask() & 0xfff00;
-        bool center_changed = _case.mask() & 0x3f00000;
+        bool corner_changed = _case.get_mask() & 0xff;
+        bool edge_changed = _case.get_mask() & 0xfff00;
+        bool center_changed = _case.get_mask() & 0x3f00000;
         std::byte twist_flag {0};
         if (corner_changed) {
             twist_flag |= CubeTwist::corners;
@@ -187,13 +186,13 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
         if (center_changed) {
             twist_flag |= CubeTwist::centers;
         }
-        Cube cube = Cube::twist(state, _case.state(), case_flag, twist_flag);
+        Cube cube = Cube::twist(state, _case.get_state(), case_flag, twist_flag);
         bool new_parity = parity ^ _case.has_parity();
         int new_corner_cycles = corner_changed
-            ? (corner_solved ? _case.corner_cycles() : cube.corner_cycles())
+            ? (corner_solved ? _case.get_corner_cycles() : cube.corner_cycles())
             : corner_cycles;
-        int new_edge_cycles = edge_changed ? (edge_solved ? _case.edge_cycles() : cube.edge_cycles()) : edge_cycles;
-        Rotation new_placement = _case.rotation() * placement;
+        int new_edge_cycles = edge_changed ? (edge_solved ? _case.get_edge_cycles() : cube.edge_cycles()) : edge_cycles;
+        Rotation new_placement = _case.get_placement() * placement;
         int new_total_cycles = this->finder.get_total_cycles(
             new_parity, new_corner_cycles, new_edge_cycles, new_placement
         );
