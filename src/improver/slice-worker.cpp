@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <cstdint>
+#include <bitset>
 #include <insertionfinder/algorithm.hpp>
 #include <insertionfinder/cube.hpp>
 #include <insertionfinder/twist.hpp>
@@ -14,6 +15,13 @@ using InsertionFinder::Rotation;
 using InsertionFinder::SliceImprover;
 using InsertionFinder::Twist;
 namespace CubeTwist = InsertionFinder::CubeTwist;
+
+
+namespace {
+    constexpr size_t bitcount(uint32_t n) noexcept {
+        return std::bitset<32>(n).count();
+    }
+};
 
 
 void SliceImprover::Worker::search() {
@@ -47,7 +55,6 @@ void SliceImprover::Worker::search() {
 
 void SliceImprover::Worker::try_insertion(size_t insert_place, const Cube& state, bool swapped) {
     static constexpr std::byte twist_flag = CubeTwist::edges | CubeTwist::centers;
-    static constexpr uint32_t valid_masks[3] = {0x3cf0000, 0x3305500, 0x0f0aa00};
     Algorithm skeleton = this->skeleton;
     if (swapped) {
         skeleton.swap_adjacent(insert_place);
@@ -57,7 +64,7 @@ void SliceImprover::Worker::try_insertion(size_t insert_place, const Cube& state
     for (const Case& _case: this->improver.cases) {
         Cube cube = Cube::twist(state, _case.get_state(), twist_flag, twist_flag);
         uint32_t mask = cube.mask();
-        if ((mask & ~valid_masks[0]) && (mask & ~valid_masks[1]) && (mask & ~valid_masks[2])) {
+        if ((mask & 0xff) || bitcount(mask & 0xfff00) > 4 || bitcount(mask & 0x3f0000) > 4) {
             continue;
         }
         for (const InsertionAlgorithm& algorithm: _case.algorithm_list()) {
@@ -70,7 +77,7 @@ void SliceImprover::Worker::try_insertion(size_t insert_place, const Cube& state
                 continue;
             }
             new_skeleton.normalize();
-            if (cube.mask() == 0) {
+            if (mask == 0) {
                 std::lock_guard<std::mutex> lock(this->improver.fewest_moves_mutex);
                 if (new_skeleton.length() < this->improver.fewest_moves) {
                     this->improver.fewest_moves = new_skeleton.length();
