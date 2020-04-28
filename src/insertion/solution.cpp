@@ -9,23 +9,32 @@ using InsertionFinder::MergedInsertion;
 using InsertionFinder::Solution;
 
 
-void Solution::print(std::ostream& out, const Algorithm& skeleton, bool expand) const {
-    if (expand) {
-        for (size_t index = 0; index < this->insertions.size(); ++index) {
-            this->insertions[index].print(out, index);
-            out << std::endl;
-        }
-    } else {
-        size_t start_index = 0;
-        for (const MergedInsertion& solution: this->merge_insertions(skeleton)) {
-            solution.print(out, start_index, *this);
-            out << std::endl;
-            start_index += solution.insertions.size();
-        }
+namespace {
+    void print_solution_status(std::ostream& out, const Solution& solution) {
+        out << termcolor::bold << "Total moves: " << termcolor::reset
+        << termcolor::yellow << solution.final_solution.length() << termcolor::reset << ", "
+        << termcolor::yellow << solution.cancellation << termcolor::reset
+        << " move" << (solution.cancellation == 1 ? "" : "s") << " cancelled." << std::endl
+        << termcolor::bold << "Final solution: " << termcolor::reset << solution.final_solution;
     }
-    out << termcolor::bold << "Total moves: " << termcolor::reset
-        << termcolor::yellow << this->final_solution.length() << termcolor::reset << ", "
-        << termcolor::yellow << this->cancellation << termcolor::reset
-        << " move" << (this->cancellation == 1 ? "" : "s") << " cancelled." << std::endl
-        << termcolor::bold << "Final solution: " << termcolor::reset << this->final_solution;
+};
+
+
+std::ostream& operator<<(std::ostream& out, const Solution& solution) {
+    for (size_t index = 0; index < solution.insertions.size(); ++index) {
+        solution.insertions[index].print(out, index);
+        out << std::endl;
+    }
+    print_solution_status(out, solution);
+    return out;
+}
+
+void Solution::print(std::ostream& out, const std::vector<MergedInsertion>& merged_insertions) const {
+    size_t start_index = 0;
+    for (const MergedInsertion& merged_insertion: merged_insertions) {
+        merged_insertion.print(out, start_index, *this);
+        out << std::endl;
+        start_index += merged_insertion.insertions.size();
+    }
+    print_solution_status(out, *this);
 }

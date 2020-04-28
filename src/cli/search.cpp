@@ -122,7 +122,11 @@ namespace {
                     const Solution& solution = solutions[index];
                     std::cout << std::endl
                         << termcolor::bold << "Solution #" << index + 1 << termcolor::reset << std::endl;
-                    solution.print(std::cout, skeleton, expand);
+                    if (expand) {
+                        std::cout << solution;
+                    } else {
+                        solution.print(std::cout, solution.merge_insertions(skeleton));
+                    }
                     std::cout << std::endl;
                 }
             } else {

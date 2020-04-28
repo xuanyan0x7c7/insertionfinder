@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 #include <boost/program_options.hpp>
@@ -59,15 +60,19 @@ namespace {
             const Improver& improver, Improver::Result result,
             bool expand
         ) override {
-            const auto& solutions = improver.get_solutions();
             if (improver.get_fewest_moves() == skeleton.length()) {
                 std::cout << "No improvements found." << std::endl;
             } else {
+                const auto& solutions = improver.get_solutions();
                 for (size_t index = 0; index < solutions.size(); ++index) {
                     const Solution& solution = solutions[index];
                     std::cout << std::endl
                         << termcolor::bold << "Improvement #" << index + 1 << termcolor::reset << std::endl;
-                    solution.print(std::cout, skeleton, expand);
+                    if (expand) {
+                        std::cout << solution;
+                    } else {
+                        solution.print(std::cout, solution.merge_insertions(skeleton));
+                    }
                     std::cout << std::endl;
                 }
             }

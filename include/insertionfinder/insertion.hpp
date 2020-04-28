@@ -5,6 +5,9 @@
 #include <vector>
 #include <insertionfinder/algorithm.hpp>
 
+namespace InsertionFinder {class Solution;};
+std::ostream& operator<<(std::ostream&, const InsertionFinder::Solution&);
+
 namespace InsertionFinder {
     struct Insertion {
         Algorithm skeleton;
@@ -43,6 +46,6 @@ namespace InsertionFinder {
         Solution(const Algorithm& final_solution, std::vector<Insertion>&& insertions):
             final_solution(final_solution), insertions(std::move(insertions)) {}
         std::vector<MergedInsertion> merge_insertions(const Algorithm& skeleton) const;
-        void print(std::ostream& _opaque_pthread_condattr_t, const Algorithm& skeleton, bool expand) const;
+        void print(std::ostream& out, const std::vector<MergedInsertion>& merged_insertions) const;
     };
 };
