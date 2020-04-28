@@ -103,17 +103,6 @@ void CLI::find_improvements(const po::variables_map& vm) {
     const fs::path algorithms_directory = vm["algs-dir"].as<std::string>();
     std::vector<std::string> algfilenames =
         vm.count("algfile") ? vm["algfile"].as<std::vector<std::string>>() : std::vector<std::string>();
-    if (vm.count("all-algs")) {
-        try {
-            for (const auto& file : fs::directory_iterator(algorithms_directory / "slices")) {
-                if (fs::is_regular_file(file) && file.path().extension() == ".algs") {
-                    algfilenames.emplace_back(file.path().string());
-                }
-            }
-        } catch (const fs::filesystem_error& e) {
-            std::cerr << e.what() << std::endl;
-        }
-    }
 
     std::unordered_map<Cube, Case> map;
     for (const std::string& name: algfilenames) {

@@ -41,7 +41,6 @@ AC_CONFIG_FILES([
     test/Makefile
     data/algorithms/Makefile
     data/algorithms/extras/Makefile
-    data/algorithms/slices/Makefile
 ])
 
 AC_OUTPUT
