@@ -55,23 +55,23 @@ UniValue Details::create_json_solution(const Algorithm& skeleton, const Solution
     UniValue merged_insertion_list(UniValue::VARR);
     size_t start_index = 0;
     for (const auto& sub_solution: solution.merge_insertions(skeleton)) {
-        UniValue insertions(UniValue::VARR);
-        for (const auto& [place, indices]: sub_solution.insert_places) {
+        UniValue insertion_list(UniValue::VARR);
+        for (const auto& [place, insertions]: sub_solution.get_insertions()) {
             UniValue algorithms(UniValue::VARR);
-            for (size_t index: indices) {
+            for (auto [insertion, order]: insertions) {
                 UniValue algorithm_object(UniValue::VOBJ);
-                algorithm_object.pushKV("algorithm", sub_solution.insertions[index].str());
-                algorithm_object.pushKV("order", static_cast<int>(index));
+                algorithm_object.pushKV("algorithm", insertion->str());
+                algorithm_object.pushKV("order", static_cast<int>(order));
                 algorithms.push_back(algorithm_object);
             }
             UniValue place_object(UniValue::VOBJ);
             place_object.pushKV("insert_place", static_cast<int>(place));
             place_object.pushKV("algorithms", algorithms);
-            insertions.push_back(place_object);
+            insertion_list.push_back(place_object);
         }
         UniValue insertion_map(UniValue::VOBJ);
         insertion_map.pushKV("skeleton", sub_solution.skeleton.str());
-        insertion_map.pushKV("insertions", insertions);
+        insertion_map.pushKV("insertions", insertion_list);
         merged_insertion_list.push_back(insertion_map);
         start_index += sub_solution.insertions.size();
     }

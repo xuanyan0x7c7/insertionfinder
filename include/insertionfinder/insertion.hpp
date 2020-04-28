@@ -29,10 +29,15 @@ namespace InsertionFinder {
     struct Solution;
 
     struct MergedInsertion {
+        struct SubInsertion {
+            const Algorithm* insertion;
+            std::size_t order;
+        };
         Algorithm skeleton;
         Algorithm final_solution;
         std::vector<std::pair<std::size_t, std::vector<std::size_t>>> insert_places;
         std::vector<Algorithm> insertions;
+        std::vector<std::pair<std::size_t, std::vector<SubInsertion>>> get_insertions() const;
         void print(std::ostream& out, std::size_t start_index, const Solution& solution) const;
     };
 

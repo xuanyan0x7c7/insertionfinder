@@ -148,6 +148,21 @@ bool MultiInsertion::try_insert(const Insertion& insertion) {
 }
 
 
+std::vector<std::pair<size_t, std::vector<MergedInsertion::SubInsertion>>> MergedInsertion::get_insertions() const {
+    std::vector<std::pair<size_t, std::vector<SubInsertion>>> result;
+    result.reserve(this->insert_places.size());
+    for (const auto& [insert_place, indices]: this->insert_places) {
+        std::vector<SubInsertion> insertions;
+        insertions.reserve(indices.size());
+        for (size_t index: indices) {
+            insertions.push_back(SubInsertion{&this->insertions[index], index});
+        }
+        result.emplace_back(insert_place, std::move(insertions));
+    }
+    return result;
+}
+
+
 void MergedInsertion::print(std::ostream& out, std::size_t start_index, const Solution& solution) const {
     auto [
         result, skeleton_marks, insertion_masks
