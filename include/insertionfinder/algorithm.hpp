@@ -109,6 +109,20 @@ namespace InsertionFinder {
         template<class T> Algorithm& operator+=(T&& rhs) {
             return *this += Algorithm(std::forward<T>(rhs));
         }
+        Algorithm operator+(Twist twist) const {
+            return Algorithm(*this) += twist;
+        }
+        Algorithm& operator+=(Twist twist) {
+            this->twists.push_back(twist / this->rotation);
+            return *this;
+        }
+        Algorithm operator+(Rotation rotation) const {
+            return Algorithm(*this) += rotation;
+        }
+        Algorithm operator+=(Rotation rotation) {
+            this->rotation *= rotation;
+            return *this;
+        }
     private:
         std::size_t cancel_moves() noexcept;
         std::vector<int> cancel_moves_return_marks();
