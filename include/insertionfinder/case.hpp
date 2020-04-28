@@ -22,7 +22,7 @@ namespace InsertionFinder {
         Cube state;
         std::vector<InsertionAlgorithm> list;
     private:
-        std::uint32_t mask;
+        std::uint64_t mask;
         bool parity;
         int corner_cycles;
         int edge_cycles;
@@ -49,7 +49,7 @@ namespace InsertionFinder {
         const Cube& get_state() const noexcept {
             return this->state;
         }
-        std::uint32_t get_mask() const noexcept {
+        std::uint64_t get_mask() const noexcept {
             return this->mask;
         }
         bool has_parity() const noexcept {

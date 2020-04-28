@@ -9,7 +9,7 @@
 #include <vector>
 #include <insertionfinder/cube.hpp>
 using std::size_t;
-using std::uint32_t;
+using std::uint64_t;
 using InsertionFinder::Cube;
 using InsertionFinder::CubeStreamError;
 
@@ -73,8 +73,8 @@ Cube Cube::inverse(const Cube& cube) noexcept {
 }
 
 
-uint32_t Cube::mask() const noexcept {
-    static constexpr uint32_t center_mask[24] = {
+uint64_t Cube::mask() const noexcept {
+    static constexpr uint64_t center_mask[24] = {
         0x00, 0x3c, 0x3c, 0x3c,
         0x33, 0x3f, 0x3f, 0x3f,
         0x33, 0x3f, 0x0f, 0x3f,
@@ -82,15 +82,21 @@ uint32_t Cube::mask() const noexcept {
         0x0f, 0x3f, 0x3f, 0x3f,
         0x0f, 0x3f, 0x3f, 0x3f
     };
-    uint32_t mask = 0;
+    uint64_t mask = 0;
     for (unsigned i = 0; i < 8; ++i) {
         if (this->corner[i] != i * 3) {
-            mask |= 1 << i;
+            mask |= UINT64_C(1) << i;
+            if (this->corner[i] / 3 == i) {
+                mask |= UINT64_C(1) << (i + 32);
+            }
         }
     }
     for (unsigned i = 0; i < 12; ++i) {
         if (this->edge[i] != i << 1) {
-            mask |= 1 << (i + 8);
+            mask |= UINT64_C(1) << (i + 8);
+            if (this->edge[i] >> 1 == i) {
+                mask |= UINT64_C(1) << (i + 40);
+            }
         }
     }
     mask |= center_mask[this->_placement] << 20;

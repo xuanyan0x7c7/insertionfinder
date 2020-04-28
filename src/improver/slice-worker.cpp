@@ -8,6 +8,7 @@
 #include <insertionfinder/improver/slice.hpp>
 using std::size_t;
 using std::uint32_t;
+using std::uint64_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::Cube;
 using InsertionFinder::InsertionAlgorithm;
@@ -63,7 +64,7 @@ void SliceImprover::Worker::try_insertion(size_t insert_place, const Cube& state
 
     for (const Case& _case: this->improver.cases) {
         Cube cube = Cube::twist(state, _case.get_state(), twist_flag, twist_flag);
-        uint32_t mask = cube.mask();
+        uint64_t mask = cube.mask();
         if ((mask & 0xff) || bitcount(mask & 0xfff00) > 4 || bitcount(mask & 0x3f0000) > 4) {
             continue;
         }

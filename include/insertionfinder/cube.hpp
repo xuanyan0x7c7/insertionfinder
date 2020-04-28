@@ -142,7 +142,7 @@ namespace InsertionFinder {
     public:
         void inverse() noexcept;
         static Cube inverse(const Cube& cube) noexcept;
-        std::uint32_t mask() const noexcept;
+        std::uint64_t mask() const noexcept;
     public:
         bool has_parity() const noexcept;
         bool parity() const noexcept {

@@ -10,7 +10,7 @@
 #include <insertionfinder/finder/greedy.hpp>
 #include "utils.hpp"
 using std::size_t;
-using std::uint32_t;
+using std::uint64_t;
 using InsertionFinder::Algorithm;
 using InsertionFinder::Case;
 using InsertionFinder::Cube;
@@ -148,7 +148,7 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
     if (swapped) {
         skeleton.swap_adjacent(insert_place);
     }
-    uint32_t mask = state.mask();
+    uint64_t mask = state.mask();
     bool corner_solved = !(mask & 0xff);
     bool edge_solved = !(mask & 0xfff00);
     bool center_solved = !(mask & 0x3f00000);
@@ -170,7 +170,7 @@ void GreedyFinder::Worker::try_insertion(size_t insert_place, const Cube& state,
     int total_cycles = this->finder.get_total_cycles(parity, corner_cycles, edge_cycles, placement);
 
     for (const Case& _case: this->finder.cases) {
-        if (Details::bitcount_less_than_2(mask & _case.get_mask())) {
+        if (Details::bitcount_less_than_2(mask & _case.get_mask() & 0xffffffff)) {
             continue;
         }
         bool corner_changed = _case.get_mask() & 0xff;
