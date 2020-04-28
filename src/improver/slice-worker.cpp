@@ -19,7 +19,7 @@ namespace CubeTwist = InsertionFinder::CubeTwist;
 
 
 namespace {
-    constexpr size_t bitcount(uint32_t n) noexcept {
+    size_t bitcount(uint32_t n) noexcept {
         return std::bitset<32>(n).count();
     }
 };
