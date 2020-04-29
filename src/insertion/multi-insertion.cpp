@@ -151,11 +151,11 @@ bool MultiInsertion::try_insert(const Insertion& insertion) {
 std::vector<std::pair<size_t, std::vector<MergedInsertion::SubInsertion>>> MergedInsertion::get_insertions() const {
     std::vector<std::pair<size_t, std::vector<SubInsertion>>> result;
     result.reserve(this->insert_places.size());
-    for (const auto& [insert_place, indices]: this->insert_places) {
+    for (const auto& [insert_place, orders]: this->insert_places) {
         std::vector<SubInsertion> insertions;
-        insertions.reserve(indices.size());
-        for (size_t index: indices) {
-            insertions.push_back(SubInsertion{&this->insertions[index], index});
+        insertions.reserve(orders.size());
+        for (size_t order: orders) {
+            insertions.push_back(SubInsertion{&this->insertions[order], order});
         }
         result.emplace_back(insert_place, std::move(insertions));
     }
@@ -163,39 +163,43 @@ std::vector<std::pair<size_t, std::vector<MergedInsertion::SubInsertion>>> Merge
 }
 
 
-void MergedInsertion::print(std::ostream& out, std::size_t start_index, const Solution& solution) const {
+void MergedInsertion::print(std::ostream& out, std::size_t initial_order, const Solution& solution) const {
     auto [
         result, skeleton_marks, insertion_masks
     ] = this->skeleton.multi_insert_return_marks(this->insertions, this->insert_places);
     bool skeleton_has_space = this->insert_places.front().first > 0;
     this->skeleton.print(out, skeleton_marks, 0, this->insert_places.front().first);
-    for (size_t index: this->insert_places.front().second) {
+    for (size_t order: this->insert_places.front().second) {
         if (skeleton_has_space) {
             out << ' ';
         }
         skeleton_has_space = true;
-        out << termcolor::bold << "[@" << start_index + index + 1 << ']' << termcolor::reset;
+        out << termcolor::bold << "[@" << initial_order + order + 1 << ']' << termcolor::reset;
     }
     for (size_t i = 1; i < this->insert_places.size(); ++i) {
         out << ' ';
         this->skeleton.print(out, skeleton_marks, this->insert_places[i - 1].first, this->insert_places[i].first);
-        for (size_t index: this->insert_places[i].second) {
-            out << termcolor::bold << " [@" << start_index + index + 1 << ']' << termcolor::reset;
+        for (size_t order: this->insert_places[i].second) {
+            out << termcolor::bold << " [@" << initial_order + order + 1 << ']' << termcolor::reset;
         }
     }
     if (this->insert_places.back().first < this->skeleton.length()) {
         out << ' ';
         this->skeleton.print(out, skeleton_marks, this->insert_places.back().first, this->skeleton.length());
     }
-    for (size_t i = 0; i < this->insertions.size(); ++i) {
-        out << std::endl << termcolor::bold << "Insert at @" << start_index + i + 1 << ": " << termcolor::reset;
-        this->insertions[i].print(out, insertion_masks[i]);
-        size_t length_before = solution.insertions[start_index + i].skeleton.length();
-        size_t length_after = start_index + i + 1 >= solution.insertions.size()
-            ? solution.final_solution.length()
-            : solution.insertions[start_index + i + 1].skeleton.length();
-        out << termcolor::dark << termcolor::italic << " (+" << this->insertions[i].length()
-            << " -" << length_before + this->insertions[i].length() - length_after << ')' << termcolor::reset;
+    for (const auto& [_, orders]: this->insert_places) {
+        for (size_t order: orders) {
+            const Algorithm& insertion = this->insertions[order];
+            out << std::endl
+                << termcolor::bold << "Insert at @" << initial_order + order + 1 << ": " << termcolor::reset;
+            insertion.print(out, insertion_masks[order]);
+            size_t length_before = solution.insertions[initial_order + order].skeleton.length();
+            size_t length_after = initial_order + order + 1 >= solution.insertions.size()
+                ? solution.final_solution.length()
+                : solution.insertions[initial_order + order + 1].skeleton.length();
+            out << termcolor::dark << termcolor::italic << " (+" << insertion.length()
+                << " -" << length_before + insertion.length() - length_after << ')' << termcolor::reset;
+        }
     }
 }
 
@@ -224,14 +228,14 @@ std::vector<MergedInsertion> Solution::merge_insertions(const Algorithm& skeleto
         for (size_t i = insertion_count; i-- > 0;) {
             Algorithm insertion = *insertions[i];
             Rotation rotation = 0;
-            for (const auto& [_, indices]: merged_insertion.insert_places) {
+            for (const auto& [_, orders]: merged_insertion.insert_places) {
                 bool found = false;
-                for (size_t index: indices) {
-                    if (index == i) {
+                for (size_t order: orders) {
+                    if (order == i) {
                         found = true;
                         break;
-                    } else if (index < i) {
-                        rotation *= insertions[index]->cube_rotation();
+                    } else if (order < i) {
+                        rotation *= insertions[order]->cube_rotation();
                     }
                 }
                 if (found) {

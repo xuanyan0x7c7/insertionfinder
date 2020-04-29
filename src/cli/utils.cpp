@@ -53,7 +53,7 @@ UniValue Details::create_json_solution(const Algorithm& skeleton, const Solution
         insertion_list.push_back(insertion_map);
     }
     UniValue merged_insertion_list(UniValue::VARR);
-    size_t start_index = 0;
+    size_t initial_order = 0;
     for (const auto& sub_solution: solution.merge_insertions(skeleton)) {
         UniValue insertion_list(UniValue::VARR);
         for (const auto& [place, insertions]: sub_solution.get_insertions()) {
@@ -73,7 +73,7 @@ UniValue Details::create_json_solution(const Algorithm& skeleton, const Solution
         insertion_map.pushKV("skeleton", sub_solution.skeleton.str());
         insertion_map.pushKV("insertions", insertion_list);
         merged_insertion_list.push_back(insertion_map);
-        start_index += sub_solution.insertions.size();
+        initial_order += sub_solution.insertions.size();
     }
     UniValue solution_map(UniValue::VOBJ);
     solution_map.pushKV("final_solution", solution.final_solution.str());

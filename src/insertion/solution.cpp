@@ -30,11 +30,11 @@ std::ostream& operator<<(std::ostream& out, const Solution& solution) {
 }
 
 void Solution::print(std::ostream& out, const std::vector<MergedInsertion>& merged_insertions) const {
-    size_t start_index = 0;
+    size_t initial_order = 0;
     for (const MergedInsertion& merged_insertion: merged_insertions) {
-        merged_insertion.print(out, start_index, *this);
+        merged_insertion.print(out, initial_order, *this);
         out << std::endl;
-        start_index += merged_insertion.insertions.size();
+        initial_order += merged_insertion.insertions.size();
     }
     print_solution_status(out, *this);
 }

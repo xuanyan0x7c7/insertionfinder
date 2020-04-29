@@ -38,7 +38,7 @@ namespace InsertionFinder {
         std::vector<std::pair<std::size_t, std::vector<std::size_t>>> insert_places;
         std::vector<Algorithm> insertions;
         std::vector<std::pair<std::size_t, std::vector<SubInsertion>>> get_insertions() const;
-        void print(std::ostream& out, std::size_t start_index, const Solution& solution) const;
+        void print(std::ostream& out, std::size_t initial_order, const Solution& solution) const;
     };
 
     struct Solution {
