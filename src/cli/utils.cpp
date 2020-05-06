@@ -62,6 +62,7 @@ UniValue Details::create_json_solution(const Algorithm& skeleton, const Solution
                 UniValue algorithm_object(UniValue::VOBJ);
                 algorithm_object.pushKV("algorithm", insertion->str());
                 algorithm_object.pushKV("order", static_cast<int>(order));
+                algorithm_object.pushKV("cumulative_order", static_cast<int>(initial_order + order));
                 algorithms.push_back(algorithm_object);
             }
             UniValue place_object(UniValue::VOBJ);
