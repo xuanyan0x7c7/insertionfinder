@@ -132,14 +132,14 @@ bool MultiInsertion::try_insert(const Insertion& insertion) {
         }
     }
     std::vector<std::size_t> new_positions(insertion_result.length(), invalid);
-    for (size_t i = 0; i < insertion.insert_place; ++i) {
+    for (size_t i = 0; i < std::min(insertion.insert_place, insertion_result.length()); ++i) {
         if (skeleton_marks[i] == 0) {
             new_positions[i] = this->positions[i];
         }
     }
     for (size_t i = insertion.insert_place; i < length; ++i) {
         if (skeleton_marks[i] == 0) {
-            new_positions[insertion_result.length() + i - this->current_skeleton.length()] = this->positions[i];
+            new_positions[insertion_result.length() + i - length] = this->positions[i];
         }
     }
     this->current_skeleton = std::move(insertion_result);
