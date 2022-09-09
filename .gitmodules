@@ -1,0 +1,3 @@
+[submodule "vendors/univalue"]
+	path = vendors/univalue
+	url = https://github.com/jgarzik/univalue.git
