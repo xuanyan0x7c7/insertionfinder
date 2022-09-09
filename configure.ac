@@ -11,7 +11,12 @@ AC_LANG([C++])
 AX_CXX_COMPILE_STDCXX([17])
 AX_PTHREAD
 
-AC_CHECK_HEADERS([univalue.h], [], [AC_MSG_ERROR([unable to find header univalue.h])])
+# AC_CHECK_HEADERS([univalue.h], [], [AC_MSG_ERROR([unable to find header univalue.h])])
+AC_CHECK_HEADERS([univalue.h], [HAVE_UNIVALUE=1], [
+    AC_CONFIG_SUBDIRS([vendors/univalue])
+    HAVE_UNIVALUE=0
+])
+AM_CONDITIONAL([USE_SYS_UNIVALUE], [test "$HAVE_UNIVALUE" -eq 1])
 AC_CHECK_HEADERS([filesystem], [HAVE_FILESYSTEM=yes])
 
 BOOST_REQUIRE([1.66.0])
